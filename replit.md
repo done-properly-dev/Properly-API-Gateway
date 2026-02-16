@@ -103,6 +103,10 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Didit VOI integration - v3 API, QR code on desktop / direct redirect on mobile, webhook verification
+- 2026-02-16: Resend email updated to use resend.dev testing domain (switch to verified domain for production)
+- 2026-02-16: Apple Maps token generation confirmed working
+- 2026-02-16: Four external services integrated (Resend, Twilio, Didit, Apple Maps)
 - 2026-02-16: Sprint 1 complete - onboarding, 5-pillar, playbook, empty states, Australian tone
 - 2026-02-16: Demo login endpoint with auto Supabase Auth account creation and ID migration
 - 2026-02-16: Migrated auth from session-based to Supabase Auth (JWT Bearer tokens)

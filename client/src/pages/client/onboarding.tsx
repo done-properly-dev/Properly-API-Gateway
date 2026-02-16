@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/lib/auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useMutation } from '@tanstack/react-query';
@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation, useSearch } from 'wouter';
-import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper, Loader2, AlertCircle, ExternalLink, Smartphone, Monitor } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const STEPS = [
   { id: 'welcome', title: "G'day!", icon: PartyPopper },
@@ -20,10 +21,19 @@ const STEPS = [
 
 type VoiState = 'idle' | 'starting' | 'in_progress' | 'completed' | 'failed' | 'not_configured';
 
+function useIsMobile() {
+  return useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || window.innerWidth < 768;
+  }, []);
+}
+
 export default function OnboardingPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const searchString = useSearch();
+  const isMobile = useIsMobile();
   const [step, setStep] = useState(user?.onboardingStep || 0);
   const [formData, setFormData] = useState({
     phone: user?.phone || '',
@@ -38,13 +48,36 @@ export default function OnboardingPage() {
     user?.voiStatus === 'verified' ? 'completed' : 'idle'
   );
   const [voiError, setVoiError] = useState<string | null>(null);
+  const [verificationUrl, setVerificationUrl] = useState<string | null>(null);
+  const [voiSessionId, setVoiSessionId] = useState<string | null>(null);
+  const [checkMessage, setCheckMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     if (params.get('voi') === 'complete') {
       setStep(2);
-      setVoiState('completed');
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      (async () => {
+        try {
+          const meRes = await apiRequest('GET', '/api/auth/me');
+          const me = await meRes.json();
+          if (me.voiStatus === 'verified') {
+            setVoiState('completed');
+          } else if (me.voiSessionId) {
+            setVoiSessionId(me.voiSessionId);
+            const statusRes = await apiRequest('GET', `/api/verification/status/${me.voiSessionId}`);
+            const statusData = await statusRes.json();
+            if (statusData.status === 'Approved') {
+              setVoiState('completed');
+            } else {
+              setVoiState('in_progress');
+              setCheckMessage('Verification is being processed. Please check again shortly.');
+            }
+          }
+        } catch {
+          setVoiState('idle');
+        }
+        queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      })();
     }
   }, [searchString]);
 
@@ -61,6 +94,7 @@ export default function OnboardingPage() {
   const startVerification = useCallback(async () => {
     setVoiState('starting');
     setVoiError(null);
+    setVerificationUrl(null);
     try {
       const res = await apiRequest('POST', '/api/verification/start');
       if (!res.ok) {
@@ -74,14 +108,20 @@ export default function OnboardingPage() {
       const session = await res.json();
 
       if (session.verificationUrl) {
+        setVerificationUrl(session.verificationUrl);
+        setVoiSessionId(session.sessionId);
+        setCheckMessage(null);
         setVoiState('in_progress');
-        window.open(session.verificationUrl, '_blank');
+
+        if (isMobile) {
+          window.location.href = session.verificationUrl;
+        }
       }
     } catch (err: any) {
       setVoiError(err.message);
       setVoiState('failed');
     }
-  }, []);
+  }, [isMobile]);
 
   const handleNext = async () => {
     if (step === 1) {
@@ -268,7 +308,7 @@ export default function OnboardingPage() {
                 <h2 className="text-2xl font-heading font-bold" data-testid="voi-heading">Verify Your Identity</h2>
                 <p className="text-muted-foreground mt-2">
                   It's a legal requirement for property transactions in Australia. 
-                  We use Didit to verify your identity securely.
+                  We use secure verification powered by Didit.
                 </p>
               </div>
 
@@ -278,17 +318,41 @@ export default function OnboardingPage() {
                     <Shield className="h-12 w-12 text-primary mx-auto" />
                     <h3 className="font-heading font-semibold text-lg">Quick & Secure Verification</h3>
                     <p className="text-sm text-muted-foreground">
-                      You'll need a valid photo ID (driver's licence or passport) and your device camera.
+                      You'll need a valid photo ID (driver's licence or passport) and your phone camera.
                       The process takes about 2 minutes.
                     </p>
-                    <Button
-                      onClick={startVerification}
-                      className="bg-primary hover:bg-primary/90 text-white px-8 py-3"
-                      data-testid="button-start-voi"
-                    >
-                      <Shield className="mr-2 h-5 w-5" />
-                      Start Verification
-                    </Button>
+
+                    {isMobile ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                          <Smartphone className="h-4 w-4" />
+                          <span>You'll verify right here on your phone</span>
+                        </div>
+                        <Button
+                          onClick={startVerification}
+                          className="bg-primary hover:bg-primary/90 text-white px-8 py-3 w-full"
+                          data-testid="button-start-voi"
+                        >
+                          <Shield className="mr-2 h-5 w-5" />
+                          Verify Now
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                          <Monitor className="h-4 w-4" />
+                          <span>We'll generate a QR code to scan with your phone</span>
+                        </div>
+                        <Button
+                          onClick={startVerification}
+                          className="bg-primary hover:bg-primary/90 text-white px-8 py-3"
+                          data-testid="button-start-voi"
+                        >
+                          <Shield className="mr-2 h-5 w-5" />
+                          Start Verification
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -301,25 +365,98 @@ export default function OnboardingPage() {
                 </div>
               )}
 
-              {voiState === 'in_progress' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center space-y-4">
-                  <ExternalLink className="h-12 w-12 text-blue-600 mx-auto" />
-                  <h3 className="font-heading font-semibold text-lg text-blue-900">Verification In Progress</h3>
-                  <p className="text-sm text-blue-700">
-                    A new window has opened for your identity verification. 
-                    Complete the steps there and come back here when you're done.
-                  </p>
-                  <div className="flex flex-col gap-2">
+              {voiState === 'in_progress' && !isMobile && verificationUrl && (
+                <div className="bg-white border-2 border-primary/20 rounded-xl p-6 text-center space-y-5">
+                  <div className="space-y-2">
+                    <Smartphone className="h-8 w-8 text-primary mx-auto" />
+                    <h3 className="font-heading font-semibold text-lg">Scan with your phone</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Open your phone camera and point it at this QR code to start the verification process.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-center" data-testid="voi-qr-code">
+                    <div className="bg-white p-4 rounded-xl shadow-md inline-block">
+                      <QRCodeSVG
+                        value={verificationUrl}
+                        size={200}
+                        level="H"
+                        fgColor="#425b58"
+                        includeMargin={false}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                      <p className="text-sm text-amber-700 font-medium">Waiting for verification to complete...</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Once you've finished on your phone, click "Check Verification Status" below.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2 pt-2">
                     <Button
-                      onClick={startVerification}
-                      variant="outline"
-                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                      data-testid="button-reopen-voi"
+                      onClick={async () => {
+                        try {
+                          const res = await apiRequest('GET', `/api/verification/status/${voiSessionId}`);
+                          if (res.ok) {
+                            const result = await res.json();
+                            if (result.status === 'Approved') {
+                              setVoiState('completed');
+                              queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+                            } else if (result.status === 'Declined') {
+                              setVoiState('failed');
+                              setVoiError('Your verification was not approved. Please try again.');
+                            } else {
+                              setVoiError(null);
+                              setCheckMessage("We haven't received your results yet. Finish verification on your phone and check again.");
+                            }
+                          }
+                        } catch {
+                          setCheckMessage("Couldn't check status. Try again in a moment.");
+                        }
+                      }}
+                      className="bg-primary hover:bg-primary/90 text-white"
+                      data-testid="button-voi-check"
                     >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Reopen Verification Window
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Check Verification Status
+                    </Button>
+                    {checkMessage && (
+                      <p className="text-sm text-amber-700 bg-amber-50 p-3 rounded-lg text-center">{checkMessage}</p>
+                    )}
+                    <Button
+                      onClick={() => window.open(verificationUrl, '_blank')}
+                      variant="ghost"
+                      className="text-muted-foreground text-xs"
+                      data-testid="button-open-voi-link"
+                    >
+                      <ExternalLink className="mr-2 h-3 w-3" />
+                      Or open in a new browser tab instead
                     </Button>
                   </div>
+                </div>
+              )}
+
+              {voiState === 'in_progress' && isMobile && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center space-y-4">
+                  <Loader2 className="h-10 w-10 text-blue-600 mx-auto animate-spin" />
+                  <h3 className="font-heading font-semibold text-lg text-blue-900">Redirecting to verification...</h3>
+                  <p className="text-sm text-blue-700">
+                    If you're not redirected automatically, tap the button below.
+                  </p>
+                  <Button
+                    onClick={() => { if (verificationUrl) window.location.href = verificationUrl; }}
+                    variant="outline"
+                    className="border-blue-300 text-blue-700"
+                    data-testid="button-redirect-voi"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Open Verification
+                  </Button>
                 </div>
               )}
 

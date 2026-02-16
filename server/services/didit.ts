@@ -78,10 +78,15 @@ export async function createVerificationSession(
     body: JSON.stringify(body),
   });
 
+
+  const verificationUrl = data.verification_url
+    || data.url
+    || (data.session_token ? `https://verify.didit.me/session/${data.session_token}` : '');
+
   return {
     sessionId: data.session_id,
     sessionToken: data.session_token,
-    verificationUrl: data.verification_url,
+    verificationUrl,
     status: data.status || 'Not Started',
   };
 }

@@ -401,7 +401,11 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ message: parsed.error.issues[0].message });
       }
-      const user = await storage.updateUser(req.userId!, parsed.data);
+      const updates = { ...parsed.data };
+      if (updates.voiStatus === 'verified') {
+        delete updates.voiStatus;
+      }
+      const user = await storage.updateUser(req.userId!, updates);
       if (!user) return res.status(404).json({ message: "User not found" });
       const { password: _, ...safe } = user;
       res.json(safe);
