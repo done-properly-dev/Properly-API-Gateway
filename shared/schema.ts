@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -10,6 +10,15 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   role: text("role").notNull(),
   avatar: text("avatar"),
+  phone: text("phone"),
+  onboardingStep: integer("onboarding_step").notNull().default(0),
+  onboardingComplete: boolean("onboarding_complete").notNull().default(false),
+  voiStatus: text("voi_status").notNull().default("not_started"),
+  voiMethod: text("voi_method"),
+  dateOfBirth: text("date_of_birth"),
+  address: text("address"),
+  state: text("state"),
+  postcode: text("postcode"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -19,6 +28,16 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export const FIVE_PILLARS = [
+  "pre_settlement",
+  "exchange",
+  "conditions",
+  "pre_completion",
+  "settlement",
+] as const;
+
+export type PillarKey = (typeof FIVE_PILLARS)[number];
 
 export const matters = pgTable("matters", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -31,6 +50,18 @@ export const matters = pgTable("matters", {
   transactionType: text("transaction_type").notNull(),
   settlementDate: timestamp("settlement_date"),
   lastActive: timestamp("last_active").defaultNow(),
+  pillarPreSettlement: text("pillar_pre_settlement").notNull().default("not_started"),
+  pillarExchange: text("pillar_exchange").notNull().default("not_started"),
+  pillarConditions: text("pillar_conditions").notNull().default("not_started"),
+  pillarPreCompletion: text("pillar_pre_completion").notNull().default("not_started"),
+  pillarSettlement: text("pillar_settlement").notNull().default("not_started"),
+  currentPillar: text("current_pillar").notNull().default("pre_settlement"),
+  contractPrice: integer("contract_price"),
+  depositAmount: integer("deposit_amount"),
+  depositPaid: boolean("deposit_paid").notNull().default(false),
+  coolingOffDate: timestamp("cooling_off_date"),
+  financeDate: timestamp("finance_date"),
+  buildingPestDate: timestamp("building_pest_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -48,6 +79,9 @@ export const tasks = pgTable("tasks", {
   status: text("status").notNull(),
   dueDate: timestamp("due_date"),
   type: text("type").notNull(),
+  pillar: text("pillar"),
+  assignedTo: varchar("assigned_to").references(() => users.id),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -65,6 +99,8 @@ export const documents = pgTable("documents", {
   size: text("size").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
   locked: boolean("locked").notNull().default(false),
+  category: text("category"),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
 });
 
 export const insertDocumentSchema = createInsertSchema(documents).omit({
@@ -82,6 +118,8 @@ export const referrals = pgTable("referrals", {
   notes: text("notes"),
   status: text("status").notNull(),
   commission: integer("commission").notNull().default(0),
+  propertyAddress: text("property_address"),
+  transactionType: text("transaction_type"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -104,3 +142,24 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 });
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+export const playbookArticles = pgTable("playbook_articles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  summary: text("summary").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(),
+  pillar: text("pillar"),
+  readTimeMinutes: integer("read_time_minutes").notNull().default(3),
+  sortOrder: integer("sort_order").notNull().default(0),
+  published: boolean("published").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPlaybookArticleSchema = createInsertSchema(playbookArticles).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPlaybookArticle = z.infer<typeof insertPlaybookArticleSchema>;
+export type PlaybookArticle = typeof playbookArticles.$inferSelect;

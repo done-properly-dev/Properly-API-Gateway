@@ -116,8 +116,26 @@ export default function ConveyancerDashboard() {
             <TableBody>
               {filteredMatters.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No matters found.
+                  <TableCell colSpan={7} className="text-center py-12" data-testid="empty-matters">
+                    <div className="space-y-4">
+                      <div className="bg-[#e7f6f3] h-16 w-16 rounded-full flex items-center justify-center mx-auto">
+                        <AlertCircle className="h-8 w-8 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-heading font-bold text-lg">No Active Matters</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto mt-1">
+                          {searchTerm 
+                            ? `No matters match "${searchTerm}". Try a different search term.`
+                            : "Your matters will appear here once they're synced from Smokeball or created manually."
+                          }
+                        </p>
+                      </div>
+                      {!searchTerm && (
+                        <Button variant="outline" className="gap-2">
+                          <RefreshCw className="h-4 w-4" /> Sync from Smokeball
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (

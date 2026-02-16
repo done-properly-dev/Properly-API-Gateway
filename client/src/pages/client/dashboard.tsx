@@ -3,11 +3,13 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { ProgressCircle } from '@/components/progress-circle';
+import { FivePillars } from '@/components/five-pillars';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, FileText, Upload, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, Upload, ChevronRight, AlertCircle, Calendar, BookOpen } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'wouter';
 import type { Matter, Task } from '@shared/schema';
 
 export default function ClientDashboard() {
@@ -37,13 +39,30 @@ export default function ClientDashboard() {
   if (!matter) {
     return (
        <Layout role="CLIENT">
-         <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-           <div className="bg-secondary p-6 rounded-full">
-             <FileText className="h-10 w-10 text-primary" />
+         <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-6 px-4">
+           <div className="bg-[#e7f6f3] p-8 rounded-full">
+             <FileText className="h-12 w-12 text-primary" />
            </div>
-           <h2 className="text-2xl font-bold font-heading">Welcome to Properly</h2>
-           <p className="text-muted-foreground max-w-xs mx-auto">Your journey to settlement starts here. Upload your contract to get moving.</p>
-           <Button className="bg-primary hover:bg-primary/90 text-white">Upload Contract</Button>
+           <div className="space-y-2">
+             <h2 className="text-3xl font-bold font-heading" data-testid="empty-state-heading">G'day, {user?.name?.split(' ')[0]}!</h2>
+             <p className="text-muted-foreground max-w-md mx-auto text-lg">
+               Your settlement journey starts here. Once your conveyancer sets things up, 
+               you'll see your progress, tasks, and key dates right on this dashboard.
+             </p>
+           </div>
+           <div className="flex flex-col sm:flex-row gap-3">
+             <Button className="bg-primary hover:bg-primary/90 text-white px-6" data-testid="button-upload-contract">
+               <Upload className="mr-2 h-4 w-4" /> Upload Contract
+             </Button>
+             <Link href="/client/playbook">
+               <Button variant="outline" className="px-6" data-testid="button-browse-playbook">
+                 <BookOpen className="mr-2 h-4 w-4" /> Browse The Playbook
+               </Button>
+             </Link>
+           </div>
+           <p className="text-sm text-muted-foreground">
+             New to property settlement? Check out our guides — they're written in plain English, promise.
+           </p>
          </div>
        </Layout>
     );
@@ -71,25 +90,10 @@ export default function ClientDashboard() {
             </div>
           </div>
 
-          {/* Progress Card - "Buying tasks desktop" style */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <Card className="bg-white border shadow-sm overflow-hidden relative">
-               <CardHeader>
-                 <CardTitle>Milestone Progress</CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <ProgressCircle percent={matter.milestonePercent} />
-               </CardContent>
-             </Card>
-
-             <Card className="bg-[#e7f6f3] border-none shadow-sm flex flex-col justify-center items-center text-center p-6">
-                <div className="bg-white p-4 rounded-full mb-4 shadow-sm">
-                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                </div>
-                <h3 className="font-heading font-bold text-lg mb-2">On Track</h3>
-                <p className="text-sm text-muted-foreground">Everything is looking good for your settlement date. No blockers detected.</p>
-             </Card>
-          </div>
+          {/* 5-Pillar Progress Bar */}
+          <Card className="bg-white border shadow-sm p-6">
+            <FivePillars matter={matter} variant="full" />
+          </Card>
 
           {/* Tasks Section */}
           <div className="space-y-4">
@@ -160,13 +164,16 @@ export default function ClientDashboard() {
 
           <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-none shadow-md">
             <CardContent className="p-6">
-              <h3 className="font-bold text-lg mb-2">Need Help?</h3>
+              <BookOpen className="h-8 w-8 mb-3 text-white/80" />
+              <h3 className="font-bold text-lg mb-2">The Playbook</h3>
               <p className="text-primary-foreground/80 text-sm mb-4">
-                Check our playbook for guides on what to expect during settlement.
+                Your go-to guide for understanding the settlement process. No jargon, just helpful info.
               </p>
-              <Button variant="secondary" className="w-full bg-white text-primary hover:bg-white/90 border-none">
-                Read Guides
-              </Button>
+              <Link href="/client/playbook">
+                <Button variant="secondary" className="w-full bg-white text-primary hover:bg-white/90 border-none" data-testid="button-read-playbook">
+                  Read Guides
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

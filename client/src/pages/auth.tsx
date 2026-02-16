@@ -103,15 +103,9 @@ export default function AuthPage() {
           <div className="flex items-center gap-12">
             <Logo variant="color" />
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-              <Link href="/">
-                <a className="hover:text-slate-900">Features</a>
-              </Link>
-              <Link href="/">
-                <a className="hover:text-slate-900">Become a Partner</a>
-              </Link>
-              <Link href="/">
-                <a className="hover:text-slate-900">About</a>
-              </Link>
+              <Link href="/" className="hover:text-slate-900">Features</Link>
+              <Link href="/" className="hover:text-slate-900">Become a Partner</Link>
+              <Link href="/" className="hover:text-slate-900">About</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '@/lib/auth';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell } from 'lucide-react';
+import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell, BookOpen } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Logo } from '@/components/logo';
@@ -41,15 +41,10 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
                
                {/* Desktop Nav Links */}
                <nav className="hidden md:flex items-center gap-6">
-                 <Link href="/client/dashboard">
-                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>Dashboard</a>
-                 </Link>
-                 <Link href="/client/documents">
-                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground'}`}>Documents</a>
-                 </Link>
-                 <Link href="/client/settings">
-                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground'}`}>Settings</a>
-                 </Link>
+                 <Link href="/client/dashboard" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>Dashboard</Link>
+                 <Link href="/client/documents" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground'}`}>Documents</Link>
+                 <Link href="/client/playbook" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/playbook' ? 'text-primary' : 'text-muted-foreground'}`}>Playbook</Link>
+                 <Link href="/client/settings" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground'}`}>Settings</Link>
                </nav>
             </div>
 
@@ -81,6 +76,12 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
              <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
                <FileText className={`h-6 w-6 ${location === '/client/documents' ? 'fill-current' : ''}`} />
                <span className="text-[10px] font-medium">Vault</span>
+             </div>
+           </Link>
+           <Link href="/client/playbook">
+             <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/playbook' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+               <BookOpen className={`h-6 w-6 ${location === '/client/playbook' ? 'fill-current' : ''}`} />
+               <span className="text-[10px] font-medium">Playbook</span>
              </div>
            </Link>
            <Link href="/client/settings">

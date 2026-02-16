@@ -6,6 +6,8 @@ import LandingPage from '@/pages/landing';
 import AuthPage from '@/pages/auth';
 import ClientDashboard from '@/pages/client/dashboard';
 import ClientDocuments from '@/pages/client/documents';
+import ClientOnboarding from '@/pages/client/onboarding';
+import ClientPlaybook from '@/pages/client/playbook';
 import ReferrerDashboard from '@/pages/referrer/dashboard';
 import ReferrerCreate from '@/pages/referrer/create';
 import AdminDashboard from '@/pages/admin/dashboard';
@@ -28,6 +30,11 @@ function PrivateRoute({ component: Component, allowedRoles }: { component: any, 
   const hasRole = allowedRoles.includes(user.role);
   if (!hasRole) return <Redirect to="/auth" />; 
 
+  if (user.role === 'CLIENT' && !user.onboardingComplete && 
+      !window.location.pathname.startsWith('/client/onboarding')) {
+    return <Redirect to="/client/onboarding" />;
+  }
+
   return <Component />;
 }
 
@@ -39,11 +46,17 @@ function App() {
         <Route path="/auth" component={AuthPage} />
         
         {/* Client Routes */}
+        <Route path="/client/onboarding">
+          <PrivateRoute component={ClientOnboarding} allowedRoles={['CLIENT']} />
+        </Route>
         <Route path="/client/dashboard">
           <PrivateRoute component={ClientDashboard} allowedRoles={['CLIENT']} />
         </Route>
         <Route path="/client/documents">
           <PrivateRoute component={ClientDocuments} allowedRoles={['CLIENT']} />
+        </Route>
+        <Route path="/client/playbook">
+          <PrivateRoute component={ClientPlaybook} allowedRoles={['CLIENT']} />
         </Route>
         
         {/* Referrer Routes */}

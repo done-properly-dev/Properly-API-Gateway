@@ -1,13 +1,14 @@
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import {
-  users, matters, tasks, documents, referrals, notifications,
+  users, matters, tasks, documents, referrals, notifications, playbookArticles,
   type User, type InsertUser,
   type Matter, type InsertMatter,
   type Task, type InsertTask,
   type Document, type InsertDocument,
   type Referral, type InsertReferral,
   type Notification, type InsertNotification,
+  type PlaybookArticle, type InsertPlaybookArticle,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -37,6 +38,12 @@ export interface IStorage {
 
   getNotifications(): Promise<Notification[]>;
   updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined>;
+
+  getPlaybookArticles(): Promise<PlaybookArticle[]>;
+  getPlaybookArticleBySlug(slug: string): Promise<PlaybookArticle | undefined>;
+  getPlaybookArticlesByCategory(category: string): Promise<PlaybookArticle[]>;
+  getPlaybookArticlesByPillar(pillar: string): Promise<PlaybookArticle[]>;
+  createPlaybookArticle(article: InsertPlaybookArticle): Promise<PlaybookArticle>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -134,6 +141,28 @@ export class DatabaseStorage implements IStorage {
   async updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined> {
     const [notification] = await db.update(notifications).set(data).where(eq(notifications.id, id)).returning();
     return notification;
+  }
+
+  async getPlaybookArticles(): Promise<PlaybookArticle[]> {
+    return db.select().from(playbookArticles).where(eq(playbookArticles.published, true));
+  }
+
+  async getPlaybookArticleBySlug(slug: string): Promise<PlaybookArticle | undefined> {
+    const [article] = await db.select().from(playbookArticles).where(eq(playbookArticles.slug, slug));
+    return article;
+  }
+
+  async getPlaybookArticlesByCategory(category: string): Promise<PlaybookArticle[]> {
+    return db.select().from(playbookArticles).where(eq(playbookArticles.category, category));
+  }
+
+  async getPlaybookArticlesByPillar(pillar: string): Promise<PlaybookArticle[]> {
+    return db.select().from(playbookArticles).where(eq(playbookArticles.pillar, pillar));
+  }
+
+  async createPlaybookArticle(data: InsertPlaybookArticle): Promise<PlaybookArticle> {
+    const [article] = await db.insert(playbookArticles).values(data).returning();
+    return article;
   }
 }
 

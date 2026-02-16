@@ -2,7 +2,20 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { supabase } from "./supabase";
-import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema } from "@shared/schema";
+import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema } from "@shared/schema";
+import { z } from "zod";
+
+const onboardingUpdateSchema = z.object({
+  phone: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  address: z.string().optional(),
+  state: z.string().optional(),
+  postcode: z.string().optional(),
+  voiMethod: z.string().optional(),
+  voiStatus: z.string().optional(),
+  onboardingStep: z.number().optional(),
+  onboardingComplete: z.boolean().optional(),
+}).strict();
 
 function paramId(req: Request, key: string): string {
   const val = req.params[key];
@@ -268,6 +281,50 @@ export async function registerRoutes(
       const notification = await storage.updateNotification(paramId(req, "id"), req.body);
       if (!notification) return res.status(404).json({ message: "Notification not found" });
       res.json(notification);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Onboarding ───
+  app.patch("/api/auth/onboarding", requireAuth, async (req, res) => {
+    try {
+      const parsed = onboardingUpdateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.issues[0].message });
+      }
+      const user = await storage.updateUser(req.userId!, parsed.data);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const { password: _, ...safe } = user;
+      res.json(safe);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Playbook Articles ───
+  app.get("/api/playbook", async (req, res) => {
+    try {
+      const { category, pillar } = req.query;
+      let result;
+      if (typeof category === "string") {
+        result = await storage.getPlaybookArticlesByCategory(category);
+      } else if (typeof pillar === "string") {
+        result = await storage.getPlaybookArticlesByPillar(pillar);
+      } else {
+        result = await storage.getPlaybookArticles();
+      }
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/playbook/:slug", async (req, res) => {
+    try {
+      const article = await storage.getPlaybookArticleBySlug(paramId(req, "slug"));
+      if (!article) return res.status(404).json({ message: "Article not found" });
+      res.json(article);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

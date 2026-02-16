@@ -106,8 +106,23 @@ export default function ReferrerDashboard() {
                  <tbody>
                    {myReferrals.length === 0 ? (
                      <tr>
-                       <td colSpan={4} className="p-8 text-center text-muted-foreground">
-                         No referrals yet. Create your first referral to get started.
+                       <td colSpan={4} className="p-12 text-center" data-testid="empty-referrals">
+                         <div className="space-y-4">
+                           <div className="bg-[#e7f6f3] h-16 w-16 rounded-full flex items-center justify-center mx-auto">
+                             <Users className="h-8 w-8 text-primary" />
+                           </div>
+                           <div>
+                             <h3 className="font-heading font-bold text-lg">No Referrals Yet</h3>
+                             <p className="text-muted-foreground max-w-sm mx-auto mt-1">
+                               Send your first referral and start tracking your clients' settlement progress in real time. Easy as.
+                             </p>
+                           </div>
+                           <Link href="/referrer/create">
+                             <Button className="gap-2">
+                               <Plus className="h-4 w-4" /> Create Your First Referral
+                             </Button>
+                           </Link>
+                         </div>
                        </td>
                      </tr>
                    ) : (
