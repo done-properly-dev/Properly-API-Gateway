@@ -29,7 +29,10 @@ export interface IStorage {
   updateTask(id: string, data: Partial<Task>): Promise<Task | undefined>;
 
   getDocumentsByMatter(matterId: string): Promise<Document[]>;
+  getDocument(id: string): Promise<Document | undefined>;
+  getDocumentByFileKey(fileKey: string): Promise<Document | undefined>;
   createDocument(doc: InsertDocument): Promise<Document>;
+  updateDocument(id: string, data: Partial<Document>): Promise<Document | undefined>;
   deleteDocument(id: string): Promise<void>;
 
   getReferralsByBroker(brokerId: string): Promise<Referral[]>;
@@ -112,8 +115,23 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(documents).where(eq(documents.matterId, matterId));
   }
 
+  async getDocument(id: string): Promise<Document | undefined> {
+    const [doc] = await db.select().from(documents).where(eq(documents.id, id));
+    return doc;
+  }
+
+  async getDocumentByFileKey(fileKey: string): Promise<Document | undefined> {
+    const [doc] = await db.select().from(documents).where(eq(documents.fileKey, fileKey));
+    return doc;
+  }
+
   async createDocument(data: InsertDocument): Promise<Document> {
     const [doc] = await db.insert(documents).values(data).returning();
+    return doc;
+  }
+
+  async updateDocument(id: string, data: Partial<Document>): Promise<Document | undefined> {
+    const [doc] = await db.update(documents).set(data).where(eq(documents.id, id)).returning();
     return doc;
   }
 

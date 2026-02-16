@@ -1,18 +1,19 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/lib/auth';
 import { Layout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Trash2, Lock, UploadCloud, File, X, Eye, Image, FileCheck, ZoomIn, ZoomOut } from 'lucide-react';
+import { FileText, Download, Trash2, Lock, UploadCloud, File, X, Eye, Image, FileCheck, ZoomIn, ZoomOut, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ProperlyLoader } from '@/components/properly-loader';
-import type { Matter, Document } from '@shared/schema';
+import { supabase } from '@/lib/supabase';
+import type { Matter, Document, Task } from '@shared/schema';
 
 function getFileType(name: string): 'image' | 'pdf' | 'other' {
   const ext = name.split('.').pop()?.toLowerCase() || '';
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)) return 'image';
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'heic'].includes(ext)) return 'image';
   if (ext === 'pdf') return 'pdf';
   return 'other';
 }
@@ -26,6 +27,24 @@ function getFileIcon(name: string) {
 function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => void }) {
   const [zoom, setZoom] = useState(1);
   const fileType = getFileType(doc.name);
+  const hasRealFile = !!doc.fileUrl;
+
+  const handleDownload = async () => {
+    if (doc.fileUrl) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || '';
+      const response = await fetch(`${doc.fileUrl}?download=true`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="document-preview-modal">
@@ -63,7 +82,23 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
         </div>
 
         <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-8" style={{ minHeight: '400px' }}>
-          {fileType === 'image' ? (
+          {hasRealFile && fileType === 'image' ? (
+            <div className="transition-transform duration-200" style={{ transform: `scale(${zoom})` }}>
+              <img
+                src={doc.fileUrl!}
+                alt={doc.name}
+                className="max-w-full max-h-[60vh] rounded-lg shadow-lg border bg-white"
+                data-testid="preview-image"
+              />
+            </div>
+          ) : hasRealFile && fileType === 'pdf' ? (
+            <iframe
+              src={doc.fileUrl!}
+              className="w-full h-[60vh] rounded-lg shadow-lg border bg-white"
+              title={doc.name}
+              data-testid="preview-pdf"
+            />
+          ) : fileType === 'image' ? (
             <div className="transition-transform duration-200" style={{ transform: `scale(${zoom})` }}>
               <div className="bg-white rounded-lg shadow-lg overflow-hidden border">
                 <div className="bg-gradient-to-br from-[#e7f6f3] via-[#d5ece7] to-[#c8e0db] flex items-center justify-center" style={{ width: '480px', height: '360px' }}>
@@ -101,13 +136,6 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
                   <div className="h-3 bg-gray-200 rounded-full w-full" />
                   <div className="h-3 bg-gray-200 rounded-full w-5/6" />
                   <div className="h-3 bg-gray-200 rounded-full w-11/12" />
-                  <div className="h-3 bg-gray-200 rounded-full w-2/3" />
-                </div>
-                <div className="h-px bg-gray-100 my-4" />
-                <div className="space-y-3">
-                  <div className="h-3 bg-gray-200 rounded-full w-full" />
-                  <div className="h-3 bg-gray-200 rounded-full w-4/5" />
-                  <div className="h-3 bg-gray-200 rounded-full w-11/12" />
                 </div>
               </div>
               <div className="px-6 py-3 bg-gray-50 border-t flex items-center justify-between">
@@ -141,7 +169,13 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
             )}
             <span className="bg-secondary px-2 py-1 rounded-full text-primary font-medium">{doc.category || 'document'}</span>
           </div>
-          <Button className="bg-primary text-white hover:bg-primary/90" size="sm" data-testid="button-download-preview">
+          <Button
+            className="bg-primary text-white hover:bg-primary/90"
+            size="sm"
+            onClick={handleDownload}
+            disabled={!hasRealFile}
+            data-testid="button-download-preview"
+          >
             <Download className="h-4 w-4 mr-2" /> Download
           </Button>
         </div>
@@ -150,11 +184,22 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
   );
 }
 
+interface UploadProgress {
+  id: string;
+  fileName: string;
+  progress: number;
+  status: 'uploading' | 'complete' | 'error';
+  error?: string;
+}
+
 export default function ClientDocuments() {
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploads, setUploads] = useState<UploadProgress[]>([]);
+  const dragCounterRef = useRef(0);
 
   const { data: matters } = useQuery<Matter[]>({
     queryKey: ["/api/matters"],
@@ -168,13 +213,9 @@ export default function ClientDocuments() {
     enabled: !!matterId,
   });
 
-  const uploadMutation = useMutation({
-    mutationFn: async (data: { matterId: string; name: string; size: string }) => {
-      await apiRequest("POST", "/api/documents", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/matters", matterId, "documents"] });
-    },
+  const { data: tasks } = useQuery<Task[]>({
+    queryKey: ["/api/matters", matterId, "tasks"],
+    enabled: !!matterId,
   });
 
   const deleteMutation = useMutation({
@@ -186,31 +227,115 @@ export default function ClientDocuments() {
     },
   });
 
-  const myDocs = documents || [];
+  const uploadFile = useCallback(async (file: globalThis.File, taskId?: string) => {
+    if (!matterId) return;
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+    const maxSize = 20 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({ title: "File too large", description: "Maximum file size is 20MB.", variant: "destructive" });
+      return;
+    }
+
+    const uploadId = `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setUploads(prev => [...prev, { id: uploadId, fileName: file.name, progress: 0, status: 'uploading' }]);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('matterId', matterId);
+
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      let category = 'document';
+      if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext)) category = 'image';
+      else if (ext === 'pdf') category = 'contract';
+      formData.append('category', category);
+
+      if (taskId) {
+        formData.append('taskId', taskId);
+      }
+
+      setUploads(prev => prev.map(u => u.id === uploadId ? { ...u, progress: 30 } : u));
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || '';
+      const response = await fetch('/api/documents/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      setUploads(prev => prev.map(u => u.id === uploadId ? { ...u, progress: 80 } : u));
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      setUploads(prev => prev.map(u => u.id === uploadId ? { ...u, progress: 100, status: 'complete' } : u));
+
+      queryClient.invalidateQueries({ queryKey: ["/api/matters", matterId, "documents"] });
+      if (taskId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/matters", matterId, "tasks"] });
+      }
+
+      toast({
+        title: "Uploaded successfully",
+        description: `${file.name} has been securely stored in your vault.`,
+      });
+
+      setTimeout(() => {
+        setUploads(prev => prev.filter(u => u.id !== uploadId));
+      }, 2000);
+    } catch (err: any) {
+      setUploads(prev => prev.map(u => u.id === uploadId ? { ...u, status: 'error', error: err.message } : u));
+      toast({
+        title: "Upload failed",
+        description: err.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        setUploads(prev => prev.filter(u => u.id !== uploadId));
+      }, 4000);
+    }
+  }, [matterId, toast]);
+
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files || !matterId) return;
+    Array.from(files).forEach(file => uploadFile(file));
+  }, [matterId, uploadFile]);
+
+  const handleUploadClick = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && matterId) {
-      uploadMutation.mutate(
-        {
-          matterId,
-          name: file.name,
-          size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        },
-        {
-          onSuccess: () => {
-            toast({
-              title: "Document Uploaded",
-              description: `${file.name} has been securely stored.`,
-            });
-          },
-        }
-      );
-    }
+    handleFiles(e.target.files);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    handleFiles(e.dataTransfer.files);
   };
 
   const handleDelete = (id: string) => {
@@ -219,11 +344,34 @@ export default function ClientDocuments() {
         toast({
           title: "Document Deleted",
           description: "The file has been removed from your vault.",
-          variant: "destructive"
+          variant: "destructive",
         });
       },
     });
   };
+
+  const handleDownload = async (doc: Document) => {
+    if (doc.fileUrl) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || '';
+      const response = await fetch(`${doc.fileUrl}?download=true`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const uploadTasks = (tasks || []).filter(
+    t => t.type === 'UPLOAD' && t.status !== 'COMPLETE'
+  );
+
+  const myDocs = documents || [];
 
   if (isLoading) {
     return (
@@ -235,34 +383,124 @@ export default function ClientDocuments() {
 
   return (
     <Layout role="CLIENT">
-      <div className="space-y-6">
+      <div
+        className="space-y-6"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Document Vault</h1>
-            <p className="text-muted-foreground text-sm">Secure storage for your settlement.</p>
+            <p className="text-muted-foreground text-sm">Secure storage for your settlement documents.</p>
           </div>
-          <Button onClick={handleUploadClick} className="bg-primary text-white hover:bg-primary/90" disabled={!matterId}>
+          <Button onClick={handleUploadClick} className="bg-primary text-white hover:bg-primary/90" disabled={!matterId} data-testid="button-upload-doc">
             <UploadCloud className="h-4 w-4 mr-2" /> Upload
           </Button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            className="hidden" 
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
             onChange={handleFileChange}
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx"
+            multiple
           />
         </div>
 
+        {isDragging && (
+          <div className="fixed inset-0 z-40 bg-primary/5 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-2xl p-12 border-2 border-dashed border-primary text-center">
+              <UploadCloud className="h-16 w-16 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-heading font-bold text-foreground mb-2">Drop your files here</h3>
+              <p className="text-sm text-muted-foreground">PDF, JPEG, PNG, WebP, HEIC, DOC, DOCX — up to 20MB</p>
+            </div>
+          </div>
+        )}
+
+        {uploads.length > 0 && (
+          <div className="space-y-2">
+            {uploads.map((up, i) => (
+              <div key={`${up.fileName}-${i}`} className="bg-white rounded-xl border p-4 flex items-center gap-4" data-testid={`upload-progress-${i}`}>
+                <div className={`p-2 rounded-lg ${up.status === 'complete' ? 'bg-green-50 text-green-600' : up.status === 'error' ? 'bg-red-50 text-red-500' : 'bg-[#e7f6f3] text-primary'}`}>
+                  {up.status === 'complete' ? <CheckCircle2 className="h-5 w-5" /> : up.status === 'error' ? <X className="h-5 w-5" /> : <UploadCloud className="h-5 w-5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{up.fileName}</p>
+                  {up.status === 'uploading' && (
+                    <div className="mt-1.5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-500"
+                        style={{ width: `${up.progress}%` }}
+                      />
+                    </div>
+                  )}
+                  {up.status === 'complete' && <p className="text-xs text-green-600 mt-0.5">Uploaded</p>}
+                  {up.status === 'error' && <p className="text-xs text-red-500 mt-0.5">{up.error}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {uploadTasks.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground">Required uploads</h3>
+            {uploadTasks.map(task => (
+              <Card key={task.id} className="border-dashed border-amber-300 bg-amber-50/50 p-4" data-testid={`task-upload-${task.id}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-100 text-amber-700">
+                      <UploadCloud className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{task.title}</p>
+                      {task.dueDate && (
+                        <p className="text-xs text-muted-foreground">
+                          Due {new Date(task.dueDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short' })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-amber-300 text-amber-700 hover:bg-amber-100"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.doc,.docx';
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) uploadFile(file, task.id);
+                      };
+                      input.click();
+                    }}
+                    data-testid={`button-upload-for-task-${task.id}`}
+                  >
+                    <UploadCloud className="h-4 w-4 mr-1" /> Upload
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
         <div className="grid gap-4">
-          {myDocs.length === 0 ? (
-            <div className="text-center py-16 bg-muted/20 rounded-xl border-2 border-dashed border-muted">
+          {myDocs.length === 0 && uploads.length === 0 ? (
+            <div
+              className="text-center py-16 bg-muted/20 rounded-xl border-2 border-dashed border-muted cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-colors"
+              onClick={handleUploadClick}
+              data-testid="empty-vault-drop"
+            >
               <div className="bg-muted/50 p-4 rounded-full w-fit mx-auto mb-3">
-                 <File className="h-8 w-8 text-muted-foreground" />
+                <UploadCloud className="h-8 w-8 text-muted-foreground" />
               </div>
               <h3 className="font-bold text-lg mb-1">No documents yet</h3>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
-                Documents shared by your conveyancer or uploaded by you will appear here.
+                Drag and drop files here, or click to browse. PDF, images, and Word docs accepted.
               </p>
-              <Button variant="outline" onClick={handleUploadClick} disabled={!matterId}>Upload First Doc</Button>
+              <Button variant="outline" data-testid="button-upload-first">Upload your first document</Button>
             </div>
           ) : (
             myDocs.map((doc) => {
@@ -282,14 +520,23 @@ export default function ClientDocuments() {
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-bold text-sm truncate text-foreground">{doc.name}</h4>
                         {doc.locked && <Lock className="h-3 w-3 text-amber-500" />}
+                        {doc.fileUrl && (
+                          <span className="text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded font-medium">Uploaded</span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="bg-secondary px-2 py-0.5 rounded text-primary font-medium">{doc.size}</span>
                         <span>·</span>
-                        <span>{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : ''}</span>
+                        <span>{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-AU') : ''}</span>
+                        {doc.category && (
+                          <>
+                            <span>·</span>
+                            <span className="capitalize">{doc.category}</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
@@ -300,15 +547,24 @@ export default function ClientDocuments() {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-secondary" onClick={(e) => e.stopPropagation()}>
-                        <Download className="h-4 w-4" />
-                      </Button>
+                      {doc.fileUrl && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-secondary"
+                          onClick={(e) => { e.stopPropagation(); handleDownload(doc); }}
+                          data-testid={`button-download-${doc.id}`}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      )}
                       {!doc.locked && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
+                          data-testid={`button-delete-${doc.id}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

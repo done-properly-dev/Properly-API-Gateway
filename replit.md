@@ -85,6 +85,18 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 6. Enhanced empty states with CTAs across all role dashboards
 7. Australian tone and voice throughout
 
+## Sprint 2 Features (Complete)
+1. Enhanced documents table (fileKey, mimeType, fileUrl fields)
+2. Task-document linking (taskDocumentId on tasks table)
+3. File upload endpoint (multipart form via multer, disk storage)
+4. File download/view endpoint with auth check
+5. Auto-complete task when linked document is uploaded
+6. File validation (type whitelist: PDF/JPEG/PNG/WebP/HEIC/DOC/DOCX, 20MB max)
+7. Drag-and-drop file upload with progress indicator
+8. Document vault UI with upload, preview, lock indicators
+9. Task completion UX linked to uploads (required uploads section)
+10. Document viewer for uploaded files (real image/PDF preview for uploaded files)
+
 ## Supabase Configuration
 - Email confirmation: DISABLED (required for demo accounts)
 - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
@@ -106,6 +118,8 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Sprint 2 complete - Document Vault & Task Completion (file upload, drag-and-drop, auto-complete tasks, document preview)
+- 2026-02-16: Sprint 1 and Sprint 2 todos checked off in Notion developer documentation
 - 2026-02-16: Onboarding alert bar - shows incomplete steps on dashboard with resume links, checks actual data not onboardingComplete flag
 - 2026-02-16: Property map - Apple Maps integration on client dashboard with geocoding and marker
 - 2026-02-16: Demo user James Mitchell (midway) - partway through onboarding with matter, 5 tasks, property address

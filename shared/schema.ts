@@ -83,6 +83,7 @@ export const tasks = pgTable("tasks", {
   pillar: text("pillar"),
   assignedTo: varchar("assigned_to").references(() => users.id),
   description: text("description"),
+  taskDocumentId: varchar("task_document_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -102,6 +103,9 @@ export const documents = pgTable("documents", {
   locked: boolean("locked").notNull().default(false),
   category: text("category"),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
+  fileKey: text("file_key").unique(),
+  mimeType: text("mime_type"),
+  fileUrl: text("file_url"),
 });
 
 export const insertDocumentSchema = createInsertSchema(documents).omit({

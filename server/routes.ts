@@ -7,10 +7,52 @@ import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocum
 import { z } from "zod";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import * as resendService from "./services/resend";
 import * as twilioService from "./services/twilio";
 import * as diditService from "./services/didit";
 import * as appleMapsService from "./services/apple-maps";
+
+const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const uniqueKey = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const ext = path.extname(file.originalname);
+      cb(null, `${uniqueKey}${ext}`);
+    },
+  }),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`File type ${file.mimetype} not allowed. Accepted: PDF, JPEG, PNG, WebP, HEIC, DOC, DOCX`));
+    }
+  },
+});
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const onboardingUpdateSchema = z.object({
   phone: z.string().optional(),
@@ -475,8 +517,135 @@ export async function registerRoutes(
     }
   });
 
+  // File upload endpoint (multipart form)
+  app.post("/api/documents/upload", requireAuth, (req, res) => {
+    upload.single("file")(req, res, async (err: any) => {
+      if (err) {
+        if (err instanceof multer.MulterError) {
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({ message: "File too large. Maximum size is 20MB." });
+          }
+          return res.status(400).json({ message: err.message });
+        }
+        return res.status(400).json({ message: err.message });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file provided" });
+      }
+
+      const { matterId, category, taskId } = req.body;
+      if (!matterId) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ message: "matterId is required" });
+      }
+
+      try {
+        const matter = await storage.getMatter(matterId);
+        if (!matter) {
+          fs.unlinkSync(req.file.path);
+          return res.status(404).json({ message: "Matter not found" });
+        }
+
+        const fileKey = req.file.filename;
+        const doc = await storage.createDocument({
+          matterId,
+          name: req.file.originalname,
+          size: formatFileSize(req.file.size),
+          category: category || "document",
+          uploadedBy: req.userId!,
+          fileKey,
+          mimeType: req.file.mimetype,
+          fileUrl: `/api/documents/file/${fileKey}`,
+        });
+
+        // Auto-complete linked task if taskId provided
+        if (taskId) {
+          const task = await storage.updateTask(taskId, {
+            status: "COMPLETE",
+            taskDocumentId: doc.id,
+          });
+          if (task) {
+            console.log(`Task ${taskId} auto-completed via document upload ${doc.id}`);
+          }
+        }
+
+        res.status(201).json(doc);
+      } catch (err: any) {
+        if (req.file?.path) fs.unlinkSync(req.file.path);
+        res.status(500).json({ message: err.message });
+      }
+    });
+  });
+
+  // File download/view endpoint with ownership check
+  app.get("/api/documents/file/:fileKey", requireAuth, async (req, res) => {
+    try {
+      const fileKey = req.params.fileKey;
+
+      const sanitizedKey = path.basename(fileKey);
+      if (sanitizedKey !== fileKey || fileKey.includes('..')) {
+        return res.status(400).json({ message: "Invalid file key" });
+      }
+
+      const doc = await storage.getDocumentByFileKey(sanitizedKey);
+      if (!doc) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+
+      const matter = await storage.getMatter(doc.matterId);
+      if (!matter) return res.status(404).json({ message: "Matter not found" });
+
+      const hasAccess =
+        user.role === 'ADMIN' ||
+        user.role === 'BROKER' ||
+        (user.role === 'CLIENT' && matter.clientUserId === user.id) ||
+        (user.role === 'CONVEYANCER' && matter.conveyancerUserId === user.id);
+
+      if (!hasAccess) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const filePath = path.join(UPLOADS_DIR, sanitizedKey);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "File not found on disk" });
+      }
+
+      const ext = path.extname(sanitizedKey).toLowerCase();
+      const mimeMap: Record<string, string> = {
+        ".pdf": "application/pdf",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+        ".doc": "application/msword",
+        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      };
+
+      const contentType = mimeMap[ext] || "application/octet-stream";
+      res.setHeader("Content-Type", contentType);
+
+      if (req.query.download === "true") {
+        res.setHeader("Content-Disposition", `attachment; filename="${doc.name}"`);
+      }
+
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.delete("/api/documents/:id", requireAuth, async (req, res) => {
     try {
+      const doc = await storage.getDocument(paramId(req, "id"));
+      if (doc?.fileKey) {
+        const filePath = path.join(UPLOADS_DIR, doc.fileKey);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
       await storage.deleteDocument(paramId(req, "id"));
       res.json({ message: "Deleted" });
     } catch (err: any) {
