@@ -14,20 +14,20 @@ import type { Matter, Task, Document } from '@shared/schema';
 import clivePhoto from '@/assets/images/clive-conway.jpg';
 
 function ProgressDonut({ percent }: { percent: number }) {
-  const r = 54;
+  const r = 58;
   const circ = 2 * Math.PI * r;
   const offset = circ - (percent / 100) * circ;
   return (
     <div className="relative" data-testid="progress-donut">
-      <svg width="160" height="160" viewBox="0 0 130 130">
-        <circle cx="65" cy="65" r={r} fill="none" stroke="#e5e7eb" strokeWidth="12" />
-        <circle cx="65" cy="65" r={r} fill="none" stroke="#425b58" strokeWidth="12"
+      <svg width="170" height="170" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r={r} fill="none" stroke="#e5e7eb" strokeWidth="14" />
+        <circle cx="70" cy="70" r={r} fill="none" stroke="#9ab3a5" strokeWidth="14"
           strokeDasharray={circ} strokeDashoffset={offset}
-          strokeLinecap="round" transform="rotate(-90 65 65)"
+          strokeLinecap="round" transform="rotate(-90 70 70)"
           className="transition-all duration-1000"
         />
-        <text x="65" y="55" textAnchor="middle" className="fill-gray-400" style={{ fontSize: '11px', fontWeight: 500 }}>Overall progress</text>
-        <text x="65" y="82" textAnchor="middle" className="fill-[#1a2e2b]" style={{ fontSize: '32px', fontWeight: 700 }}>{percent}%</text>
+        <text x="70" y="60" textAnchor="middle" className="fill-gray-400" style={{ fontSize: '11px', fontWeight: 500 }}>Overall progress</text>
+        <text x="70" y="88" textAnchor="middle" className="fill-[#1a2e2b]" style={{ fontSize: '34px', fontWeight: 700 }}>{percent}%</text>
       </svg>
     </div>
   );
@@ -51,24 +51,26 @@ function VerticalTimeline({ matter }: { matter: Matter }) {
         const isLast = i === steps.length - 1;
 
         return (
-          <div key={step.key} className="flex items-start gap-3">
+          <div key={step.key} className="flex items-start gap-3.5">
             <div className="flex flex-col items-center">
               {isComplete ? (
-                <div className="h-7 w-7 rounded-full bg-[#e8946a] flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-[#e8946a] flex items-center justify-center">
                   <Check className="h-4 w-4 text-white" strokeWidth={3} />
                 </div>
               ) : isActive ? (
-                <div className="h-7 w-7 rounded-full border-[3px] border-[#e8946a] bg-white flex items-center justify-center">
-                  <div className="h-3 w-3 rounded-full bg-[#e8946a]" />
+                <div className="h-8 w-8 rounded-full border-[3px] border-[#c4a8d4] bg-white flex items-center justify-center">
+                  <div className="h-4 w-4 rounded-full bg-[#e8946a]" />
                 </div>
               ) : (
-                <div className="h-7 w-7 rounded-full border-2 border-gray-300 bg-white" />
+                <div className="h-8 w-8 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-gray-300" />
+                </div>
               )}
               {!isLast && (
-                <div className={`w-0.5 h-8 ${isComplete || isActive ? 'bg-[#e8946a]' : 'bg-gray-200'}`} />
+                <div className={`w-0.5 h-10 ${isComplete ? 'bg-[#e8946a]' : isActive ? 'bg-[#e8946a]' : 'bg-gray-200'}`} />
               )}
             </div>
-            <span className={`text-sm pt-1 ${
+            <span className={`text-sm pt-1.5 ${
               isComplete ? 'text-foreground font-medium' :
               isActive ? 'text-[#e8946a] font-semibold' :
               'text-gray-400'
