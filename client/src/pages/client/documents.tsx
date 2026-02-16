@@ -9,6 +9,7 @@ import { FileText, Download, Trash2, Lock, UploadCloud, File, X, Eye, Image, Fil
 import { useToast } from '@/hooks/use-toast';
 import { ProperlyLoader } from '@/components/properly-loader';
 import { supabase } from '@/lib/supabase';
+import { PageTransition } from '@/components/page-transition';
 import type { Matter, Document, Task } from '@shared/schema';
 
 function getFileType(name: string): 'image' | 'pdf' | 'other' {
@@ -383,6 +384,7 @@ export default function ClientDocuments() {
 
   return (
     <Layout role="CLIENT">
+      <PageTransition>
       <div
         className="space-y-6"
         onDragEnter={handleDragEnter}
@@ -581,6 +583,7 @@ export default function ClientDocuments() {
       {previewDoc && (
         <DocumentPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />
       )}
+      </PageTransition>
     </Layout>
   );
 }

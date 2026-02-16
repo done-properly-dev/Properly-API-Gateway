@@ -7,9 +7,11 @@ import { PropertyMap } from '@/components/property-map';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3, Check } from 'lucide-react';
+import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3, Check, Flame } from 'lucide-react';
 import { ProperlyLoader } from '@/components/properly-loader';
 import { Link } from 'wouter';
+import { PageTransition } from '@/components/page-transition';
+import { ProgressBadges } from '@/components/progress-badges';
 import type { Matter, Task, Document } from '@shared/schema';
 import clivePhoto from '@/assets/images/clive-conway.jpg';
 
@@ -168,8 +170,27 @@ export default function ClientDashboard() {
     return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2 }).format(amount / 100);
   };
 
+  const daysSinceCreated = matter.createdAt
+    ? Math.max(1, Math.floor((Date.now() - new Date(matter.createdAt).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
   return (
     <Layout role="CLIENT">
+      <PageTransition>
+      <style>{`
+        @keyframes cardFadeIn {
+          0% { opacity: 0; transform: translateY(12px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .card-stagger { opacity: 0; animation: cardFadeIn 0.4s ease-out forwards; }
+        .card-stagger-1 { animation-delay: 0.05s; }
+        .card-stagger-2 { animation-delay: 0.1s; }
+        .card-stagger-3 { animation-delay: 0.15s; }
+        .card-stagger-4 { animation-delay: 0.2s; }
+        .card-stagger-5 { animation-delay: 0.25s; }
+        .card-stagger-6 { animation-delay: 0.3s; }
+        .card-stagger-7 { animation-delay: 0.35s; }
+      `}</style>
       <div className="space-y-6">
         {user && !alertDismissed && (
           <OnboardingAlert user={user} hasDocuments={(myDocuments?.length ?? 0) > 0} onDismiss={() => setAlertDismissed(true)} />
@@ -187,7 +208,7 @@ export default function ClientDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-7 space-y-6">
-            <Card className="bg-[#e7f6f3]/40 border border-[#c8e0db] p-5 rounded-xl" data-testid="matter-info-card">
+            <Card className="card-stagger card-stagger-1 bg-[#e7f6f3]/40 border border-[#c8e0db] p-5 rounded-xl" data-testid="matter-info-card">
               <div className="flex items-start justify-between mb-4">
                 <h2 className="text-lg font-heading font-bold text-foreground" data-testid="text-property-address">
                   {user?.name || 'Client'}
@@ -220,12 +241,12 @@ export default function ClientDashboard() {
             </Card>
 
             {matter.address && (
-              <div data-testid="property-map-section">
+              <div className="card-stagger card-stagger-2" data-testid="property-map-section">
                 <PropertyMap address={matter.address} />
               </div>
             )}
 
-            <Card className="bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl overflow-hidden" data-testid="tasks-card">
+            <Card className="card-stagger card-stagger-3 bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl overflow-hidden" data-testid="tasks-card">
               <div className="p-5 pb-0">
                 <h3 className="text-lg font-heading font-bold text-foreground mb-4">Tasks</h3>
               </div>
@@ -272,7 +293,7 @@ export default function ClientDashboard() {
               </div>
             </Card>
 
-            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="document-vault-card">
+            <Card className="card-stagger card-stagger-4 bg-white border rounded-xl overflow-hidden" data-testid="document-vault-card">
               <div className="p-5 pb-0">
                 <h3 className="text-lg font-heading font-bold text-foreground mb-4">Document Vault</h3>
               </div>
@@ -316,7 +337,7 @@ export default function ClientDashboard() {
           </div>
 
           <div className="lg:col-span-5 space-y-6">
-            <Card className="bg-white border rounded-xl p-5" data-testid="progress-card">
+            <Card className="card-stagger card-stagger-2 bg-white border rounded-xl p-5" data-testid="progress-card">
               <div className="flex items-start gap-4">
                 <VerticalTimeline matter={matter} />
                 <div className="flex-1 flex justify-center">
@@ -325,7 +346,23 @@ export default function ClientDashboard() {
               </div>
             </Card>
 
-            <Card className="bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl p-5" data-testid="conveyancer-card">
+            {daysSinceCreated > 0 && (
+              <div className="card-stagger card-stagger-3 flex items-center gap-3 bg-[#ffece1]/60 border border-[#f5d6c5] rounded-xl px-4 py-3" data-testid="streak-counter">
+                <div className="h-9 w-9 rounded-full bg-[#e8946a] flex items-center justify-center">
+                  <Flame className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">{daysSinceCreated} day{daysSinceCreated !== 1 ? 's' : ''}</p>
+                  <p className="text-xs text-muted-foreground">on your settlement journey</p>
+                </div>
+              </div>
+            )}
+
+            <div className="card-stagger card-stagger-4">
+              <ProgressBadges matter={matter} />
+            </div>
+
+            <Card className="card-stagger card-stagger-5 bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl p-5" data-testid="conveyancer-card">
               <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-3">File owner</p>
               <div className="flex items-center gap-4">
                 <img
@@ -344,7 +381,7 @@ export default function ClientDashboard() {
               </div>
             </Card>
 
-            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="key-dates-card">
+            <Card className="card-stagger card-stagger-6 bg-white border rounded-xl overflow-hidden" data-testid="key-dates-card">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-[#e7f6f3]/60 border-b border-[#c8e0db]">
@@ -384,6 +421,7 @@ export default function ClientDashboard() {
       <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
         <Edit3 className="h-5 w-5" />
       </button>
+      </PageTransition>
     </Layout>
   );
 }

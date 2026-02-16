@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Settings, Users, Menu, Search, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown, Bell, ScrollText } from 'lucide-react';
+import { Home, FileText, Settings, Users, Menu, Search, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown, Bell, ScrollText, ShieldCheck } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from '@/components/logo';
 import type { Matter } from '@shared/schema';
@@ -102,6 +102,13 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
       </nav>
 
       <div className="pr-3 space-y-0.5 mt-2 font-['Inter',sans-serif]">
+        {role === 'BROKER' && (
+          <Link href="/referrer/2fa-setup">
+            <div className={navLinkClass('/referrer/2fa-setup', location)} data-testid="link-security">
+              <ShieldCheck className="h-[18px] w-[18px]" /> Security
+            </div>
+          </Link>
+        )}
         <Link href={`${rolePrefix}/settings`}>
           <div className={navLinkClass(`${rolePrefix}/settings`, location)} data-testid="link-settings">
             <Settings className="h-[18px] w-[18px]" /> Settings

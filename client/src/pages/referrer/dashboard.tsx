@@ -10,6 +10,7 @@ import { ProperlyLoader } from '@/components/properly-loader';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Referral } from '@shared/schema';
 import { PexaFeed } from '@/components/pexa-feed';
+import { PageTransition } from '@/components/page-transition';
 
 const TIME_FILTERS = ['12 months', '30 days', '7 days', '24 hours'] as const;
 const ITEMS_PER_PAGE = 10;
@@ -158,6 +159,7 @@ export default function ReferrerDashboard() {
 
   return (
     <Layout role="BROKER">
+      <PageTransition>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -368,6 +370,7 @@ export default function ReferrerDashboard() {
         </div>
         <PexaFeed />
       </div>
+      </PageTransition>
     </Layout>
   );
 }

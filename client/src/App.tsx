@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch, Route, Redirect } from "wouter";
 import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
 
 import LandingPage from '@/pages/landing';
 import AuthPage from '@/pages/auth';
@@ -12,6 +13,8 @@ import ReferrerDashboard from '@/pages/referrer/dashboard';
 import ReferrerCreate from '@/pages/referrer/create';
 import BrokerPayments from '@/pages/referrer/payments';
 import BrokerTeam from '@/pages/referrer/team';
+import TwoFactorSetup from '@/pages/referrer/two-factor-setup';
+import TwoFactorVerify from '@/pages/referrer/two-factor-verify';
 import AdminDashboard from '@/pages/admin/dashboard';
 import SmokeballTestPage from '@/pages/admin/smokeball-test';
 import NotificationTemplatesPage from '@/pages/admin/notification-templates';
@@ -24,6 +27,15 @@ import { ProperlyLoader } from '@/components/properly-loader';
 
 function PrivateRoute({ component: Component, allowedRoles }: { component: any, allowedRoles: string[] }) {
   const { user, isLoading } = useAuth();
+
+  const isBroker = !!user && user.role === 'BROKER';
+  const currentPath = window.location.pathname;
+  const is2faPage = currentPath === '/referrer/2fa-setup' || currentPath === '/referrer/2fa-verify';
+
+  const { data: tfaStatus, isLoading: tfaLoading } = useQuery<{ enabled: boolean; verified: boolean; phone: string | null }>({
+    queryKey: ['/api/2fa/status'],
+    enabled: isBroker && !is2faPage,
+  });
 
   if (isLoading) {
     return (
@@ -40,6 +52,12 @@ function PrivateRoute({ component: Component, allowedRoles }: { component: any, 
   if (user.role === 'CLIENT' && !user.onboardingComplete && user.onboardingStep === 0 &&
       !window.location.pathname.startsWith('/client/onboarding')) {
     return <Redirect to="/client/onboarding" />;
+  }
+
+  if (isBroker && !is2faPage && !tfaLoading && tfaStatus) {
+    if (tfaStatus.enabled && !tfaStatus.verified) {
+      return <Redirect to="/referrer/2fa-verify" />;
+    }
   }
 
   return <Component />;
@@ -68,6 +86,12 @@ function App() {
         </Route>
         
         {/* Referrer Routes */}
+        <Route path="/referrer/2fa-setup">
+          <PrivateRoute component={TwoFactorSetup} allowedRoles={['BROKER']} />
+        </Route>
+        <Route path="/referrer/2fa-verify">
+          <PrivateRoute component={TwoFactorVerify} allowedRoles={['BROKER']} />
+        </Route>
         <Route path="/referrer/dashboard">
           <PrivateRoute component={ReferrerDashboard} allowedRoles={['BROKER']} />
         </Route>
