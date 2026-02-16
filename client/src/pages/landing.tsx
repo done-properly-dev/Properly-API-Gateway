@@ -164,7 +164,7 @@ export default function LandingPage() {
           </div>
 
           <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200 bg-white p-2 mb-16 max-w-4xl mx-auto">
-            <img src="/assets/Screenshot_2026-02-16_at_10.30.22_1771237826799.png" alt="Properly Dashboard Interface" className="w-full h-auto rounded-lg" />
+            <img src="/images/product-dashboard.png" alt="Properly Dashboard Interface" className="w-full h-auto rounded-lg" />
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 text-center max-w-5xl mx-auto border-t pt-12">
