@@ -3,11 +3,11 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { supabase } from "./supabase";
-import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema, insertPaymentSchema, insertOrganisationSchema, insertOrganisationMemberSchema, insertNotificationTemplateSchema, insertNotificationLogSchema, payments, organisations, organisationMembers } from "@shared/schema";
+import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema, insertPaymentSchema, insertOrganisationSchema, insertOrganisationMemberSchema, insertNotificationTemplateSchema, insertNotificationLogSchema, payments, organisations, organisationMembers, otpCodes } from "@shared/schema";
 import crypto from "crypto";
 import { z } from "zod";
 import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, gt } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -101,6 +101,31 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+async function checkBroker2FA(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user = await storage.getUser(req.userId!);
+    if (!user) return res.status(401).json({ message: "User not found" });
+
+    if (user.role === "BROKER" && user.twoFactorEnabled) {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const [verifiedOtp] = await db.select().from(otpCodes).where(
+        and(
+          eq(otpCodes.userId, user.id),
+          eq(otpCodes.verified, true),
+          gt(otpCodes.createdAt, twentyFourHoursAgo)
+        )
+      ).limit(1);
+
+      if (!verifiedOtp) {
+        return res.status(403).json({ error: "2FA verification required", requiresTwoFactor: true });
+      }
+    }
+    next();
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -133,7 +158,7 @@ export async function registerRoutes(
     }
 
     const { password: _, ...safe } = user;
-    res.json(safe);
+    res.json({ ...safe, twoFactorEnabled: user.twoFactorEnabled });
   });
 
   app.post("/api/auth/profile", async (req, res) => {
@@ -411,6 +436,91 @@ export async function registerRoutes(
     }
   });
 
+  // ─── 2FA ───
+  app.post("/api/2fa/setup", requireAuth, async (req, res) => {
+    try {
+      const { phone } = req.body;
+      if (!phone) return res.status(400).json({ error: "Phone number is required" });
+
+      await storage.updateUser(req.userId!, { phone });
+      await storage.enableTwoFactor(req.userId!);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/2fa/send", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+      if (!user.phone) return res.status(400).json({ error: "No phone number on file" });
+
+      const latestOtp = await storage.getLatestOtpForUser(user.id);
+      if (latestOtp && latestOtp.createdAt && (Date.now() - new Date(latestOtp.createdAt).getTime()) < 60000) {
+        return res.status(429).json({ error: "Please wait before requesting another code" });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      await storage.createOtpCode({ userId: user.id, code, expiresAt, verified: false });
+
+      if (twilioService.isConfigured()) {
+        await twilioService.sendVerificationCode(user.phone, code);
+      } else {
+        console.log(`[2FA] OTP code for ${user.email}: ${code}`);
+      }
+
+      res.json({ success: true, message: "Code sent" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/2fa/verify", requireAuth, async (req, res) => {
+    try {
+      const { code } = req.body;
+      if (!code) return res.status(400).json({ error: "Code is required" });
+
+      const latestOtp = await storage.getLatestOtpForUser(req.userId!);
+      if (!latestOtp || latestOtp.code !== code) {
+        return res.status(400).json({ error: "Invalid or expired code" });
+      }
+
+      await storage.markOtpVerified(latestOtp.id);
+      res.json({ success: true, verified: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/2fa/status", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+
+      const enabled = user.twoFactorEnabled;
+      let verified = false;
+
+      if (enabled) {
+        const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const [verifiedOtp] = await db.select().from(otpCodes).where(
+          and(
+            eq(otpCodes.userId, user.id),
+            eq(otpCodes.verified, true),
+            gt(otpCodes.createdAt, twentyFourHoursAgo)
+          )
+        ).limit(1);
+        verified = !!verifiedOtp;
+      }
+
+      res.json({ enabled, verified, phone: user.phone || null });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   // ─── Matters ───
   app.get("/api/matters", requireAuth, async (req, res) => {
     try {
@@ -657,7 +767,7 @@ export async function registerRoutes(
   });
 
   // ─── Referrals ───
-  app.get("/api/referrals", requireAuth, async (req, res) => {
+  app.get("/api/referrals", requireAuth, checkBroker2FA, async (req, res) => {
     try {
       const user = await storage.getUser(req.userId!);
       if (!user) return res.status(401).json({ message: "User not found" });
@@ -686,7 +796,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/referrals", requireAuth, async (req, res) => {
+  app.post("/api/referrals", requireAuth, checkBroker2FA, async (req, res) => {
     try {
       const data = { ...req.body };
       if (data.channel === "QR") {
@@ -757,7 +867,7 @@ export async function registerRoutes(
   });
 
   // ─── Payments ───
-  app.get("/api/payments", requireAuth, async (req, res) => {
+  app.get("/api/payments", requireAuth, checkBroker2FA, async (req, res) => {
     try {
       const user = await storage.getUser(req.userId!);
       if (!user) return res.status(401).json({ message: "User not found" });
@@ -773,7 +883,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/payments", requireAuth, async (req, res) => {
+  app.post("/api/payments", requireAuth, checkBroker2FA, async (req, res) => {
     try {
       const data = { ...req.body };
       data.brokerId = data.brokerId || req.userId!;

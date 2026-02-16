@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   address: text("address"),
   state: text("state"),
   postcode: text("postcode"),
+  twoFactorEnabled: boolean("two_factor_enabled").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -266,3 +267,19 @@ export const insertOrganisationMemberSchema = createInsertSchema(organisationMem
 });
 export type InsertOrganisationMember = z.infer<typeof insertOrganisationMemberSchema>;
 export type OrganisationMember = typeof organisationMembers.$inferSelect;
+
+export const otpCodes = pgTable("otp_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  code: text("code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  verified: boolean("verified").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOtpCodeSchema = createInsertSchema(otpCodes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertOtpCode = z.infer<typeof insertOtpCodeSchema>;
+export type OtpCode = typeof otpCodes.$inferSelect;

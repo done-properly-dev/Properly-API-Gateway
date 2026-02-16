@@ -1,8 +1,9 @@
-import { eq, inArray, desc } from "drizzle-orm";
+import { eq, inArray, desc, and, gt } from "drizzle-orm";
 import { db } from "./db";
 import {
   users, matters, tasks, documents, referrals, notifications, playbookArticles,
   payments, organisations, organisationMembers, notificationTemplates, notificationLogs,
+  otpCodes,
   type User, type InsertUser,
   type Matter, type InsertMatter,
   type Task, type InsertTask,
@@ -15,6 +16,7 @@ import {
   type OrganisationMember, type InsertOrganisationMember,
   type NotificationTemplate, type InsertNotificationTemplate,
   type NotificationLog, type InsertNotificationLog,
+  type OtpCode, type InsertOtpCode,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -82,6 +84,12 @@ export interface IStorage {
   getPlaybookArticlesByCategory(category: string): Promise<PlaybookArticle[]>;
   getPlaybookArticlesByPillar(pillar: string): Promise<PlaybookArticle[]>;
   createPlaybookArticle(article: InsertPlaybookArticle): Promise<PlaybookArticle>;
+
+  createOtpCode(data: InsertOtpCode): Promise<OtpCode>;
+  getLatestOtpForUser(userId: string): Promise<OtpCode | undefined>;
+  markOtpVerified(otpId: string): Promise<void>;
+  enableTwoFactor(userId: string): Promise<void>;
+  isTwoFactorEnabled(userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -332,6 +340,35 @@ export class DatabaseStorage implements IStorage {
   async createPlaybookArticle(data: InsertPlaybookArticle): Promise<PlaybookArticle> {
     const [article] = await db.insert(playbookArticles).values(data).returning();
     return article;
+  }
+
+  async createOtpCode(data: InsertOtpCode): Promise<OtpCode> {
+    const [otp] = await db.insert(otpCodes).values(data).returning();
+    return otp;
+  }
+
+  async getLatestOtpForUser(userId: string): Promise<OtpCode | undefined> {
+    const [otp] = await db.select().from(otpCodes).where(
+      and(
+        eq(otpCodes.userId, userId),
+        eq(otpCodes.verified, false),
+        gt(otpCodes.expiresAt, new Date())
+      )
+    ).orderBy(desc(otpCodes.createdAt)).limit(1);
+    return otp;
+  }
+
+  async markOtpVerified(otpId: string): Promise<void> {
+    await db.update(otpCodes).set({ verified: true }).where(eq(otpCodes.id, otpId));
+  }
+
+  async enableTwoFactor(userId: string): Promise<void> {
+    await db.update(users).set({ twoFactorEnabled: true }).where(eq(users.id, userId));
+  }
+
+  async isTwoFactorEnabled(userId: string): Promise<boolean> {
+    const [user] = await db.select({ twoFactorEnabled: users.twoFactorEnabled }).from(users).where(eq(users.id, userId));
+    return user?.twoFactorEnabled ?? false;
   }
 }
 
