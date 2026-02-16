@@ -85,8 +85,9 @@ function VerticalTimeline({ matter }: { matter: Matter }) {
 }
 
 function StatusDot({ status }: { status: string }) {
-  if (status === 'COMPLETE') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-green-500"></span> Complete</span>;
-  if (status === 'IN_REVIEW') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-amber-400"></span> In review</span>;
+  if (status === 'COMPLETE') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-green-500"></span> Acknowledged</span>;
+  if (status === 'IN_REVIEW') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-[#e8946a]"></span> Important Info</span>;
+  if (status === 'OVERDUE') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-red-500"></span> Overdue</span>;
   return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-[#e8946a]"></span> To do</span>;
 }
 
@@ -177,7 +178,7 @@ export default function ClientDashboard() {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Home className="h-4 w-4" />
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary font-medium">Dashboard</span>
+          <span className="text-[#425b58] font-medium">Dashboard</span>
         </div>
 
         <h1 className="text-2xl font-heading font-bold text-foreground" data-testid="text-dashboard-title">
@@ -191,7 +192,7 @@ export default function ClientDashboard() {
                 <h2 className="text-lg font-heading font-bold text-foreground" data-testid="text-property-address">
                   {user?.name || 'Client'}
                 </h2>
-                <Badge className="bg-[#e7f6f3] text-primary border-[#c8e0db] text-xs font-semibold" data-testid="badge-transaction-type">
+                <Badge className="bg-[#e7f6f3] text-primary border-[#c8e0db] text-xs font-semibold rounded-full px-3" data-testid="badge-transaction-type">
                   {matter.transactionType === 'Purchase' ? 'Buyer' : 'Seller'}
                 </Badge>
               </div>
@@ -243,6 +244,7 @@ export default function ClientDashboard() {
                       <tr className="border-b border-gray-100">
                         <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide">Action</th>
                         <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-28">Status</th>
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-32">Date completed</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -250,6 +252,11 @@ export default function ClientDashboard() {
                         <tr key={task.id} className="border-b border-gray-50 last:border-0" data-testid={`task-row-${task.id}`}>
                           <td className="py-3 text-foreground">{task.title}</td>
                           <td className="py-3"><StatusDot status={task.status} /></td>
+                          <td className="py-3 text-gray-500">
+                            {task.status === 'COMPLETE' && task.dueDate
+                              ? new Date(task.dueDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
+                              : '-'}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -347,7 +354,7 @@ export default function ClientDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-100">
+                  <tr className="border-b border-gray-100 bg-[#e7f6f3]/20">
                     <td className="px-5 py-4 text-foreground font-semibold">Contract date</td>
                     <td className="px-3 py-4 text-gray-600">{contractDate}</td>
                     <td className="px-5 py-4 text-right text-gray-400">-</td>
@@ -362,7 +369,7 @@ export default function ClientDashboard() {
                     <td className="px-3 py-4 text-gray-600">{financeDate !== '-' ? financeDate : '-'}</td>
                     <td className="px-5 py-4 text-right text-foreground font-semibold">{formatCurrency(matter.depositAmount)}</td>
                   </tr>
-                  <tr>
+                  <tr className="bg-[#ffece1]/20">
                     <td className="px-5 py-4 text-foreground font-semibold">Settlement date</td>
                     <td className="px-3 py-4 text-gray-600" data-testid="text-settlement-date">{settlementDate}</td>
                     <td className="px-5 py-4 text-right text-gray-400">-</td>
@@ -374,7 +381,7 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#e7f6f3] text-primary shadow-lg hover:bg-[#d5ece7] flex items-center justify-center z-40 md:bottom-8 md:right-8 border border-[#c8e0db]" data-testid="fab-edit">
+      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
         <Edit3 className="h-5 w-5" />
       </button>
     </Layout>

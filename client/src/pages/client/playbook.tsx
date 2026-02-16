@@ -1,33 +1,24 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { BookOpen, Clock, Search, ArrowLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Clock, Search, ArrowLeft, ChevronDown, PlusCircle, MinusCircle } from 'lucide-react';
 import { ProperlyLoader } from '@/components/properly-loader';
 import type { PlaybookArticle } from '@shared/schema';
 
-const CATEGORIES = [
-  { value: '', label: 'All Articles' },
-  { value: 'Getting Started', label: 'Getting Started' },
-  { value: 'The Process', label: 'The Process' },
-  { value: 'Money Matters', label: 'Money Matters' },
-];
-
 export default function PlaybookPage() {
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedArticle, setSelectedArticle] = useState<PlaybookArticle | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [firstLoad, setFirstLoad] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   const { data: articles, isLoading } = useQuery<PlaybookArticle[]>({
-    queryKey: ['/api/playbook', selectedCategory ? `?category=${selectedCategory}` : ''],
+    queryKey: ['/api/playbook'],
     queryFn: async () => {
-      const url = selectedCategory
-        ? `/api/playbook?category=${encodeURIComponent(selectedCategory)}`
-        : '/api/playbook';
-      const res = await fetch(url);
+      const res = await fetch('/api/playbook');
       if (!res.ok) throw new Error('Failed to load articles');
       return res.json();
     },
@@ -37,6 +28,18 @@ export default function PlaybookPage() {
     !searchQuery || a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     a.summary.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (firstLoad && filteredArticles && filteredArticles.length > 0 && expandedId === null) {
+    setExpandedId(filteredArticles[0].id);
+    setFirstLoad(false);
+  }
+
+  const visibleArticles = filteredArticles?.slice(0, visibleCount);
+  const hasMore = filteredArticles && filteredArticles.length > visibleCount;
+
+  const toggleExpand = (id: string) => {
+    setExpandedId(prev => (prev === id ? null : id));
+  };
 
   if (selectedArticle) {
     return (
@@ -92,80 +95,107 @@ export default function PlaybookPage() {
   return (
     <Layout role="CLIENT">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-heading font-bold" data-testid="playbook-heading">The Playbook</h1>
+        <div className="text-center relative">
+          <h1 className="text-[30px] leading-[38px] font-semibold font-heading" data-testid="playbook-heading">
+            Properly Playbook
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Your go-to guide for understanding the property settlement process. No jargon, just straight-up helpful info.
+            Practical guidance for buyers and sellers.
           </p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search articles..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              data-testid="input-search-playbook"
-            />
-          </div>
-          <div className="flex gap-2 overflow-x-auto">
-            {CATEGORIES.map(cat => (
-              <Button
-                key={cat.value}
-                variant={selectedCategory === cat.value ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory(cat.value)}
-                className={selectedCategory === cat.value ? 'bg-primary' : ''}
-                data-testid={`filter-${cat.value || 'all'}`}
-              >
-                {cat.label}
-              </Button>
-            ))}
+          <div className="absolute right-0 top-1">
+            <Badge className="bg-[#17b26a] hover:bg-[#17b26a] text-white rounded-full px-3 py-1 text-xs font-medium">
+              Buyer
+            </Badge>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <ProperlyLoader size="md" />
+        <div className="bg-[#e7f6f3]/40 border border-[#c8e0db] rounded-xl p-6">
+          <div className="flex justify-end mb-4">
+            <div className="relative w-full max-w-xs">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search"
+                className="pl-9 pr-14 bg-white"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                data-testid="input-search-playbook"
+              />
+              <div className="absolute right-2 top-1.5">
+                <kbd className="pointer-events-none inline-flex h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                  ⌘K
+                </kbd>
+              </div>
+            </div>
           </div>
-        ) : filteredArticles?.length === 0 ? (
-          <div className="text-center py-16">
-            <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-heading font-bold text-lg">No articles found</h3>
-            <p className="text-muted-foreground">Try adjusting your search or filter.</p>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {filteredArticles?.map(article => (
-              <Card
-                key={article.id}
-                className="border hover:shadow-md transition-all cursor-pointer group"
-                onClick={() => setSelectedArticle(article)}
-                data-testid={`article-card-${article.slug}`}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="text-xs">{article.category}</Badge>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> {article.readTimeMinutes} min
-                        </span>
-                      </div>
-                      <h3 className="font-heading font-bold text-lg mb-2 group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{article.summary}</p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors shrink-0 ml-4 mt-1" />
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <ProperlyLoader size="md" />
+            </div>
+          ) : filteredArticles?.length === 0 ? (
+            <div className="text-center py-16">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-heading font-bold text-lg">No articles found</h3>
+              <p className="text-muted-foreground">Try adjusting your search.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#c8e0db]">
+              {visibleArticles?.map(article => (
+                <div
+                  key={article.id}
+                  className="py-4 first:pt-0 last:pb-0"
+                  data-testid={`article-card-${article.slug}`}
+                >
+                  <div
+                    className="flex items-start justify-between cursor-pointer"
+                    onClick={() => toggleExpand(article.id)}
+                    data-testid={`accordion-toggle-${article.slug}`}
+                  >
+                    <h3 className="text-[16px] font-semibold text-[#181d27] font-heading">
+                      {article.title}
+                    </h3>
+                    <button className="shrink-0 ml-4 mt-0.5 text-[#535862]">
+                      {expandedId === article.id ? (
+                        <MinusCircle className="h-5 w-5" />
+                      ) : (
+                        <PlusCircle className="h-5 w-5" />
+                      )}
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+
+                  {expandedId === article.id && (
+                    <div className="mt-2">
+                      <p className="text-[14px] text-[#535862] leading-relaxed">
+                        {article.summary}
+                      </p>
+                      <button
+                        className="mt-2 text-[14px] text-[#181d27] underline underline-offset-2 hover:text-primary"
+                        onClick={() => setSelectedArticle(article)}
+                        data-testid={`link-read-more-${article.slug}`}
+                      >
+                        Find out more here
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {hasMore && (
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="ghost"
+                className="text-muted-foreground"
+                onClick={() => setVisibleCount(prev => prev + 6)}
+                data-testid="button-load-more"
+              >
+                Load more
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );
