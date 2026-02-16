@@ -15,6 +15,7 @@ export const users = pgTable("users", {
   onboardingComplete: boolean("onboarding_complete").notNull().default(false),
   voiStatus: text("voi_status").notNull().default("not_started"),
   voiMethod: text("voi_method"),
+  voiSessionId: text("voi_session_id"),
   dateOfBirth: text("date_of_birth"),
   address: text("address"),
   state: text("state"),

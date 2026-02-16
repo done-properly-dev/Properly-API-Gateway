@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useMutation } from '@tanstack/react-query';
@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLocation } from 'wouter';
-import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper } from 'lucide-react';
+import { useLocation, useSearch } from 'wouter';
+import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
 
 const STEPS = [
   { id: 'welcome', title: "G'day!", icon: PartyPopper },
@@ -18,9 +18,12 @@ const STEPS = [
   { id: 'contract', title: 'Upload Contract', icon: Upload },
 ];
 
+type VoiState = 'idle' | 'starting' | 'in_progress' | 'completed' | 'failed' | 'not_configured';
+
 export default function OnboardingPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const [step, setStep] = useState(user?.onboardingStep || 0);
   const [formData, setFormData] = useState({
     phone: user?.phone || '',
@@ -30,6 +33,20 @@ export default function OnboardingPage() {
     postcode: user?.postcode || '',
     voiMethod: user?.voiMethod || '',
   });
+
+  const [voiState, setVoiState] = useState<VoiState>(
+    user?.voiStatus === 'verified' ? 'completed' : 'idle'
+  );
+  const [voiError, setVoiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    if (params.get('voi') === 'complete') {
+      setStep(2);
+      setVoiState('completed');
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+    }
+  }, [searchString]);
 
   const updateOnboarding = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
@@ -41,6 +58,31 @@ export default function OnboardingPage() {
     },
   });
 
+  const startVerification = useCallback(async () => {
+    setVoiState('starting');
+    setVoiError(null);
+    try {
+      const res = await apiRequest('POST', '/api/verification/start');
+      if (!res.ok) {
+        const err = await res.json();
+        if (res.status === 503) {
+          setVoiState('not_configured');
+          return;
+        }
+        throw new Error(err.message || 'Failed to start verification');
+      }
+      const session = await res.json();
+
+      if (session.verificationUrl) {
+        setVoiState('in_progress');
+        window.open(session.verificationUrl, '_blank');
+      }
+    } catch (err: any) {
+      setVoiError(err.message);
+      setVoiState('failed');
+    }
+  }, []);
+
   const handleNext = async () => {
     if (step === 1) {
       await updateOnboarding.mutateAsync({
@@ -49,8 +91,8 @@ export default function OnboardingPage() {
       });
     } else if (step === 2) {
       await updateOnboarding.mutateAsync({
-        voiMethod: formData.voiMethod,
-        voiStatus: formData.voiMethod ? 'pending' : 'not_started',
+        voiMethod: voiState === 'completed' ? 'didit' : formData.voiMethod || 'skip',
+        voiStatus: voiState === 'completed' ? 'verified' : (voiState === 'in_progress' ? 'pending' : 'not_started'),
         onboardingStep: 3,
       });
     }
@@ -225,31 +267,100 @@ export default function OnboardingPage() {
               <div className="text-center mb-4">
                 <h2 className="text-2xl font-heading font-bold" data-testid="voi-heading">Verify Your Identity</h2>
                 <p className="text-muted-foreground mt-2">
-                  It's a legal requirement for property transactions in Australia. Choose how you'd like to verify.
+                  It's a legal requirement for property transactions in Australia. 
+                  We use Didit to verify your identity securely.
                 </p>
               </div>
 
-              <div className="space-y-3">
-                {[
-                  { value: 'video', label: 'Video Call', desc: 'Quick video chat with a verified agent — takes 5 mins' },
-                  { value: 'auspost', label: 'Australia Post', desc: 'Pop into your local post office with your ID' },
-                  { value: 'in_person', label: 'In Person', desc: 'Visit your conveyancer\'s office with your documents' },
-                ].map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setFormData({ ...formData, voiMethod: opt.value })}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      formData.voiMethod === opt.value
-                        ? 'border-primary bg-[#e7f6f3]'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    data-testid={`voi-option-${opt.value}`}
+              {voiState === 'idle' && (
+                <div className="space-y-4">
+                  <div className="bg-[#e7f6f3] rounded-xl p-6 text-center space-y-4">
+                    <Shield className="h-12 w-12 text-primary mx-auto" />
+                    <h3 className="font-heading font-semibold text-lg">Quick & Secure Verification</h3>
+                    <p className="text-sm text-muted-foreground">
+                      You'll need a valid photo ID (driver's licence or passport) and your device camera.
+                      The process takes about 2 minutes.
+                    </p>
+                    <Button
+                      onClick={startVerification}
+                      className="bg-primary hover:bg-primary/90 text-white px-8 py-3"
+                      data-testid="button-start-voi"
+                    >
+                      <Shield className="mr-2 h-5 w-5" />
+                      Start Verification
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {voiState === 'starting' && (
+                <div className="bg-[#e7f6f3] rounded-xl p-8 text-center space-y-4">
+                  <Loader2 className="h-12 w-12 text-primary mx-auto animate-spin" />
+                  <h3 className="font-heading font-semibold text-lg">Setting up verification...</h3>
+                  <p className="text-sm text-muted-foreground">Hang tight, we're getting things ready for you.</p>
+                </div>
+              )}
+
+              {voiState === 'in_progress' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center space-y-4">
+                  <ExternalLink className="h-12 w-12 text-blue-600 mx-auto" />
+                  <h3 className="font-heading font-semibold text-lg text-blue-900">Verification In Progress</h3>
+                  <p className="text-sm text-blue-700">
+                    A new window has opened for your identity verification. 
+                    Complete the steps there and come back here when you're done.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={startVerification}
+                      variant="outline"
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                      data-testid="button-reopen-voi"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Reopen Verification Window
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {voiState === 'completed' && (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center space-y-4">
+                  <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto" />
+                  <h3 className="font-heading font-semibold text-lg text-green-900">Identity Verified!</h3>
+                  <p className="text-sm text-green-700">
+                    Bonzer! Your identity has been verified successfully. You're all set to proceed.
+                  </p>
+                </div>
+              )}
+
+              {voiState === 'failed' && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center space-y-4">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+                  <h3 className="font-heading font-semibold text-lg text-red-900">Verification Issue</h3>
+                  <p className="text-sm text-red-700">
+                    {voiError || "Something went wrong with the verification. Give it another go."}
+                  </p>
+                  <Button
+                    onClick={startVerification}
+                    variant="outline"
+                    className="border-red-300 text-red-700 hover:bg-red-50"
+                    data-testid="button-retry-voi"
                   >
-                    <div className="font-medium">{opt.label}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{opt.desc}</div>
-                  </button>
-                ))}
-              </div>
+                    Try Again
+                  </Button>
+                </div>
+              )}
+
+              {voiState === 'not_configured' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center space-y-4">
+                  <AlertCircle className="h-12 w-12 text-amber-500 mx-auto" />
+                  <h3 className="font-heading font-semibold text-lg text-amber-900">Verification Not Available Yet</h3>
+                  <p className="text-sm text-amber-700">
+                    Identity verification is being set up. You can skip this step for now and 
+                    complete it later from your dashboard.
+                  </p>
+                </div>
+              )}
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <p className="text-sm text-amber-800">

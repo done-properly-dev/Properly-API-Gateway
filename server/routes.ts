@@ -1,3 +1,4 @@
+import express from "express";
 import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
@@ -541,14 +542,29 @@ export async function registerRoutes(
     }
   });
 
-  // ─── Identity Verification (Didit) ───
+  // ─── Identity Verification (Didit v3) ───
   app.post("/api/verification/start", requireAuth, async (req, res) => {
     try {
       if (!diditService.isConfigured()) {
         return res.status(503).json({ message: "Identity verification service not configured. Add DIDIT_API_KEY." });
       }
-      const callbackUrl = `${req.protocol}://${req.get('host')}/api/verification/callback`;
-      const session = await diditService.createVerificationSession(req.userId!, callbackUrl);
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+
+      const appUrl = process.env.VITE_APP_URL || `${req.protocol}://${req.get('host')}`;
+      const callbackUrl = `${appUrl}/client/onboarding?voi=complete`;
+
+      const session = await diditService.createVerificationSession(
+        req.userId!,
+        callbackUrl,
+        { email: user.email, name: user.name, phone: user.phone || undefined }
+      );
+
+      await storage.updateUser(req.userId!, {
+        voiStatus: 'pending',
+        voiSessionId: session.sessionId,
+      });
+
       res.json(session);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -560,30 +576,52 @@ export async function registerRoutes(
       if (!diditService.isConfigured()) {
         return res.status(503).json({ message: "Identity verification service not configured" });
       }
-      const result = await diditService.getVerificationStatus(paramId(req, "sessionId"));
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.voiSessionId !== req.params.sessionId) {
+        return res.status(403).json({ message: "Not authorised to view this session" });
+      }
+      const result = await diditService.getVerificationStatus(req.params.sessionId);
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
   });
 
-  app.post("/api/verification/callback", async (req, res) => {
+  app.post("/api/verification/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
     try {
-      const callbackSecret = process.env.DIDIT_CALLBACK_SECRET;
-      if (callbackSecret) {
-        const providedSecret = req.headers['x-didit-secret'] || req.query.secret;
-        if (providedSecret !== callbackSecret) {
-          return res.status(403).json({ message: "Invalid callback secret" });
+      const signature = req.headers['x-signature-v2'] as string;
+      const timestamp = req.headers['x-timestamp'] as string;
+      const body = typeof req.body === 'string' ? req.body : req.body.toString();
+
+      if (signature && timestamp) {
+        if (!diditService.verifyWebhookSignature(body, signature, timestamp)) {
+          return res.status(401).json({ message: "Invalid webhook signature" });
+        }
+      } else {
+        const callbackSecret = process.env.DIDIT_CALLBACK_SECRET;
+        if (callbackSecret) {
+          const providedSecret = req.headers['x-didit-secret'] || req.query.secret;
+          if (providedSecret !== callbackSecret) {
+            return res.status(403).json({ message: "Invalid callback secret" });
+          }
         }
       }
 
-      const { session_id, status, vendor_data } = req.body;
-      if (vendor_data && status === 'approved') {
+      const payload = typeof req.body === 'string' ? JSON.parse(req.body) : JSON.parse(req.body.toString());
+      const { session_id, status, vendor_data } = payload;
+
+      if (vendor_data && (status === 'Approved' || status === 'approved')) {
         const user = await storage.getUser(vendor_data);
         if (user) {
           await storage.updateUser(vendor_data, { voiStatus: 'verified' });
         }
+      } else if (vendor_data && (status === 'Declined' || status === 'declined')) {
+        const user = await storage.getUser(vendor_data);
+        if (user) {
+          await storage.updateUser(vendor_data, { voiStatus: 'failed' });
+        }
       }
+
       res.json({ received: true });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
