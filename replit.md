@@ -22,10 +22,12 @@ Full-stack MVP for an API-driven property settlement platform. Supports four use
 - **ORM**: Drizzle ORM with PostgreSQL
 - **API Prefix**: All routes under `/api/`
 
-### Database (PostgreSQL)
+### Database (Supabase PostgreSQL)
+- **Provider**: Supabase (pooler connection via SUPABASE_DATABASE_URL secret)
 - **Tables**: users, matters, tasks, documents, referrals, notifications
 - **Schema**: `shared/schema.ts`
 - **Storage Layer**: `server/storage.ts`
+- **Connection**: `server/db.ts` (prefers SUPABASE_DATABASE_URL, falls back to DATABASE_URL)
 
 ## Key Files
 - `shared/schema.ts` - Database schema and types
@@ -61,4 +63,5 @@ Full-stack MVP for an API-driven property settlement platform. Supports four use
 - PATCH `/api/notifications/:id` - Update notification
 
 ## Recent Changes
+- 2026-02-16: Switched database to Supabase PostgreSQL (pooler connection)
 - 2026-02-16: Converted from frontend prototype to full-stack with PostgreSQL, session auth, and real API calls
