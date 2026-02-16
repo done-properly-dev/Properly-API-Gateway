@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch, Route, Redirect } from "wouter";
 import { useStore } from '@/lib/store';
 
+import LandingPage from '@/pages/landing';
 import AuthPage from '@/pages/auth';
 import ClientDashboard from '@/pages/client/dashboard';
 import ClientDocuments from '@/pages/client/documents';
@@ -15,10 +16,10 @@ import { Toaster } from "@/components/ui/toaster";
 function PrivateRoute({ component: Component, allowedRoles }: { component: any, allowedRoles: string[] }) {
   const { currentUser } = useStore();
 
-  if (!currentUser) return <Redirect to="/" />;
+  if (!currentUser) return <Redirect to="/auth" />;
   // Simple check - in real app would match exact roles
   const hasRole = allowedRoles.includes(currentUser.role);
-  if (!hasRole) return <Redirect to="/" />; 
+  if (!hasRole) return <Redirect to="/auth" />; 
 
   return <Component />;
 }
@@ -27,7 +28,8 @@ function App() {
   return (
     <>
       <Switch>
-        <Route path="/" component={AuthPage} />
+        <Route path="/" component={LandingPage} />
+        <Route path="/auth" component={AuthPage} />
         
         {/* Client Routes */}
         <Route path="/client/dashboard">
