@@ -9,13 +9,13 @@ interface ProperlyLoaderProps {
 }
 
 export function ProperlyLoader({ size = 'md', text, className, fullPage = false }: ProperlyLoaderProps) {
-  const dims = size === 'sm' ? 40 : size === 'md' ? 64 : 88;
-  const stroke = size === 'sm' ? 2.5 : 3;
-  const iconScale = size === 'sm' ? 0.45 : size === 'md' ? 0.65 : 0.85;
-  const r = (dims / 2) - stroke - 2;
+  const dims = size === 'sm' ? 48 : size === 'md' ? 72 : 96;
+  const stroke = size === 'sm' ? 2.5 : size === 'md' ? 3 : 3.5;
+  const iconSize = size === 'sm' ? 20 : size === 'md' ? 30 : 40;
+  const r = (dims / 2) - stroke - 4;
 
   const content = (
-    <div className={cn("flex flex-col items-center justify-center gap-3", className)} data-testid="properly-loader">
+    <div className={cn("flex flex-col items-center justify-center gap-4", className)} data-testid="properly-loader">
       <div className="relative" style={{ width: dims, height: dims }}>
         <svg
           width={dims}
@@ -47,8 +47,8 @@ export function ProperlyLoader({ size = 'md', text, className, fullPage = false 
           className="absolute inset-0 flex items-center justify-center animate-[loader-pulse_1.4s_ease-in-out_infinite]"
         >
           <svg
-            width={dims * iconScale}
-            height={dims * iconScale}
+            width={iconSize}
+            height={iconSize}
             viewBox="0 0 32 32"
             fill="none"
           >
