@@ -86,8 +86,8 @@ function VerticalTimeline({ matter }: { matter: Matter }) {
 
 function StatusDot({ status }: { status: string }) {
   if (status === 'COMPLETE') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-green-500"></span> Complete</span>;
-  if (status === 'IN_REVIEW') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-orange-400"></span> In review</span>;
-  return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-gray-400"></span> To do</span>;
+  if (status === 'IN_REVIEW') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-amber-400"></span> In review</span>;
+  return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-[#e8946a]"></span> To do</span>;
 }
 
 export default function ClientDashboard() {
@@ -224,7 +224,7 @@ export default function ClientDashboard() {
               </div>
             )}
 
-            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="tasks-card">
+            <Card className="bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl overflow-hidden" data-testid="tasks-card">
               <div className="p-5 pb-0">
                 <h3 className="text-lg font-heading font-bold text-foreground mb-4">Tasks</h3>
               </div>
