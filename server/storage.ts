@@ -1,38 +1,134 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { eq } from "drizzle-orm";
+import { db } from "./db";
+import {
+  users, matters, tasks, documents, referrals, notifications,
+  type User, type InsertUser,
+  type Matter, type InsertMatter,
+  type Task, type InsertTask,
+  type Document, type InsertDocument,
+  type Referral, type InsertReferral,
+  type Notification, type InsertNotification,
+} from "@shared/schema";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  getMattersByClient(clientUserId: string): Promise<Matter[]>;
+  getMattersByConveyancer(conveyancerUserId: string): Promise<Matter[]>;
+  getAllMatters(): Promise<Matter[]>;
+  getMatter(id: string): Promise<Matter | undefined>;
+  createMatter(matter: InsertMatter): Promise<Matter>;
+  updateMatter(id: string, data: Partial<Matter>): Promise<Matter | undefined>;
+
+  getTasksByMatter(matterId: string): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: string, data: Partial<Task>): Promise<Task | undefined>;
+
+  getDocumentsByMatter(matterId: string): Promise<Document[]>;
+  createDocument(doc: InsertDocument): Promise<Document>;
+  deleteDocument(id: string): Promise<void>;
+
+  getReferralsByBroker(brokerId: string): Promise<Referral[]>;
+  getAllReferrals(): Promise<Referral[]>;
+  createReferral(referral: InsertReferral): Promise<Referral>;
+
+  getNotifications(): Promise<Notification[]>;
+  updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(data: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(data).returning();
+    return user;
+  }
+
+  async getMattersByClient(clientUserId: string): Promise<Matter[]> {
+    return db.select().from(matters).where(eq(matters.clientUserId, clientUserId));
+  }
+
+  async getMattersByConveyancer(conveyancerUserId: string): Promise<Matter[]> {
+    return db.select().from(matters).where(eq(matters.conveyancerUserId, conveyancerUserId));
+  }
+
+  async getAllMatters(): Promise<Matter[]> {
+    return db.select().from(matters);
+  }
+
+  async getMatter(id: string): Promise<Matter | undefined> {
+    const [matter] = await db.select().from(matters).where(eq(matters.id, id));
+    return matter;
+  }
+
+  async createMatter(data: InsertMatter): Promise<Matter> {
+    const [matter] = await db.insert(matters).values(data).returning();
+    return matter;
+  }
+
+  async updateMatter(id: string, data: Partial<Matter>): Promise<Matter | undefined> {
+    const [matter] = await db.update(matters).set(data).where(eq(matters.id, id)).returning();
+    return matter;
+  }
+
+  async getTasksByMatter(matterId: string): Promise<Task[]> {
+    return db.select().from(tasks).where(eq(tasks.matterId, matterId));
+  }
+
+  async createTask(data: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(data).returning();
+    return task;
+  }
+
+  async updateTask(id: string, data: Partial<Task>): Promise<Task | undefined> {
+    const [task] = await db.update(tasks).set(data).where(eq(tasks.id, id)).returning();
+    return task;
+  }
+
+  async getDocumentsByMatter(matterId: string): Promise<Document[]> {
+    return db.select().from(documents).where(eq(documents.matterId, matterId));
+  }
+
+  async createDocument(data: InsertDocument): Promise<Document> {
+    const [doc] = await db.insert(documents).values(data).returning();
+    return doc;
+  }
+
+  async deleteDocument(id: string): Promise<void> {
+    await db.delete(documents).where(eq(documents.id, id));
+  }
+
+  async getReferralsByBroker(brokerId: string): Promise<Referral[]> {
+    return db.select().from(referrals).where(eq(referrals.brokerId, brokerId));
+  }
+
+  async getAllReferrals(): Promise<Referral[]> {
+    return db.select().from(referrals);
+  }
+
+  async createReferral(data: InsertReferral): Promise<Referral> {
+    const [referral] = await db.insert(referrals).values(data).returning();
+    return referral;
+  }
+
+  async getNotifications(): Promise<Notification[]> {
+    return db.select().from(notifications);
+  }
+
+  async updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined> {
+    const [notification] = await db.update(notifications).set(data).where(eq(notifications.id, id)).returning();
+    return notification;
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
