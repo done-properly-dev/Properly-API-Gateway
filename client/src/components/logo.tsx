@@ -8,20 +8,15 @@ interface LogoProps {
 }
 
 export function Logo({ className, showText = true, variant = 'color' }: LogoProps) {
-  const textColor = variant === 'light' ? 'text-white' : 'text-slate-900';
+  const filterClass = variant === 'light' ? 'brightness-0 invert' : '';
   
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center", className)}>
       <img 
-        src="/images/logo-icon.png" 
-        alt="Properly Logo" 
-        className="h-8 w-auto object-contain" 
+        src="/images/properly-logo.png" 
+        alt="Properly" 
+        className={cn("h-8 w-auto object-contain", filterClass)} 
       />
-      {showText && (
-        <span className={cn("font-heading font-extrabold text-xl tracking-tight", textColor)}>
-          Properly.
-        </span>
-      )}
     </div>
   );
 }
