@@ -6,7 +6,7 @@ Full-stack MVP for an API-driven property settlement platform for the Australian
 ## Current State
 - Full-stack application with Supabase Auth, PostgreSQL, and API routes
 - All four role dashboards functional with demo login buttons
-- Sprint 1 complete: onboarding wizard, 5-pillar progress, The Playbook, enhanced empty states
+- Sprint 1-5 complete: full feature set with 2FA security, animations, and design polish
 - Australian tone applied throughout client-facing copy
 
 ## Architecture
@@ -27,7 +27,7 @@ Full-stack MVP for an API-driven property settlement platform for the Australian
 
 ### Database (Supabase PostgreSQL)
 - **Provider**: Supabase (pooler connection via SUPABASE_DATABASE_URL secret)
-- **Tables**: users, matters, tasks, documents, referrals, notifications, playbook_articles
+- **Tables**: users, matters, tasks, documents, referrals, notifications, playbook_articles, otp_codes, payments, organisations, organisation_members, notification_templates, notification_logs
 - **Schema**: `shared/schema.ts`
 - **Storage Layer**: `server/storage.ts`
 - **Connection**: `server/db.ts` (prefers SUPABASE_DATABASE_URL, falls back to DATABASE_URL)
@@ -48,6 +48,11 @@ Full-stack MVP for an API-driven property settlement platform for the Australian
 - `client/src/components/five-pillars.tsx` - 5-pillar settlement progress component
 - `client/src/pages/client/onboarding.tsx` - 4-step client onboarding wizard
 - `client/src/pages/client/playbook.tsx` - Educational content section
+- `client/src/pages/referrer/two-factor-setup.tsx` - 2FA setup page for referrers
+- `client/src/pages/referrer/two-factor-verify.tsx` - 2FA OTP verification page
+- `client/src/components/milestone-celebration.tsx` - Milestone celebration with confetti
+- `client/src/components/progress-badges.tsx` - Settlement progress reward badges
+- `client/src/components/page-transition.tsx` - Page transition wrapper
 
 ## Demo Accounts
 Demo login buttons on /auth page auto-create Supabase Auth accounts:
@@ -75,6 +80,10 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - GET `/api/referrals/qr/:token` - Public QR code referral landing (no auth)
 - GET/POST `/api/payments` - List/create payments (broker sees own, admin sees all)
 - PATCH `/api/payments/:id` - Update payment status
+- POST `/api/2fa/setup` - Enable 2FA for broker (saves phone, enables flag)
+- POST `/api/2fa/send` - Generate and send 6-digit OTP via SMS
+- POST `/api/2fa/verify` - Verify OTP code
+- GET `/api/2fa/status` - Check 2FA enabled/verified status
 - GET `/api/organisations/me` - Current user's organisation + members
 - GET `/api/notifications` - List notifications
 - PATCH `/api/notifications/:id` - Update notification
@@ -134,6 +143,22 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 14. Address autocomplete integrated into client onboarding and referral creation forms
 15. All 12 Sprint 4 items checked off in Notion
 
+## Sprint 5 Features (Complete)
+1. Schema: otpCodes table (userId, code, expiresAt, verified) for 2FA OTP storage
+2. Schema: twoFactorEnabled boolean field on users table
+3. SMS-based 2FA flow for referrer login (OTP generation, 6-digit code entry, session gating)
+4. 2FA setup page for referrers (phone number capture, enable 2FA)
+5. 2FA verification page (6-digit OTP input with auto-advance, resend with 60s cooldown)
+6. 2FA verification middleware — blocks BROKER routes (referrals, payments) until verified OTP in last 24h
+7. Milestone celebration component with CSS confetti animation (30 colored particles, auto-dismiss 5s)
+8. Progress reward badges (6 achievement types based on pillar completion, pulse/glow animations)
+9. Page transition wrapper (fade-in/slide-up 300ms ease-out)
+10. Staggered card animations on client dashboard
+11. Streak counter showing days since matter creation
+12. Mobile responsiveness fixes (responsive tables, stacking grids, touch targets)
+13. Australian tone copy polish across all role dashboards
+14. All 9 Sprint 5 items checked off in Notion
+
 ## Supabase Configuration
 - Email confirmation: DISABLED (required for demo accounts)
 - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
@@ -155,6 +180,7 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Sprint 5 complete - Security (MFA) & Design Polish (SMS 2FA for brokers, milestone celebrations, progress badges, page transitions, mobile fixes, Australian copy polish)
 - 2026-02-16: Sprint 4 complete - Mock Integrations & Notifications (Smokeball/PEXA mock APIs, notification system, Apple Maps address autocomplete)
 - 2026-02-16: Sprint 3 complete - Referrer Portal Expansion & Payments (multi-channel referrals, QR codes, SMS, payments tracking, team pipeline)
 - 2026-02-16: Sprint 2 complete - Document Vault & Task Completion (file upload, drag-and-drop, auto-complete tasks, document preview)
