@@ -50,7 +50,7 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" data-testid="document-preview-modal">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-2 sm:mx-4 max-h-[90vh] sm:max-h-[90vh] h-[95vh] sm:h-auto flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50/80">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2 rounded-lg bg-[#e7f6f3] text-primary">
@@ -102,7 +102,7 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
           ) : fileType === 'image' ? (
             <div className="transition-transform duration-200" style={{ transform: `scale(${zoom})` }}>
               <div className="bg-white rounded-lg shadow-lg overflow-hidden border">
-                <div className="bg-gradient-to-br from-[#e7f6f3] via-[#d5ece7] to-[#c8e0db] flex items-center justify-center" style={{ width: '480px', height: '360px' }}>
+                <div className="bg-gradient-to-br from-[#e7f6f3] via-[#d5ece7] to-[#c8e0db] flex items-center justify-center w-full max-w-[480px] aspect-[4/3]">
                   <div className="text-center space-y-3">
                     <div className="bg-white/80 backdrop-blur rounded-full p-4 mx-auto w-fit">
                       <Image className="h-12 w-12 text-primary" />
@@ -116,7 +116,7 @@ function DocumentPreviewModal({ doc, onClose }: { doc: Document; onClose: () => 
               </div>
             </div>
           ) : fileType === 'pdf' ? (
-            <div className="bg-white rounded-lg shadow-lg border overflow-hidden" style={{ width: '420px' }}>
+            <div className="bg-white rounded-lg shadow-lg border overflow-hidden w-full max-w-[420px]">
               <div className="bg-red-50 px-6 py-4 border-b border-red-100 flex items-center gap-3">
                 <FileText className="h-8 w-8 text-red-500" />
                 <div>
@@ -392,12 +392,12 @@ export default function ClientDocuments() {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground">Document Vault</h1>
-            <p className="text-muted-foreground text-sm">Secure storage for your settlement documents.</p>
+            <p className="text-muted-foreground text-sm">Your settlement docs, safe and sorted.</p>
           </div>
-          <Button onClick={handleUploadClick} className="bg-primary text-white hover:bg-primary/90" disabled={!matterId} data-testid="button-upload-doc">
+          <Button onClick={handleUploadClick} className="bg-primary text-white hover:bg-primary/90 w-full sm:w-auto" disabled={!matterId} data-testid="button-upload-doc">
             <UploadCloud className="h-4 w-4 mr-2" /> Upload
           </Button>
           <input

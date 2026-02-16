@@ -129,7 +129,7 @@ export default function AuthPage() {
 
       {/* Navigation */}
       <nav className="relative z-10 w-full bg-white border-b" style={{ borderColor: '#e9eaeb', height: '80px' }}>
-        <div className="max-w-[1280px] mx-auto px-8 h-full flex items-center justify-between">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8 h-full flex items-center justify-between">
           <div className="flex items-center gap-12">
             <Logo variant="color" />
             <div className="hidden md:flex items-center gap-8">
@@ -168,7 +168,7 @@ export default function AuthPage() {
               {authMode === 'signup' ? 'Sign up' : 'Log in to your account'}
             </h1>
             <p className="text-[16px] leading-[24px] font-normal" style={{ color: '#535862' }}>
-              {authMode === 'signup' ? 'Get started with Properly today.' : 'Welcome back! Please enter your details.'}
+              {authMode === 'signup' ? 'Get started with Properly today.' : "Welcome back! Let's get you sorted."}
             </p>
           </div>
 
@@ -336,7 +336,7 @@ export default function AuthPage() {
 
       {/* Footer */}
       <footer className="w-full border-t bg-white" style={{ borderColor: '#e9eaeb' }}>
-        <div className="max-w-[1280px] mx-auto px-8 pt-[32px] pb-[32px] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8 pt-[32px] pb-[32px] flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-[14px] font-normal" style={{ color: '#535862' }}>
             © 2026 Properly. All rights reserved.
           </div>

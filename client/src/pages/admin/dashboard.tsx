@@ -17,7 +17,7 @@ export default function AdminDashboard() {
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-heading font-bold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">System status and configuration.</p>
+          <p className="text-muted-foreground">System status and configuration — all sorted.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

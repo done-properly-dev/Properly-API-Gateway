@@ -164,7 +164,7 @@ export default function ReferrerDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-heading font-bold text-foreground" data-testid="dashboard-title">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Track and manage your client referrals.</p>
+            <p className="text-sm text-muted-foreground">Track and manage your client referrals. Easy as.</p>
           </div>
           <Link href="/referrer/create">
             <Button className="w-full md:w-auto gap-2" data-testid="button-new-referral">
@@ -249,9 +249,9 @@ export default function ReferrerDashboard() {
         </div>
 
         <div className="border border-[#d5d7da] rounded-[8px] bg-white" data-testid="referrals-table-section">
-          <div className="flex items-center justify-between p-4 border-b border-[#e9eaeb]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b border-[#e9eaeb]">
             <h2 className="text-base font-semibold font-heading">Referrals</h2>
-            <div className="w-64">
+            <div className="w-full sm:w-64">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -265,7 +265,8 @@ export default function ReferrerDashboard() {
             </div>
           </div>
 
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[500px]">
             <thead>
               <tr className="bg-gray-50 text-left border-b border-[#e9eaeb]">
                 <th className="p-4 w-10">
@@ -288,7 +289,7 @@ export default function ReferrerDashboard() {
                       <div>
                         <h3 className="font-heading font-bold text-lg">No Referrals Yet</h3>
                         <p className="text-muted-foreground max-w-sm mx-auto mt-1">
-                          Send your first referral and start tracking your clients' settlement progress in real time. Easy as.
+                          Send your first referral and start tracking your clients' settlement progress in real time. No worries, it only takes a minute!
                         </p>
                       </div>
                       <Link href="/referrer/create">
@@ -326,6 +327,7 @@ export default function ReferrerDashboard() {
               )}
             </tbody>
           </table>
+          </div>
 
           {filteredReferrals.length > ITEMS_PER_PAGE && (
             <div className="flex items-center justify-between p-4 border-t border-[#e9eaeb]" data-testid="pagination">

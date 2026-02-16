@@ -20,8 +20,8 @@ function ProgressDonut({ percent }: { percent: number }) {
   const circ = 2 * Math.PI * r;
   const offset = circ - (percent / 100) * circ;
   return (
-    <div className="relative" data-testid="progress-donut">
-      <svg width="170" height="170" viewBox="0 0 140 140">
+    <div className="relative max-w-[170px] w-full" data-testid="progress-donut">
+      <svg width="100%" height="100%" viewBox="0 0 140 140">
         <circle cx="70" cy="70" r={r} fill="none" stroke="#e5e7eb" strokeWidth="14" />
         <circle cx="70" cy="70" r={r} fill="none" stroke="#9ab3a5" strokeWidth="14"
           strokeDasharray={circ} strokeDashoffset={offset}
@@ -218,7 +218,7 @@ export default function ClientDashboard() {
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 sm:gap-x-6 gap-y-2 text-sm">
                 <span className="text-gray-500 font-medium">Matter number</span>
                 <span className="text-foreground">{matter.id.slice(0, 6).toUpperCase()}</span>
 
@@ -256,7 +256,7 @@ export default function ClientDashboard() {
                 </div>
               ) : tasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-5">
-                  <p>No tasks yet. Check back soon!</p>
+                  <p>No tasks yet — she'll be right! Check back soon.</p>
                 </div>
               ) : (
                 <div className="px-5">
@@ -265,7 +265,7 @@ export default function ClientDashboard() {
                       <tr className="border-b border-gray-100">
                         <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide">Action</th>
                         <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-28">Status</th>
-                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-32">Date completed</th>
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-32 hidden sm:table-cell">Date completed</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -273,7 +273,7 @@ export default function ClientDashboard() {
                         <tr key={task.id} className="border-b border-gray-50 last:border-0" data-testid={`task-row-${task.id}`}>
                           <td className="py-3 text-foreground">{task.title}</td>
                           <td className="py-3"><StatusDot status={task.status} /></td>
-                          <td className="py-3 text-gray-500">
+                          <td className="py-3 text-gray-500 hidden sm:table-cell">
                             {task.status === 'COMPLETE' && task.dueDate
                               ? new Date(task.dueDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
                               : '-'}
@@ -299,7 +299,7 @@ export default function ClientDashboard() {
               </div>
               {documents.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-5">
-                  <p>No documents uploaded yet.</p>
+                  <p>No documents uploaded yet. Drop one in when you're ready!</p>
                 </div>
               ) : (
                 <div className="px-5">
@@ -382,7 +382,8 @@ export default function ClientDashboard() {
             </Card>
 
             <Card className="card-stagger card-stagger-6 bg-white border rounded-xl overflow-hidden" data-testid="key-dates-card">
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[340px]">
                 <thead>
                   <tr className="bg-[#e7f6f3]/60 border-b border-[#c8e0db]">
                     <th className="text-left px-5 py-3 font-bold text-foreground text-xs tracking-wide">Key dates</th>
@@ -413,12 +414,13 @@ export default function ClientDashboard() {
                   </tr>
                 </tbody>
               </table>
+              </div>
             </Card>
           </div>
         </div>
       </div>
 
-      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
+      <button className="fixed bottom-20 right-4 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
         <Edit3 className="h-5 w-5" />
       </button>
       </PageTransition>

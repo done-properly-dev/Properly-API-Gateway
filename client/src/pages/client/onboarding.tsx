@@ -553,17 +553,17 @@ export default function OnboardingPage() {
                 </p>
               </div>
 
-              <div className="flex justify-between pt-4">
+              <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 pt-4">
                 <Button variant="ghost" onClick={() => setStep(2)} data-testid="button-back">
                   <ArrowLeft className="mr-2 h-4 w-4" /> Back
                 </Button>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleSkip} data-testid="button-skip">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button variant="outline" onClick={handleSkip} className="w-full sm:w-auto" data-testid="button-skip">
                     Skip for Now
                   </Button>
                   <Button
                     onClick={handleComplete}
-                    className="bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 w-full sm:w-auto"
                     disabled={updateOnboarding.isPending}
                     data-testid="button-complete"
                   >

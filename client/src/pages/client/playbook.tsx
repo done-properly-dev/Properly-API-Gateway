@@ -100,9 +100,9 @@ export default function PlaybookPage() {
             Properly Playbook
           </h1>
           <p className="text-muted-foreground mt-2">
-            Practical guidance for buyers and sellers.
+            Your go-to guide for buying and selling property in Australia.
           </p>
-          <div className="absolute right-0 top-1">
+          <div className="absolute right-0 top-1 hidden sm:block">
             <Badge className="bg-[#17b26a] hover:bg-[#17b26a] text-white rounded-full px-3 py-1 text-xs font-medium">
               Buyer
             </Badge>
@@ -111,7 +111,7 @@ export default function PlaybookPage() {
 
         <div className="bg-[#e7f6f3]/40 border border-[#c8e0db] rounded-xl p-6">
           <div className="flex justify-end mb-4">
-            <div className="relative w-full max-w-xs">
+            <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search"

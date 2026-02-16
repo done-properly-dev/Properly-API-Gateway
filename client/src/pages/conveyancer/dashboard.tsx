@@ -176,8 +176,8 @@ export default function ConveyancerDashboard() {
         </div>
 
         {activeTab === 'tasks' && (
-          <div className="flex gap-6">
-            <div className={`flex-1 min-w-0 ${selectedMatter ? 'max-w-[calc(100%-380px)]' : ''}`}>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className={`flex-1 min-w-0 ${selectedMatter ? 'lg:max-w-[calc(100%-380px)]' : ''}`}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-heading font-semibold" data-testid="text-tasks-title">Tasks</h2>
               </div>
@@ -222,8 +222,8 @@ export default function ConveyancerDashboard() {
                               <h3 className="font-heading font-bold text-lg">No Active Matters</h3>
                               <p className="text-muted-foreground max-w-md mx-auto mt-1">
                                 {searchTerm
-                                  ? `No matters match "${searchTerm}". Try a different search term.`
-                                  : "Your matters will appear here once they're synced from Smokeball or created manually."
+                                  ? `No matters match "${searchTerm}". Give it another go with a different search.`
+                                  : "No worries — your matters will appear here once they're synced from Smokeball or created manually."
                                 }
                               </p>
                             </div>
@@ -300,7 +300,7 @@ export default function ConveyancerDashboard() {
             </div>
 
             {selectedMatter && (
-              <div className="w-[360px] shrink-0" data-testid="task-detail-panel">
+              <div className="w-full lg:w-[360px] shrink-0" data-testid="task-detail-panel">
                 <Card className="border border-[#d5d7da] shadow-none rounded-xl p-5 sticky top-4">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-base font-heading font-semibold" data-testid="text-task-title">

@@ -58,7 +58,7 @@ export function ProgressBadges({ matter }: ProgressBadgesProps) {
         }
       `}</style>
       <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Achievements</h4>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {BADGE_CONFIG.map((badge) => {
           const earned = badge.check(matter);
           const Icon = badge.icon;
