@@ -10,18 +10,52 @@ interface ProperlyLoaderProps {
 
 export function ProperlyLoader({ size = 'md', text, className, fullPage = false }: ProperlyLoaderProps) {
   const dims = size === 'sm' ? 48 : size === 'md' ? 72 : 96;
-  const stroke = size === 'sm' ? 2.5 : size === 'md' ? 3 : 3.5;
-  const iconSize = size === 'sm' ? 20 : size === 'md' ? 30 : 40;
-  const r = (dims / 2) - stroke - 4;
+  const ringStroke = size === 'sm' ? 2.5 : size === 'md' ? 3 : 3.5;
+  const iconSize = size === 'sm' ? 22 : size === 'md' ? 34 : 46;
+  const r = (dims / 2) - ringStroke - 4;
+  const circ = 2 * Math.PI * r;
 
   const content = (
     <div className={cn("flex flex-col items-center justify-center gap-4", className)} data-testid="properly-loader">
       <div className="relative" style={{ width: dims, height: dims }}>
         <svg
+          width={iconSize}
+          height={iconSize}
+          viewBox="0 0 36 36"
+          fill="none"
+          className="absolute"
+          style={{
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <path
+            d="M18 4L5 14V31C5 31.55 5.45 32 6 32H15V23H21V32H30C30.55 32 31 31.55 31 31V14L18 4Z"
+            stroke="#425b58"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <path
+            d="M13 19L16.5 22.5L23 15"
+            stroke="#425b58"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            style={{
+              strokeDasharray: 20,
+              animation: 'loader-check-draw 1.8s ease-in-out infinite',
+            }}
+          />
+        </svg>
+
+        <svg
           width={dims}
           height={dims}
           viewBox={`0 0 ${dims} ${dims}`}
-          className="animate-[loader-spin_1.4s_ease-in-out_infinite]"
+          style={{ animation: 'loader-ring-spin 1.2s linear infinite' }}
         >
           <circle
             cx={dims / 2}
@@ -29,7 +63,7 @@ export function ProperlyLoader({ size = 'md', text, className, fullPage = false 
             r={r}
             fill="none"
             stroke="#e7f6f3"
-            strokeWidth={stroke}
+            strokeWidth={ringStroke}
           />
           <circle
             cx={dims / 2}
@@ -37,45 +71,20 @@ export function ProperlyLoader({ size = 'md', text, className, fullPage = false 
             r={r}
             fill="none"
             stroke="#425b58"
-            strokeWidth={stroke}
+            strokeWidth={ringStroke}
             strokeLinecap="round"
-            strokeDasharray={`${Math.PI * r * 0.7} ${Math.PI * r * 1.3}`}
+            strokeDasharray={`${circ * 0.3} ${circ * 0.7}`}
+            style={{ transformOrigin: 'center' }}
           />
         </svg>
-
-        <div
-          className="absolute inset-0 flex items-center justify-center animate-[loader-pulse_1.4s_ease-in-out_infinite]"
-        >
-          <svg
-            width={iconSize}
-            height={iconSize}
-            viewBox="0 0 32 32"
-            fill="none"
-          >
-            <path
-              d="M16 3L4 12V27C4 27.55 4.45 28 5 28H13V20H19V28H27C27.55 28 28 27.55 28 27V12L16 3Z"
-              stroke="#425b58"
-              strokeWidth="2.2"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <path
-              d="M11 17L14.5 20.5L21 13"
-              stroke="#e8946a"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-              className="animate-[loader-check_1.4s_ease-in-out_infinite]"
-            />
-          </svg>
-        </div>
       </div>
       {text && (
         <p className={cn(
-          "text-muted-foreground font-medium animate-pulse",
+          "text-muted-foreground font-medium",
           size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base'
-        )}>
+        )}
+        style={{ animation: 'loader-text-fade 2s ease-in-out infinite' }}
+        >
           {text}
         </p>
       )}

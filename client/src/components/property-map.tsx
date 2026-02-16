@@ -8,6 +8,51 @@ interface PropertyMapProps {
   address: string;
 }
 
+let mapkitInitialized = false;
+let mapkitInitPromise: Promise<void> | null = null;
+
+async function ensureMapKit(token: string): Promise<void> {
+  if (!window.mapkit) {
+    await new Promise<void>((resolve, reject) => {
+      const existing = document.querySelector('script[src*="apple-mapkit"]');
+      if (existing) {
+        const check = () => {
+          if (window.mapkit) resolve();
+          else setTimeout(check, 50);
+        };
+        check();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js';
+      script.crossOrigin = 'anonymous';
+      script.dataset.libraries = 'map,annotations,services';
+      script.onload = () => {
+        const waitForMapkit = () => {
+          if (window.mapkit) resolve();
+          else setTimeout(waitForMapkit, 50);
+        };
+        waitForMapkit();
+      };
+      script.onerror = () => reject(new Error('Failed to load MapKit'));
+      document.head.appendChild(script);
+    });
+  }
+
+  if (!mapkitInitialized) {
+    if (!mapkitInitPromise) {
+      mapkitInitPromise = new Promise<void>((resolve) => {
+        mapkit.init({
+          authorizationCallback: (done: (token: string) => void) => done(token),
+        });
+        mapkitInitialized = true;
+        resolve();
+      });
+    }
+    await mapkitInitPromise;
+  }
+}
+
 export function PropertyMap({ address }: PropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -26,27 +71,15 @@ export function PropertyMap({ address }: PropertyMapProps) {
         }
         const { token } = await res.json();
 
-        if (!window.mapkit) {
-          await new Promise<void>((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js';
-            script.crossOrigin = 'anonymous';
-            script.dataset.libraries = 'map,annotations,services';
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Failed to load MapKit'));
-            document.head.appendChild(script);
-          });
-        }
-
         if (cancelled) return;
 
-        if (!mapkit.maps || mapkit.maps.length === 0) {
-          mapkit.init({
-            authorizationCallback: (done: (token: string) => void) => done(token),
-          });
-        }
+        await ensureMapKit(token);
 
-        if (!mapRef.current || cancelled) return;
+        if (cancelled || !mapRef.current) return;
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (cancelled || !mapRef.current) return;
 
         const geocoder = new mapkit.Geocoder();
         geocoder.lookup(address, (error: any, data: any) => {
@@ -60,7 +93,8 @@ export function PropertyMap({ address }: PropertyMapProps) {
           const coordinate = place.coordinate;
 
           if (mapInstanceRef.current) {
-            mapInstanceRef.current.destroy();
+            try { mapInstanceRef.current.destroy(); } catch {}
+            mapInstanceRef.current = null;
           }
 
           const map = new mapkit.Map(mapRef.current, {
@@ -85,7 +119,8 @@ export function PropertyMap({ address }: PropertyMapProps) {
           mapInstanceRef.current = map;
           setMapLoaded(true);
         });
-      } catch {
+      } catch (err) {
+        console.error('Map init error:', err);
         if (!cancelled) setMapError(true);
       }
     }
@@ -95,7 +130,7 @@ export function PropertyMap({ address }: PropertyMapProps) {
     return () => {
       cancelled = true;
       if (mapInstanceRef.current) {
-        mapInstanceRef.current.destroy();
+        try { mapInstanceRef.current.destroy(); } catch {}
         mapInstanceRef.current = null;
       }
     };
