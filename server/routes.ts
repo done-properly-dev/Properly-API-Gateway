@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { supabase } from "./supabase";
 import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema } from "@shared/schema";
 import { z } from "zod";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 const onboardingUpdateSchema = z.object({
   phone: z.string().optional(),
@@ -148,17 +150,43 @@ export async function registerRoutes(
         password: demoPassword 
       });
 
-      if (!signInError && signInData.session) {
-        let user = await storage.getUser(signInData.user.id);
-        if (!user) {
-          user = await storage.createUser({
-            id: signInData.user.id,
-            email,
-            password: "supabase-managed",
-            name: demo.name,
-            role: demo.role,
-          });
+      const ensureLocalUser = async (supabaseUserId: string) => {
+        let user = await storage.getUser(supabaseUserId);
+        if (user) return user;
+
+        const existingByEmail = await storage.getUserByEmail(email);
+        if (existingByEmail && existingByEmail.id !== supabaseUserId) {
+          const oldId = existingByEmail.id;
+          try {
+            await db.execute(sql`UPDATE matters SET client_user_id = ${supabaseUserId} WHERE client_user_id = ${oldId}`);
+            await db.execute(sql`UPDATE matters SET conveyancer_user_id = ${supabaseUserId} WHERE conveyancer_user_id = ${oldId}`);
+            await db.execute(sql`UPDATE referrals SET broker_id = ${supabaseUserId} WHERE broker_id = ${oldId}`);
+            await db.execute(sql`UPDATE notifications SET user_id = ${supabaseUserId} WHERE user_id = ${oldId}`);
+            await db.execute(sql`UPDATE users SET id = ${supabaseUserId} WHERE id = ${oldId}`);
+            user = await storage.getUser(supabaseUserId);
+          } catch (e) {
+            console.error("Failed to migrate user ID:", e);
+          }
         }
+
+        if (!user) {
+          try {
+            user = await storage.createUser({
+              id: supabaseUserId,
+              email,
+              password: "supabase-managed",
+              name: demo.name,
+              role: demo.role,
+            });
+          } catch {
+            user = await storage.getUserByEmail(email) || undefined;
+          }
+        }
+        return user;
+      };
+
+      if (!signInError && signInData.session) {
+        await ensureLocalUser(signInData.user.id);
         return res.json({ session: signInData.session });
       }
 
@@ -173,13 +201,7 @@ export async function registerRoutes(
       }
 
       if (signUpData.session) {
-        await storage.createUser({
-          id: signUpData.user!.id,
-          email,
-          password: "supabase-managed",
-          name: demo.name,
-          role: demo.role,
-        });
+        await ensureLocalUser(signUpData.user!.id);
         return res.json({ session: signUpData.session });
       }
 
@@ -191,16 +213,7 @@ export async function registerRoutes(
         return res.status(400).json({ message: retryError.message });
       }
 
-      let user = await storage.getUser(retryData.user.id);
-      if (!user) {
-        user = await storage.createUser({
-          id: retryData.user.id,
-          email,
-          password: "supabase-managed",
-          name: demo.name,
-          role: demo.role,
-        });
-      }
+      await ensureLocalUser(retryData.user.id);
       return res.json({ session: retryData.session });
     } catch (err: any) {
       res.status(500).json({ message: err.message });

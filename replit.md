@@ -1,12 +1,13 @@
 # Properly - Property Settlement Platform
 
 ## Overview
-Full-stack MVP for an API-driven property settlement platform. Supports four user roles (CLIENT, BROKER, CONVEYANCER, ADMIN) with role-specific dashboards. Built with React + Express + PostgreSQL.
+Full-stack MVP for an API-driven property settlement platform for the Australian market. Supports four user roles (CLIENT, BROKER, CONVEYANCER, ADMIN) with role-specific dashboards. Acts as a "real-time mirror" sitting on top of Smokeball (practice management) and PEXA (settlement platform). Mobile-first for buyers/sellers, web-first for referrers/partners.
 
 ## Current State
-- Full-stack application with real database, session auth, and API routes
-- All four role dashboards functional with real data
-- Demo seed data pre-loaded for testing
+- Full-stack application with Supabase Auth, PostgreSQL, and API routes
+- All four role dashboards functional with demo login buttons
+- Sprint 1 complete: onboarding wizard, 5-pillar progress, The Playbook, enhanced empty states
+- Australian tone applied throughout client-facing copy
 
 ## Architecture
 
@@ -16,15 +17,17 @@ Full-stack MVP for an API-driven property settlement platform. Supports four use
 - **UI**: shadcn/ui + Tailwind CSS
 - **Design System**: Mineral Green (#425b58), Linen (#ffece1), Water (#e7f6f3)
 - **Typography**: Plus Jakarta Sans (headings), Inter (UI)
+- **Supabase Client**: `client/src/lib/supabase.ts`
 
 ### Backend (Express)
-- **Auth**: Session-based with bcryptjs hashing, connect-pg-simple session store
+- **Auth**: Supabase Auth with JWT Bearer tokens, requireAuth middleware
 - **ORM**: Drizzle ORM with PostgreSQL
 - **API Prefix**: All routes under `/api/`
+- **Demo Login**: Server-side `/api/auth/demo-login` auto-creates Supabase Auth accounts and maps to local DB users
 
 ### Database (Supabase PostgreSQL)
 - **Provider**: Supabase (pooler connection via SUPABASE_DATABASE_URL secret)
-- **Tables**: users, matters, tasks, documents, referrals, notifications
+- **Tables**: users, matters, tasks, documents, referrals, notifications, playbook_articles
 - **Schema**: `shared/schema.ts`
 - **Storage Layer**: `server/storage.ts`
 - **Connection**: `server/db.ts` (prefers SUPABASE_DATABASE_URL, falls back to DATABASE_URL)
@@ -32,25 +35,31 @@ Full-stack MVP for an API-driven property settlement platform. Supports four use
 ## Key Files
 - `shared/schema.ts` - Database schema and types
 - `server/db.ts` - Database connection
+- `server/supabase.ts` - Supabase client (server-side)
 - `server/storage.ts` - CRUD operations interface
-- `server/routes.ts` - API endpoints with session auth
-- `client/src/lib/auth.ts` - Auth hook (useAuth)
-- `client/src/lib/queryClient.ts` - TanStack Query setup
-- `client/src/App.tsx` - Router with role-based private routes
+- `server/routes.ts` - API endpoints with Supabase JWT auth
+- `client/src/lib/auth.ts` - Auth hook (useAuth) with Supabase session management
+- `client/src/lib/supabase.ts` - Supabase client (frontend)
+- `client/src/lib/queryClient.ts` - TanStack Query setup (adds Bearer token to requests)
+- `client/src/App.tsx` - Router with role-based private routes + onboarding redirect
 - `client/src/components/layout.tsx` - Role-specific layouts
+- `client/src/components/five-pillars.tsx` - 5-pillar settlement progress component
+- `client/src/pages/client/onboarding.tsx` - 4-step client onboarding wizard
+- `client/src/pages/client/playbook.tsx` - Educational content section
 
 ## Demo Accounts
-- Client: sarah@example.com / password
-- Broker: mike@broker.com.au / password
-- Conveyancer: admin@legaleagles.com.au / password
-- Admin: admin@properly.com.au / password
+Demo login buttons on /auth page auto-create Supabase Auth accounts:
+- Client: sarah@example.com (mapped to demo-buyer@properly-app.com.au in Supabase)
+- Broker: mike@broker.com.au (mapped to demo-broker@properly-app.com.au)
+- Conveyancer: admin@legaleagles.com.au (mapped to demo-conveyancer@properly-app.com.au)
+- Admin: admin@properly.com.au (mapped to demo-admin@properly-app.com.au)
 
 ## API Routes
-- POST `/api/auth/signup` - Register
-- POST `/api/auth/login` - Login
-- POST `/api/auth/logout` - Logout
-- GET `/api/auth/me` - Current user
-- GET/POST `/api/matters` - List/create matters
+- GET `/api/auth/me` - Current user (creates local DB record if needed)
+- POST `/api/auth/profile` - Create/update profile
+- POST `/api/auth/demo-login` - Demo account login (auto-creates Supabase Auth + local user)
+- PATCH `/api/auth/onboarding` - Update onboarding progress (Zod validated)
+- GET/POST `/api/matters` - List/create matters (role-filtered)
 - GET/PATCH `/api/matters/:id` - Get/update matter
 - GET `/api/matters/:matterId/tasks` - Tasks for matter
 - POST `/api/tasks` - Create task
@@ -61,7 +70,25 @@ Full-stack MVP for an API-driven property settlement platform. Supports four use
 - GET/POST `/api/referrals` - List/create referrals
 - GET `/api/notifications` - List notifications
 - PATCH `/api/notifications/:id` - Update notification
+- GET `/api/playbook` - List playbook articles (public, supports ?category and ?pillar filters)
+- GET `/api/playbook/:slug` - Get article by slug (public)
+
+## Sprint 1 Features (Complete)
+1. Supabase Auth migration (JWT tokens, Bearer header auth)
+2. Extended data model (onboarding/VOI fields, 5-pillar milestones, playbook articles)
+3. Client onboarding wizard (4 steps: welcome > personal details > VOI > contract upload)
+4. 5-pillar progress bar (Pre-Settlement > Exchange > Conditions > Pre-Completion > Settlement)
+5. The Playbook educational content (6 articles, category filtering, search, inline reading)
+6. Enhanced empty states with CTAs across all role dashboards
+7. Australian tone and voice throughout
+
+## Supabase Configuration
+- Email confirmation: DISABLED (required for demo accounts)
+- VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
+- SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_DATABASE_URL set as secrets
 
 ## Recent Changes
+- 2026-02-16: Sprint 1 complete - onboarding, 5-pillar, playbook, empty states, Australian tone
+- 2026-02-16: Demo login endpoint with auto Supabase Auth account creation and ID migration
+- 2026-02-16: Migrated auth from session-based to Supabase Auth (JWT Bearer tokens)
 - 2026-02-16: Switched database to Supabase PostgreSQL (pooler connection)
-- 2026-02-16: Converted from frontend prototype to full-stack with PostgreSQL, session auth, and real API calls

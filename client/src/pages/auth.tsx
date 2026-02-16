@@ -74,7 +74,17 @@ export default function AuthPage() {
           refresh_token: data.session.refresh_token,
         });
         if (error) throw new Error(error.message);
-        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        
+        const meRes = await fetch("/api/auth/me", {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+        });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          queryClient.setQueryData(["/api/auth/me"], meData);
+          redirectByRole(meData.role);
+        } else {
+          queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Demo login failed');
