@@ -1,29 +1,65 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
+import React from 'react';
+import { Switch, Route, Redirect } from "wouter";
+import { useStore } from '@/lib/store';
 
-function Router() {
-  return (
-    <Switch>
-      {/* Add pages below */}
-      {/* <Route path="/" component={Home}/> */}
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
-  );
+import AuthPage from '@/pages/auth';
+import ClientDashboard from '@/pages/client/dashboard';
+import ClientDocuments from '@/pages/client/documents';
+import ReferrerDashboard from '@/pages/referrer/dashboard';
+import ReferrerCreate from '@/pages/referrer/create';
+import AdminDashboard from '@/pages/admin/dashboard';
+import ConveyancerDashboard from '@/pages/conveyancer/dashboard';
+import NotFound from "@/pages/not-found";
+import { Toaster } from "@/components/ui/toaster";
+
+function PrivateRoute({ component: Component, allowedRoles }: { component: any, allowedRoles: string[] }) {
+  const { currentUser } = useStore();
+
+  if (!currentUser) return <Redirect to="/" />;
+  // Simple check - in real app would match exact roles
+  const hasRole = allowedRoles.includes(currentUser.role);
+  if (!hasRole) return <Redirect to="/" />; 
+
+  return <Component />;
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <>
+      <Switch>
+        <Route path="/" component={AuthPage} />
+        
+        {/* Client Routes */}
+        <Route path="/client/dashboard">
+          <PrivateRoute component={ClientDashboard} allowedRoles={['CLIENT']} />
+        </Route>
+        <Route path="/client/documents">
+          <PrivateRoute component={ClientDocuments} allowedRoles={['CLIENT']} />
+        </Route>
+        
+        {/* Referrer Routes */}
+        <Route path="/referrer/dashboard">
+          <PrivateRoute component={ReferrerDashboard} allowedRoles={['BROKER']} />
+        </Route>
+        <Route path="/referrer/create">
+          <PrivateRoute component={ReferrerCreate} allowedRoles={['BROKER']} />
+        </Route>
+
+        {/* Conveyancer Routes */}
+        <Route path="/conveyancer/dashboard">
+          <PrivateRoute component={ConveyancerDashboard} allowedRoles={['CONVEYANCER']} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin/dashboard">
+          <PrivateRoute component={AdminDashboard} allowedRoles={['ADMIN']} />
+        </Route>
+
+        {/* Fallback */}
+        <Route component={NotFound} />
+      </Switch>
+      <Toaster />
+    </>
   );
 }
 
