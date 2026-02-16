@@ -127,6 +127,7 @@ export async function registerRoutes(
   // ─── Demo Login ───
   const DEMO_ACCOUNTS: Record<string, { name: string; role: string }> = {
     "sarah@example.com": { name: "Sarah Johnson", role: "CLIENT" },
+    "james@buyer.com.au": { name: "James Mitchell", role: "CLIENT" },
     "mike@broker.com.au": { name: "Mike Thompson", role: "BROKER" },
     "admin@legaleagles.com.au": { name: "Legal Eagles", role: "CONVEYANCER" },
     "admin@properly.com.au": { name: "Admin", role: "ADMIN" },
@@ -134,9 +135,38 @@ export async function registerRoutes(
 
   const DEMO_SUPABASE_EMAIL_MAP: Record<string, string> = {
     "sarah@example.com": "demo-buyer@properly-app.com.au",
+    "james@buyer.com.au": "demo-buyer2@properly-app.com.au",
     "mike@broker.com.au": "demo-broker@properly-app.com.au",
     "admin@legaleagles.com.au": "demo-conveyancer@properly-app.com.au",
     "admin@properly.com.au": "demo-admin@properly-app.com.au",
+  };
+
+  const DEMO_MIDWAY_CONFIG: Record<string, { onboardingStep: number; onboardingComplete: boolean; phone: string; address: string; state: string; postcode: string; voiStatus: string }> = {
+    "james@buyer.com.au": {
+      onboardingStep: 2,
+      onboardingComplete: false,
+      phone: "0412 345 678",
+      address: "42 Wallaby Way, Sydney",
+      state: "NSW",
+      postcode: "2000",
+      voiStatus: "not_started",
+    },
+  };
+
+  const DEMO_MATTERS: Record<string, { address: string; transactionType: string; settlementDate: string; status: string; milestonePercent: number; pillarPreSettlement: string; pillarExchange: string; currentPillar: string; contractPrice: number; depositAmount: number; depositPaid: boolean }> = {
+    "james@buyer.com.au": {
+      address: "14 Bronte Road, Bondi Junction NSW 2022",
+      transactionType: "Purchase",
+      settlementDate: "2026-04-15",
+      status: "Active",
+      milestonePercent: 25,
+      pillarPreSettlement: "complete",
+      pillarExchange: "in_progress",
+      currentPillar: "exchange",
+      contractPrice: 1250000,
+      depositAmount: 125000,
+      depositPaid: true,
+    },
   };
 
   app.post("/api/auth/demo-login", async (req, res) => {
@@ -157,36 +187,109 @@ export async function registerRoutes(
 
       const ensureLocalUser = async (supabaseUserId: string) => {
         let user = await storage.getUser(supabaseUserId);
-        if (user) return user;
-
-        const existingByEmail = await storage.getUserByEmail(email);
-        if (existingByEmail && existingByEmail.id !== supabaseUserId) {
-          const oldId = existingByEmail.id;
-          try {
-            await db.execute(sql`UPDATE matters SET client_user_id = ${supabaseUserId} WHERE client_user_id = ${oldId}`);
-            await db.execute(sql`UPDATE matters SET conveyancer_user_id = ${supabaseUserId} WHERE conveyancer_user_id = ${oldId}`);
-            await db.execute(sql`UPDATE referrals SET broker_id = ${supabaseUserId} WHERE broker_id = ${oldId}`);
-            await db.execute(sql`UPDATE notifications SET user_id = ${supabaseUserId} WHERE user_id = ${oldId}`);
-            await db.execute(sql`UPDATE users SET id = ${supabaseUserId} WHERE id = ${oldId}`);
-            user = await storage.getUser(supabaseUserId);
-          } catch (e) {
-            console.error("Failed to migrate user ID:", e);
-          }
-        }
 
         if (!user) {
-          try {
-            user = await storage.createUser({
-              id: supabaseUserId,
-              email,
-              password: "supabase-managed",
-              name: demo.name,
-              role: demo.role,
-            });
-          } catch {
-            user = await storage.getUserByEmail(email) || undefined;
+          const existingByEmail = await storage.getUserByEmail(email);
+          if (existingByEmail && existingByEmail.id !== supabaseUserId) {
+            const oldId = existingByEmail.id;
+            try {
+              await db.execute(sql`UPDATE matters SET client_user_id = ${supabaseUserId} WHERE client_user_id = ${oldId}`);
+              await db.execute(sql`UPDATE matters SET conveyancer_user_id = ${supabaseUserId} WHERE conveyancer_user_id = ${oldId}`);
+              await db.execute(sql`UPDATE referrals SET broker_id = ${supabaseUserId} WHERE broker_id = ${oldId}`);
+              await db.execute(sql`UPDATE notifications SET user_id = ${supabaseUserId} WHERE user_id = ${oldId}`);
+              await db.execute(sql`UPDATE users SET id = ${supabaseUserId} WHERE id = ${oldId}`);
+              user = await storage.getUser(supabaseUserId);
+            } catch (e) {
+              console.error("Failed to migrate user ID:", e);
+            }
+          }
+
+          if (!user) {
+            try {
+              user = await storage.createUser({
+                id: supabaseUserId,
+                email,
+                password: "supabase-managed",
+                name: demo.name,
+                role: demo.role,
+              });
+            } catch {
+              user = await storage.getUserByEmail(email) || undefined;
+            }
           }
         }
+
+        if (user) {
+          const midway = DEMO_MIDWAY_CONFIG[email];
+          if (midway) {
+            user = await storage.updateUser(user.id, midway) || user;
+          }
+
+          const matterConfig = DEMO_MATTERS[email];
+          if (matterConfig && demo.role === 'CLIENT') {
+            const existing = await storage.getMattersByClient(user.id);
+            if (existing.length === 0) {
+              const matter = await storage.createMatter({
+                address: matterConfig.address,
+                clientUserId: user.id,
+                transactionType: matterConfig.transactionType,
+                status: matterConfig.status,
+                milestonePercent: matterConfig.milestonePercent,
+                pillarPreSettlement: matterConfig.pillarPreSettlement,
+                pillarExchange: matterConfig.pillarExchange,
+                currentPillar: matterConfig.currentPillar,
+                contractPrice: matterConfig.contractPrice,
+                depositAmount: matterConfig.depositAmount,
+                depositPaid: matterConfig.depositPaid,
+                settlementDate: new Date(matterConfig.settlementDate),
+              });
+
+              await storage.createTask({
+                matterId: matter.id,
+                title: "Sign Contract of Sale",
+                status: "COMPLETE",
+                type: "SIGN",
+                pillar: "pre_settlement",
+                assignedTo: user.id,
+              });
+              await storage.createTask({
+                matterId: matter.id,
+                title: "Pay deposit to trust account",
+                status: "COMPLETE",
+                type: "PAYMENT",
+                pillar: "pre_settlement",
+                assignedTo: user.id,
+              });
+              await storage.createTask({
+                matterId: matter.id,
+                title: "Complete identity verification (VOI)",
+                status: "TODO",
+                type: "ACTION",
+                pillar: "exchange",
+                assignedTo: user.id,
+              });
+              await storage.createTask({
+                matterId: matter.id,
+                title: "Upload proof of finance approval",
+                status: "TODO",
+                type: "UPLOAD",
+                pillar: "exchange",
+                assignedTo: user.id,
+                dueDate: new Date("2026-03-01"),
+              });
+              await storage.createTask({
+                matterId: matter.id,
+                title: "Review Section 32 Vendor Statement",
+                status: "TODO",
+                type: "REVIEW",
+                pillar: "exchange",
+                assignedTo: user.id,
+                dueDate: new Date("2026-03-10"),
+              });
+            }
+          }
+        }
+
         return user;
       };
 

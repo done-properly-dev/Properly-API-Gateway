@@ -30,7 +30,7 @@ function PrivateRoute({ component: Component, allowedRoles }: { component: any, 
   const hasRole = allowedRoles.includes(user.role);
   if (!hasRole) return <Redirect to="/auth" />; 
 
-  if (user.role === 'CLIENT' && !user.onboardingComplete && 
+  if (user.role === 'CLIENT' && !user.onboardingComplete && user.onboardingStep === 0 &&
       !window.location.pathname.startsWith('/client/onboarding')) {
     return <Redirect to="/client/onboarding" />;
   }

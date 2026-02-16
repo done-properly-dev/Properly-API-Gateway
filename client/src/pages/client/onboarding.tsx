@@ -54,7 +54,10 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
-    if (params.get('voi') === 'complete') {
+    const resumeStep = params.get('resumeStep');
+    if (resumeStep) {
+      setStep(parseInt(resumeStep, 10));
+    } else if (params.get('voi') === 'complete') {
       setStep(2);
       (async () => {
         try {

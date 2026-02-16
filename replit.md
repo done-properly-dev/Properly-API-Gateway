@@ -41,7 +41,9 @@ Full-stack MVP for an API-driven property settlement platform for the Australian
 - `client/src/lib/auth.ts` - Auth hook (useAuth) with Supabase session management
 - `client/src/lib/supabase.ts` - Supabase client (frontend)
 - `client/src/lib/queryClient.ts` - TanStack Query setup (adds Bearer token to requests)
-- `client/src/App.tsx` - Router with role-based private routes + onboarding redirect
+- `client/src/App.tsx` - Router with role-based private routes + onboarding redirect (step 0 only)
+- `client/src/components/onboarding-alert.tsx` - Alert bar for incomplete onboarding steps
+- `client/src/components/property-map.tsx` - Apple Maps property location card
 - `client/src/components/layout.tsx` - Role-specific layouts
 - `client/src/components/five-pillars.tsx` - 5-pillar settlement progress component
 - `client/src/pages/client/onboarding.tsx` - 4-step client onboarding wizard
@@ -50,6 +52,7 @@ Full-stack MVP for an API-driven property settlement platform for the Australian
 ## Demo Accounts
 Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - Client: sarah@example.com (mapped to demo-buyer@properly-app.com.au in Supabase)
+- Client (Midway): james@buyer.com.au (mapped to demo-buyer2@properly-app.com.au) - Partway through onboarding with a matter, tasks, and property map
 - Broker: mike@broker.com.au (mapped to demo-broker@properly-app.com.au)
 - Conveyancer: admin@legaleagles.com.au (mapped to demo-conveyancer@properly-app.com.au)
 - Admin: admin@properly.com.au (mapped to demo-admin@properly-app.com.au)
@@ -103,6 +106,10 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Onboarding alert bar - shows incomplete steps on dashboard with resume links, checks actual data not onboardingComplete flag
+- 2026-02-16: Property map - Apple Maps integration on client dashboard with geocoding and marker
+- 2026-02-16: Demo user James Mitchell (midway) - partway through onboarding with matter, 5 tasks, property address
+- 2026-02-16: Onboarding redirect only forces step 0 users, midway users can access dashboard freely
 - 2026-02-16: Didit VOI integration - v3 API, QR code on desktop / direct redirect on mobile, webhook verification
 - 2026-02-16: Resend email updated to use resend.dev testing domain (switch to verified domain for production)
 - 2026-02-16: Apple Maps token generation confirmed working

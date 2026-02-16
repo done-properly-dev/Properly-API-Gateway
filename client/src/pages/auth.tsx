@@ -284,16 +284,19 @@ export default function AuthPage() {
           <div className="pt-8 border-t border-slate-100 mt-8">
             <p className="text-xs text-center text-slate-400 mb-4 uppercase tracking-wider font-semibold">Demo Access</p>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('sarah@example.com', 'password')}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('sarah@example.com', 'password')} data-testid="demo-login-buyer">
                 Login as Buyer
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('mike@broker.com.au', 'password')}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('james@buyer.com.au', 'password')} data-testid="demo-login-buyer-midway">
+                Login as Buyer (Midway)
+              </Button>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('mike@broker.com.au', 'password')} data-testid="demo-login-broker">
                 Login as Broker
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@legaleagles.com.au', 'password')}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@legaleagles.com.au', 'password')} data-testid="demo-login-conveyancer">
                 Login as Conveyancer
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@properly.com.au', 'password')}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@properly.com.au', 'password')} data-testid="demo-login-admin">
                 Login as Admin
               </Button>
             </div>
