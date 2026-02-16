@@ -6,6 +6,10 @@ import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocum
 import { z } from "zod";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
+import * as resendService from "./services/resend";
+import * as twilioService from "./services/twilio";
+import * as diditService from "./services/didit";
+import * as appleMapsService from "./services/apple-maps";
 
 const onboardingUpdateSchema = z.object({
   phone: z.string().optional(),
@@ -428,6 +432,172 @@ export async function registerRoutes(
       const article = await storage.getPlaybookArticleBySlug(paramId(req, "slug"));
       if (!article) return res.status(404).json({ message: "Article not found" });
       res.json(article);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Service Status ───
+  app.get("/api/services/status", requireAuth, async (req, res) => {
+    res.json({
+      resend: resendService.isConfigured(),
+      twilio: twilioService.isConfigured(),
+      didit: diditService.isConfigured(),
+      appleMaps: appleMapsService.isConfigured(),
+    });
+  });
+
+  // ─── Email (Resend) — Admin only for arbitrary sends ───
+  app.post("/api/email/send", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Only admins can send arbitrary emails" });
+      }
+      if (!resendService.isConfigured()) {
+        return res.status(503).json({ message: "Email service not configured. Add RESEND_API_KEY." });
+      }
+      const schema = z.object({ to: z.string().email(), subject: z.string().min(1), html: z.string().min(1), text: z.string().optional() });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0].message });
+      const result = await resendService.sendEmail(parsed.data);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/email/welcome", requireAuth, async (req, res) => {
+    try {
+      if (!resendService.isConfigured()) {
+        return res.status(503).json({ message: "Email service not configured" });
+      }
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+      const result = await resendService.sendWelcomeEmail(user.email, user.name);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── SMS (Twilio) — Scoped to authenticated user's own phone ───
+  app.post("/api/sms/send", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== 'ADMIN') {
+        return res.status(403).json({ message: "Only admins can send arbitrary SMS" });
+      }
+      if (!twilioService.isConfigured()) {
+        return res.status(503).json({ message: "SMS service not configured. Add Twilio credentials." });
+      }
+      const schema = z.object({ to: z.string().min(8), body: z.string().min(1).max(1600) });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: parsed.error.issues[0].message });
+      const result = await twilioService.sendSms(parsed.data);
+      res.json({ sid: result.sid, status: result.status });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/sms/verification-code", requireAuth, async (req, res) => {
+    try {
+      if (!twilioService.isConfigured()) {
+        return res.status(503).json({ message: "SMS service not configured" });
+      }
+      const user = await storage.getUser(req.userId!);
+      if (!user || !user.phone) {
+        return res.status(400).json({ message: "No phone number on file. Update your profile first." });
+      }
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const result = await twilioService.sendVerificationCode(user.phone, code);
+      res.json({ sid: result.sid, status: result.status, codeLength: 6 });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── In-App Chat (Twilio-backed, in-memory for MVP) ───
+  app.get("/api/chat/:matterId", requireAuth, async (req, res) => {
+    const messages = twilioService.getChatMessages(paramId(req, "matterId"));
+    res.json(messages);
+  });
+
+  app.post("/api/chat/:matterId", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+      const { body } = req.body;
+      const message = twilioService.addChatMessage(
+        paramId(req, "matterId"),
+        user.id,
+        user.name,
+        body
+      );
+      res.json(message);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Identity Verification (Didit) ───
+  app.post("/api/verification/start", requireAuth, async (req, res) => {
+    try {
+      if (!diditService.isConfigured()) {
+        return res.status(503).json({ message: "Identity verification service not configured. Add DIDIT_API_KEY." });
+      }
+      const callbackUrl = `${req.protocol}://${req.get('host')}/api/verification/callback`;
+      const session = await diditService.createVerificationSession(req.userId!, callbackUrl);
+      res.json(session);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/verification/status/:sessionId", requireAuth, async (req, res) => {
+    try {
+      if (!diditService.isConfigured()) {
+        return res.status(503).json({ message: "Identity verification service not configured" });
+      }
+      const result = await diditService.getVerificationStatus(paramId(req, "sessionId"));
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/verification/callback", async (req, res) => {
+    try {
+      const callbackSecret = process.env.DIDIT_CALLBACK_SECRET;
+      if (callbackSecret) {
+        const providedSecret = req.headers['x-didit-secret'] || req.query.secret;
+        if (providedSecret !== callbackSecret) {
+          return res.status(403).json({ message: "Invalid callback secret" });
+        }
+      }
+
+      const { session_id, status, vendor_data } = req.body;
+      if (vendor_data && status === 'approved') {
+        const user = await storage.getUser(vendor_data);
+        if (user) {
+          await storage.updateUser(vendor_data, { voiStatus: 'verified' });
+        }
+      }
+      res.json({ received: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Apple Maps Token ───
+  app.get("/api/maps/token", requireAuth, async (req, res) => {
+    try {
+      if (!appleMapsService.isConfigured()) {
+        return res.status(503).json({ message: "Apple Maps not configured. Add Apple Maps credentials." });
+      }
+      const token = appleMapsService.generateMapToken();
+      res.json({ token });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

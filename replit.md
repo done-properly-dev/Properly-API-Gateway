@@ -87,6 +87,21 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
 - SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_DATABASE_URL set as secrets
 
+## External Services
+- **Resend** (email): `server/services/resend.ts` - Welcome emails, milestone notifications, task reminders
+  - Requires: RESEND_API_KEY, RESEND_FROM_EMAIL (optional)
+  - Routes: POST /api/email/send, POST /api/email/welcome
+- **Twilio** (SMS + chat): `server/services/twilio.ts` - SMS notifications, verification codes, in-app chat
+  - Requires: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+  - Routes: POST /api/sms/send, POST /api/sms/verification-code, GET/POST /api/chat/:matterId
+- **Didit** (identity verification): `server/services/didit.ts` - VOI for property settlement
+  - Requires: DIDIT_API_KEY, DIDIT_BASE_URL (optional)
+  - Routes: POST /api/verification/start, GET /api/verification/status/:sessionId, POST /api/verification/callback
+- **Apple Maps** (mapping): `server/services/apple-maps.ts` - Property location mapping
+  - Requires: APPLE_MAPS_TEAM_ID, APPLE_MAPS_KEY_ID, APPLE_MAPS_PRIVATE_KEY
+  - Routes: GET /api/maps/token
+- **Service Status**: GET /api/services/status - Returns configuration status of all services
+
 ## Recent Changes
 - 2026-02-16: Sprint 1 complete - onboarding, 5-pillar, playbook, empty states, Australian tone
 - 2026-02-16: Demo login endpoint with auto Supabase Auth account creation and ID migration
