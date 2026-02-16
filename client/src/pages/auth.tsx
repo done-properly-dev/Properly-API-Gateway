@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { ShieldCheck, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Logo } from '@/components/logo';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -116,7 +117,9 @@ export default function AuthPage() {
        <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-white">
          <div className="w-full max-w-md space-y-8">
            <div className="text-center md:text-left space-y-2">
-             <div className="md:hidden font-heading font-bold text-2xl text-primary mb-8">Properly.</div>
+             <div className="md:hidden mb-8 flex justify-center">
+               <Logo variant="color" />
+             </div>
              <h2 className="text-3xl font-bold font-heading text-slate-900">Welcome back</h2>
              <p className="text-slate-500 text-lg">
                Enter your email to access your dashboard.

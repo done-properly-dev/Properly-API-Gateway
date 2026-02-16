@@ -3,6 +3,7 @@ import { useStore } from '@/lib/store';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, ArrowRight, MessageSquare, Zap, LayoutTemplate, Shield, Clock, Users } from 'lucide-react';
+import { Logo } from '@/components/logo';
 
 export default function LandingPage() {
   const [_, setLocation] = useLocation();
@@ -13,7 +14,7 @@ export default function LandingPage() {
       <nav className="bg-[#D1E8E2] py-4">
         <div className="container max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-12">
-            <div className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">Properly</div>
+            <Logo variant="color" />
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-700">
               <a href="#" className="hover:text-slate-900">Features</a>
               <a href="#" className="hover:text-slate-900">Become a Partner</a>
@@ -251,7 +252,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="bg-white border-t py-12">
         <div className="container max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-           <div className="font-heading font-bold text-xl text-slate-900">Properly.</div>
+           <Logo variant="color" />
            <div className="flex gap-6 text-sm text-slate-500">
              <a href="#" className="hover:text-slate-900">Terms</a>
              <a href="#" className="hover:text-slate-900">Privacy</a>

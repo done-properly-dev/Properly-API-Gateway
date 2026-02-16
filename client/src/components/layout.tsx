@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
+import { Logo } from '@/components/logo';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,7 +34,7 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
         <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
           <div className="flex h-16 items-center px-4 max-w-5xl mx-auto justify-between">
             <div className="flex items-center gap-8">
-               <div className="font-heading font-extrabold text-2xl text-primary tracking-tight">Properly.</div>
+               <Logo variant="color" />
                
                {/* Desktop Nav Links */}
                <nav className="hidden md:flex items-center gap-6">
@@ -96,7 +97,7 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
       {/* Sidebar - Hidden on mobile */}
       <aside className="hidden md:flex w-72 flex-col border-r bg-white text-sidebar-foreground fixed inset-y-0 left-0 z-30">
         <div className="p-6 h-20 flex items-center border-b border-transparent">
-          <h1 className="font-heading font-extrabold text-2xl text-primary tracking-tight">Properly.</h1>
+          <Logo variant="color" />
         </div>
         
         <div className="px-4 py-4">
@@ -136,7 +137,7 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
              </SheetTrigger>
              <SheetContent side="left" className="bg-white p-0 w-72">
                 <div className="p-6 border-b">
-                  <h1 className="font-heading font-bold text-2xl text-primary">Properly.</h1>
+                  <Logo variant="color" />
                 </div>
                 <nav className="px-4 py-6 space-y-2">
                   <NavLinks role={role} location={location} />
