@@ -1,0 +1,1371 @@
+<mcp_external_output>
+
+### Content Block 1 (Text)
+const imgIcon = "https://www.figma.com/api/mcp/asset/8a368805-203f-4ded-8769-207cbd2539b2";
+const imgGroup7 = "https://www.figma.com/api/mcp/asset/578ef481-0758-4206-9657-c30177875be2";
+const imgGroup3 = "https://www.figma.com/api/mcp/asset/02104461-fd19-49b4-b071-613cce021e8c";
+const imgNavAccountCard = "https://www.figma.com/api/mcp/asset/3b1c0ace-7c4c-4c13-ad57-3f220d82b699";
+const imgIcon1 = "https://www.figma.com/api/mcp/asset/3a9f2915-a336-4d97-afd8-0ec4d9125eed";
+const imgIcon2 = "https://www.figma.com/api/mcp/asset/e4a88ddf-139e-42ec-ab0e-99a61d4f4a68";
+const imgNavigation = "https://www.figma.com/api/mcp/asset/2ccb7290-7299-4e01-bc32-f4bc9037b836";
+const imgNavigation1 = "https://www.figma.com/api/mcp/asset/8219098e-1c45-4892-8da8-1f409dd5b71a";
+const imgNavigation2 = "https://www.figma.com/api/mcp/asset/bec93032-3822-4e4e-b3a3-b76529f3380e";
+const imgNavItemBase = "https://www.figma.com/api/mcp/asset/6066d21a-87f4-438b-bc4e-4da0b2df9e70";
+const imgIcon3 = "https://www.figma.com/api/mcp/asset/827bb409-4fa7-4b23-9e75-f7555aa6bb82";
+const imgContent = "https://www.figma.com/api/mcp/asset/9036b769-29cd-4380-84fb-47709abb2cc0";
+const imgContent1 = "https://www.figma.com/api/mcp/asset/cefdbe0c-57fa-44d9-a260-0bef7ce58d4e";
+const imgNavFeaturedCard = "https://www.figma.com/api/mcp/asset/7586fe56-ae72-41c2-89b6-d9f642f779d5";
+const imgNavAccountCard1 = "https://www.figma.com/api/mcp/asset/9bc14923-4b5a-4c31-a42c-d83ad6ebe9e7";
+const imgNavAccountCard2 = "https://www.figma.com/api/mcp/asset/02521f85-99ad-469c-a2a8-6586996029dc";
+const imgNavAccountCard3 = "https://www.figma.com/api/mcp/asset/2adaccd9-0240-4460-be7a-11319e14112f";
+const imgNavAccountCard4 = "https://www.figma.com/api/mcp/asset/67f73b49-08a3-4901-a6e0-ffb723b29e86";
+const imgNavAccountCard5 = "https://www.figma.com/api/mcp/asset/c5f6ce5f-5114-4ea0-add8-4c3d32b42554";
+const imgNavAccountCard6 = "https://www.figma.com/api/mcp/asset/68f94c3e-ab1a-441c-94e3-27131ac6b369";
+const imgNavAccountCard7 = "https://www.figma.com/api/mcp/asset/cefae1a7-dea0-407d-98a0-d0def9cd705a";
+const imgRing = "https://www.figma.com/api/mcp/asset/07bc0e48-3063-4b17-a2f5-bba671bfbb33";
+const imgRectangle10 = "https://www.figma.com/api/mcp/asset/c0d42a0a-ad50-49f8-979d-084978ea0c54";
+const imgIcon4 = "https://www.figma.com/api/mcp/asset/af874cc0-7249-491c-953a-d4edaba9723e";
+const imgIcon5 = "https://www.figma.com/api/mcp/asset/c216da1f-ce6b-4da8-a77a-66c0e390eee0";
+const imgIcon6 = "https://www.figma.com/api/mcp/asset/55883b69-2cfd-44fb-968f-1276587bf1c9";
+const imgBackground = "https://www.figma.com/api/mcp/asset/ff7f284d-9907-4da6-9948-e86cca80b36c";
+const imgLine = "https://www.figma.com/api/mcp/asset/41ce5446-8ba5-4ab7-ad58-6df32d34bdc9";
+const imgStepBase = "https://www.figma.com/api/mcp/asset/7c47f0f4-5939-4c60-ba05-70a2041c6da7";
+const imgStepBase1 = "https://www.figma.com/api/mcp/asset/de81e7a1-10a3-4c20-b472-6dbb929a55e7";
+const imgStepBase2 = "https://www.figma.com/api/mcp/asset/5dad15ff-b8e0-4a12-b963-c33fbb912b00";
+const imgStepBase3 = "https://www.figma.com/api/mcp/asset/3b8f46a4-afc4-4120-8f37-f708e7815142";
+const imgStepBase4 = "https://www.figma.com/api/mcp/asset/87e893e5-9ed1-4450-ba25-d576b3a63820";
+type BreadcrumbButtonBaseProps = {
+  className?: string;
+  current?: boolean;
+  icon?: boolean;
+  state?: "Default" | "Hover";
+  type?: "Text" | "Button";
+};
+
+function BreadcrumbButtonBase({ className, current = false, icon = true, state = "Default", type = "Text" }: BreadcrumbButtonBaseProps) {
+  return (
+    <div className={className || "content-stretch flex items-start relative"} data-node-id="1:10508">
+      <div className="overflow-clip relative shrink-0 size-[20px]" data-name="home-line" data-node-id="1:10509">
+        <div className="absolute inset-[9.45%_12.5%_12.5%_12.5%]" data-name="Icon" data-node-id="I1:10509;3463:405439">
+          <div className="absolute inset-[-5.34%_-5.56%]">
+            <img alt="" className="block max-w-none size-full" src={imgIcon} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Logo({ className }: { className?: string }) {
+  return (
+    <div className={className || ""} data-name="Logo" data-node-id="1:10034">
+      <div className="content-stretch flex items-start relative w-[139px]" data-name="Dark mode=False" data-node-id="1:10035">
+        <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0" data-node-id="1:10036">
+          <div className="col-1 h-[24.6px] ml-[29.33%] mt-[40%] relative row-1 w-[98.79px]" data-node-id="1:10037">
+            <img alt="" className="absolute block inset-0 max-w-none" src={imgGroup7} />
+          </div>
+          <div className="col-1 h-[41px] ml-0 mt-0 relative row-1 w-[32.8px]" data-node-id="1:10039">
+            <img alt="" className="absolute block inset-0 max-w-none" src={imgGroup3} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function BuyerDashboard() {
+  return (
+    <div className="relative size-full" data-name="Buyer - Dashboard" data-node-id="1:37625">
+      <div className="absolute bg-white content-stretch flex h-[960px] isolate items-start left-0 top-0 w-[1440px]" data-name="Buying tasks desktop" data-node-id="1:37626">
+        <div className="absolute contents left-[321px] top-[360px] z-[6]" data-name="Tasks" data-node-id="1:37627">
+          <div className="absolute bg-[var(--linen,#ffece1)] h-[280px] left-[321px] rounded-[8px] top-[360px] w-[530px]" data-node-id="1:37628" />
+          <div className="-translate-x-1/2 -translate-y-1/2 absolute bg-white border border-[#e9eaeb] border-solid h-[170px] left-[calc(50%-134.5px)] overflow-clip rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] top-[calc(50%+10px)] w-[493px]" data-name="Table" data-node-id="1:37629">
+            <div className="absolute bg-white border border-[var(--to-do,#fac515)] border-solid content-stretch flex h-[174px] items-start left-[-1px] top-[-1px] w-[495px]" data-name="Content" data-node-id="1:37630">
+              <div className="content-stretch flex flex-col isolate items-start relative shrink-0 w-[244px]" data-name="Column" data-node-id="1:37631">
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[4]" data-name="Table header cell" data-node-id="1:37632">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37632;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37632;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37633">
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37633;1222:107427">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[20px] not-italic relative shrink-0 text-[#181d27] text-[14px]" data-node-id="I1:37633;1222:107428">
+                      Olivia Rhye
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-[#fafafa] border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37634">
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37634;1222:107441">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[20px] not-italic relative shrink-0 text-[#181d27] text-[14px]" data-node-id="I1:37634;1222:107442">
+                      Olivia Rhye
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37635">
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37635;1222:107427">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[20px] not-italic relative shrink-0 text-[#181d27] text-[14px]" data-node-id="I1:37635;1222:107428">
+                      Olivia Rhye
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col isolate items-start relative shrink-0 w-[245px]" data-name="Column" data-node-id="1:37636">
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[4]" data-name="Table header cell" data-node-id="1:37637">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37637;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37637;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37638">
+                  <div className="bg-[#ecfdf3] border border-[#abefc6] border-solid content-stretch flex items-center px-[8px] py-[2px] relative rounded-[16px] shrink-0" data-name="Badge" data-node-id="I1:37638;1224:173">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#067647] text-[12px] text-center" data-node-id="I1:37638;1224:173;3918:415771">
+                      Label
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-[#fafafa] border-[#e9eaeb] border-b border-solid content-stretch flex h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37639">
+                  <div className="bg-[#ecfdf3] border border-[#abefc6] border-solid content-stretch flex items-center px-[8px] py-[2px] relative rounded-[16px] shrink-0" data-name="Badge" data-node-id="I1:37639;1224:226">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#067647] text-[12px] text-center" data-node-id="I1:37639;1224:226;3918:415771">
+                      Label
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37640">
+                  <div className="bg-[#ecfdf3] border border-[#abefc6] border-solid content-stretch flex items-center px-[8px] py-[2px] relative rounded-[16px] shrink-0" data-name="Badge" data-node-id="I1:37640;1224:173">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#067647] text-[12px] text-center" data-node-id="I1:37640;1224:173;3918:415771">
+                      Label
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute content-stretch flex flex-col h-[240px] items-start left-[473px] pb-[80px] pt-[8px] px-[6px] top-[-2px]" data-name="_Scroll bar (control fill with bottom padding)" data-node-id="1:37641">
+              <div className="bg-black border border-solid border-white flex-[1_0_0] min-h-px min-w-px opacity-15 rounded-[8px] w-[6px]" data-name="Bar" data-node-id="I1:37641;7709:74279" />
+            </div>
+          </div>
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold h-[23px] justify-center leading-[0] left-[337px] not-italic text-[16px] text-[color:var(--anthracite-grey,#383e42)] top-[384.5px] w-[357px]" data-node-id="1:37642">
+            <p className="leading-[24px] whitespace-pre-wrap">Tasks</p>
+          </div>
+          <div className="absolute bg-[var(--mineral-green,#425b58)] border-2 border-[rgba(255,255,255,0.12)] border-solid content-stretch flex items-center justify-center left-[759px] overflow-clip px-[12px] py-[8px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] top-[585px]" data-name="Buttons/Button" data-node-id="1:37643">
+            <div className="content-stretch flex items-center justify-center px-[2px] relative shrink-0" data-name="Text padding" data-node-id="I1:37643;14617:174378">
+              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[14px] text-white" data-node-id="I1:37643;14617:174379">
+                Button CTA
+              </p>
+            </div>
+            <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_0px_1px_rgba(10,13,18,0.18),inset_0px_-2px_0px_0px_rgba(10,13,18,0.05)]" />
+          </div>
+        </div>
+        <div className="absolute contents left-[321px] top-[656px] z-[5]" data-name="Document vault" data-node-id="1:37644">
+          <div className="absolute bg-[var(---water,#e7f6f3)] h-[280px] left-[321px] rounded-[8px] top-[656px] w-[530px]" data-node-id="1:37645" />
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold h-[23px] justify-center leading-[0] left-[337px] not-italic text-[16px] text-[color:var(--anthracite-grey,#383e42)] top-[680.5px] w-[357px]" data-node-id="1:37646">
+            <p className="leading-[24px] whitespace-pre-wrap">Document Vault</p>
+          </div>
+          <div className="absolute bg-[var(--mineral-green,#425b58)] border-2 border-[rgba(255,255,255,0.12)] border-solid content-stretch flex items-center justify-center left-[759px] overflow-clip px-[12px] py-[8px] rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] top-[881px]" data-name="Buttons/Button" data-node-id="1:37647">
+            <div className="content-stretch flex items-center justify-center px-[2px] relative shrink-0" data-name="Text padding" data-node-id="I1:37647;14617:174378">
+              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[14px] text-white" data-node-id="I1:37647;14617:174379">
+                Button CTA
+              </p>
+            </div>
+            <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_0px_1px_rgba(10,13,18,0.18),inset_0px_-2px_0px_0px_rgba(10,13,18,0.05)]" />
+          </div>
+          <div className="-translate-x-1/2 absolute bg-white border border-[#f5f5f5] border-solid h-[170px] left-[calc(50%-134.5px)] overflow-clip rounded-[12px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] top-[699px] w-[493px]" data-name="Table" data-node-id="1:37648">
+            <div className="absolute bg-white border border-[var(--to-do,#fac515)] border-solid content-stretch flex h-[174px] items-start left-[-1px] pr-[5px] top-[-1px] w-[492px]" data-name="Content" data-node-id="1:37649">
+              <div className="content-stretch flex flex-col isolate items-start mr-[-5px] relative shrink-0 w-[245px]" data-name="Column" data-node-id="1:37650">
+                <div className="bg-[#fafafa] border-[#e9eaeb] border-b border-solid content-stretch flex h-[43px] items-center max-h-[44px] p-[8px] relative shrink-0 w-full z-[4]" data-name="Table header cell" data-node-id="1:37651">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="1:37652">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37652;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[43px] items-center max-h-[72px] px-[8px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37653">
+                  <div className="h-[16.667px] relative shrink-0 w-[13.333px]" data-name="Icon" data-node-id="1:37655">
+                    <div className="absolute inset-[-5.01%_-6.26%]">
+                      <img alt="" className="block max-w-none size-full" src={imgIcon1} />
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37656">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#181d27] text-[12px]" data-node-id="1:37657">
+                      Purchase Agreement.pdf
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-[#fafafa] border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[44px] items-center max-h-[72px] px-[8px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37659">
+                  <div className="h-[16.667px] relative shrink-0 w-[13.333px]" data-name="Icon" data-node-id="1:37661">
+                    <div className="absolute inset-[-5.01%_-6.26%]">
+                      <img alt="" className="block max-w-none size-full" src={imgIcon1} />
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37662">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#181d27] text-[12px]" data-node-id="1:37663">
+                      Pest Inspection.pdf
+                    </p>
+                  </div>
+                </div>
+                <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[44px] items-center max-h-[72px] px-[8px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37665">
+                  <div className="h-[16.667px] relative shrink-0 w-[13.333px]" data-name="Icon" data-node-id="1:37667">
+                    <div className="absolute inset-[-5.01%_-6.26%]">
+                      <img alt="" className="block max-w-none size-full" src={imgIcon1} />
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37668">
+                    <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#181d27] text-[12px]" data-node-id="1:37669">
+                      Pool Safety.jpg
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col h-[172px] isolate items-start mr-[-5px] relative shrink-0 w-[241px]" data-name="Column" data-node-id="1:37671">
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[4]" data-name="Table header cell" data-node-id="1:37672">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37672;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37672;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[3]" data-name="Table header cell" data-node-id="1:37673">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37673;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37673;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[2]" data-name="Table header cell" data-node-id="1:37674">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37674;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37674;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[1]" data-name="Table header cell" data-node-id="1:37675">
+                  <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37675;1224:4556">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37675;1224:4556;1221:106781">
+                      Company
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col h-[240px] items-start mr-[-5px] pb-[80px] pt-[8px] px-[6px] relative shrink-0" data-name="_Scroll bar (control fill with bottom padding)" data-node-id="1:37676">
+                <div className="bg-black border border-solid border-white flex-[1_0_0] min-h-px min-w-px opacity-15 rounded-[8px] w-[6px]" data-name="Bar" data-node-id="I1:37676;7709:74279" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white border-[#e9eaeb] border-r border-solid content-stretch flex h-full items-start relative shrink-0 w-[296px] z-[4]" data-name="Sidebar navigation" data-node-id="1:37677">
+          <div className="content-stretch flex flex-[1_0_0] flex-col h-full items-start justify-between min-h-px min-w-px relative" data-name="Content" data-node-id="I1:37677;1161:8594">
+            <div className="content-stretch flex flex-col gap-[16px] isolate items-start pt-[24px] relative shrink-0 w-full" data-name="Navigation" data-node-id="I1:37677;1161:8595">
+              <div className="content-stretch flex flex-col gap-[20px] items-start px-[20px] relative shrink-0 w-full z-[2]" data-name="Header" data-node-id="I1:37677;1161:8596">
+                <Logo className="content-stretch flex items-start relative shrink-0 w-[139px]" />
+                <button className="content-stretch cursor-pointer flex flex-col gap-[6px] items-start relative shrink-0 w-full" data-name="Select" data-node-id="I1:37677;7674:396184">
+                  <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full" data-name="Input with label" data-node-id="I1:37677;7674:396184;7667:394333">
+                    <div className="bg-white border border-[#d5d7da] border-solid content-stretch flex gap-[8px] items-center overflow-clip px-[12px] py-[8px] relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] shrink-0 w-full" data-name="Input" data-node-id="I1:37677;7674:396184;7667:394338">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Content" data-node-id="I1:37677;7674:396184;7667:394339">
+                        <div className="overflow-clip relative shrink-0 size-[24px]" data-name="search-lg" data-node-id="I1:37677;7674:396184;7667:394340">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;7674:396184;7667:394340;3463:405301">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgIcon2} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="flex-[1_0_0] font-['Inter:Regular',sans-serif] font-normal leading-[24px] min-h-px min-w-px not-italic overflow-hidden relative text-[#0c0d0e] text-[16px] text-ellipsis text-left whitespace-nowrap" data-node-id="I1:37677;7674:396184;7667:394341">
+                          Search
+                        </p>
+                      </div>
+                      <div className="border border-[#e9eaeb] border-solid content-stretch flex items-start mix-blend-multiply px-[4px] py-px relative rounded-[4px] shrink-0" data-name="Shortcut wrapper" data-node-id="I1:37677;7674:396184;7673:395318">
+                        <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px] text-left" data-node-id="I1:37677;7674:396184;7673:395319">
+                          ⌘K
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              <div className="content-stretch cursor-pointer flex flex-col items-start px-[16px] relative shrink-0 w-full z-[1]" data-name="Navigation" data-node-id="I1:37677;1161:8598">
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8599">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8599;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8599;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8599;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8599;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8599;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8599;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8599;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8599;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8600">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8600;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8600;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8600;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8600;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8600;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.57%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation2} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8600;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8600;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8600;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8601">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8601;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8601;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8601;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8601;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8601;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8601;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8601;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8601;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8602">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8602;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8602;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8602;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8602;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8602;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8602;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8602;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8602;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8603">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8603;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8603;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8603;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8603;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8603;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8603;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8603;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8603;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <button className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="I1:37677;1161:8604">
+                  <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37677;1161:8604;1153:89416">
+                    <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8604;1153:89416;7596:276047">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8604;1153:89416;1152:89352">
+                        <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37677;1161:8604;1153:89416;3479:464410">
+                          <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;1161:8604;1153:89416;3479:464410;3463:403900">
+                            <div className="absolute inset-[-5.56%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37677;1161:8604;1153:89416;1152:89354">
+                          Dashboard
+                        </p>
+                      </div>
+                      <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;1161:8604;1153:89416;1152:89357">
+                        <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;1161:8604;1153:89416;1152:89357;3463:404534">
+                          <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[16px] items-start pb-[24px] px-[16px] relative shrink-0 w-full" data-name="Footer" data-node-id="I1:37677;1161:8605">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full" data-name="Navigation" data-node-id="I1:37677;1161:8606">
+                <div className="content-stretch flex items-center overflow-clip py-[2px] relative shrink-0 w-full" data-name="_Nav item base" data-node-id="I1:37677;1161:8608">
+                  <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;1161:8608;7596:276047">
+                    <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;1161:8608;1152:89352">
+                      <div className="overflow-clip relative shrink-0 size-[20px]" data-name="settings-01" data-node-id="I1:37677;1161:8608;3479:464410">
+                        <div className="absolute inset-[8.33%]" data-name="Icon" data-node-id="I1:37677;1161:8608;3479:464410;3463:405313">
+                          <div className="absolute inset-[-5%]">
+                            <img alt="" className="block max-w-none size-full" src={imgNavItemBase} />
+                          </div>
+                        </div>
+                      </div>
+                      <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px]" data-node-id="I1:37677;1161:8608;1152:89354">
+                        Dashboard
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="content-stretch flex items-center overflow-clip py-[2px] relative shrink-0 w-full" data-name="_Nav item base" data-node-id="I1:37677;7620:391062">
+                  <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7620:391062;7596:276047">
+                    <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;7620:391062;1152:89352">
+                      <div className="overflow-clip relative shrink-0 size-[20px]" data-name="message-chat-circle" data-node-id="I1:37677;7620:391062;3479:464410">
+                        <div className="absolute inset-[8.33%_7.89%_8.33%_8.33%]" data-name="Icon" data-node-id="I1:37677;7620:391062;3479:464410;3463:406231">
+                          <div className="absolute inset-[-5.01%_-4.98%]">
+                            <img alt="" className="block max-w-none size-full" src={imgIcon3} />
+                          </div>
+                        </div>
+                      </div>
+                      <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px]" data-node-id="I1:37677;7620:391062;1152:89354">
+                        Dashboard
+                      </p>
+                    </div>
+                    <div className="bg-[#fafafa] border border-[#e9eaeb] border-solid content-stretch flex items-center px-[8px] py-[2px] relative rounded-[16px] shrink-0" data-name="Badge" data-node-id="I1:37677;7620:391062;1152:89356">
+                      <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#414651] text-[12px] text-center" data-node-id="I1:37677;7620:391062;1152:89356;3918:407462">
+                        Label
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="content-stretch flex items-center overflow-clip py-[2px] relative shrink-0 w-full" data-name="_Nav item base" data-node-id="I1:37677;7618:386936">
+                  <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7618:386936;7596:276047">
+                    <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37677;7618:386936;1152:89352">
+                      <div className="overflow-clip relative shrink-0 size-[20px]" data-name="layout-alt-01" data-node-id="I1:37677;7618:386936;3479:464410">
+                        <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;7618:386936;3479:464410;3463:403781">
+                          <div className="absolute inset-[-5.57%]">
+                            <img alt="" className="block max-w-none size-full" src={imgContent} />
+                          </div>
+                        </div>
+                      </div>
+                      <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px]" data-node-id="I1:37677;7618:386936;1152:89354">
+                        Dashboard
+                      </p>
+                    </div>
+                    <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37677;7618:386936;1152:89357">
+                      <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37677;7618:386936;1152:89357;3463:404534">
+                        <div className="absolute inset-[-16.67%_-8.33%]">
+                          <img alt="" className="block max-w-none size-full" src={imgContent1} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-[#fafafa] content-stretch flex flex-col gap-[16px] items-start p-[16px] relative rounded-[12px] shrink-0 w-full" data-name="_Nav featured card" data-node-id="I1:37677;1161:8609">
+                <div className="absolute content-stretch flex items-center justify-center overflow-clip p-[8px] right-[8px] rounded-[8px] size-[36px] top-[8px]" data-name="Button close X" data-node-id="I1:37677;1161:8609;7626:35679">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="x-close" data-node-id="I1:37677;1161:8609;7626:35679;2763:420457">
+                    <div className="absolute inset-1/4" data-name="Icon" data-node-id="I1:37677;1161:8609;7626:35679;2763:420457;3463:405166">
+                      <div className="absolute inset-[-8.33%]">
+                        <img alt="" className="block max-w-none size-full" src={imgNavFeaturedCard} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full" data-name="Text and supporting text" data-node-id="I1:37677;1161:8609;1157:99075">
+                  <div className="content-stretch flex items-start pr-[24px] relative shrink-0 w-full" data-name="Text wrap" data-node-id="I1:37677;1161:8609;1157:99076">
+                    <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] min-h-px min-w-px not-italic relative text-[#181d27] text-[14px] whitespace-pre-wrap" data-node-id="I1:37677;1161:8609;1157:99077">
+                      Used space
+                    </p>
+                  </div>
+                  <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px] w-full whitespace-pre-wrap" data-node-id="I1:37677;1161:8609;1157:99080">
+                    Your team has used 80% of your available space. Need more?
+                  </p>
+                </div>
+                <div className="content-stretch flex items-center relative shrink-0 w-full" data-name="Progress bar" data-node-id="I1:37677;1161:8609;1157:99081">
+                  <div className="flex-[1_0_0] h-[8px] min-h-px min-w-px relative rounded-[8px]" data-name="Progress bar" data-node-id="I1:37677;1161:8609;1157:99081;1086:131">
+                    <div className="absolute bg-[#e9eaeb] h-[8px] left-0 right-0 rounded-[4px] top-0" data-name="Background" data-node-id="I1:37677;1161:8609;1157:99081;1086:132" />
+                    <div className="absolute bg-[var(--light-salmon,#f8a47b)] h-[8px] left-0 right-[16.63%] rounded-[4px] top-0" data-name="Progress" data-node-id="I1:37677;1161:8609;1157:99081;1086:133" />
+                  </div>
+                </div>
+                <div className="content-stretch flex gap-[12px] items-start relative shrink-0" data-name="Actions" data-node-id="I1:37677;1161:8609;2763:419727">
+                  <div className="content-stretch flex items-center justify-center overflow-clip relative shrink-0" data-name="_Nav featured card button" data-node-id="I1:37677;1161:8609;2763:419728">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37677;1161:8609;2763:419728;2763:418605">
+                      Button CTA
+                    </p>
+                  </div>
+                  <div className="content-stretch flex items-center justify-center overflow-clip relative shrink-0" data-name="_Nav featured card button" data-node-id="I1:37677;1161:8609;2763:419729">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#6941c6] text-[14px]" data-node-id="I1:37677;1161:8609;2763:419729;2763:418603">
+                      Button CTA
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <button className="bg-white border border-[#e9eaeb] border-solid content-stretch cursor-pointer flex gap-[16px] items-start p-[12px] relative rounded-[12px] shrink-0 w-full" data-name="_Nav account card" data-node-id="I1:37677;7616:379264">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Avatar label group" data-node-id="I1:37677;7616:379264;7616:376076">
+                  <div className="border border-[rgba(0,0,0,0.08)] border-solid relative rounded-[200px] shrink-0 size-[40px]" data-name="Avatar" data-node-id="I1:37677;7616:379264;7616:376076;1034:778">
+                    <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[200px] size-full" src={imgNavAccountCard} />
+                    <div className="absolute bg-[#17b26a] border-[1.5px] border-solid border-white bottom-[-1px] right-[-1px] rounded-[5px] size-[10px]" data-name="_Avatar online indicator" data-node-id="I1:37677;7616:379264;7616:376076;1034:778;19:1085" />
+                  </div>
+                  <div className="content-stretch flex flex-col items-start leading-[20px] not-italic relative shrink-0 text-[14px] text-left" data-name="Text and supporting text" data-node-id="I1:37677;7616:379264;7616:376076;82:2790">
+                    <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#181d27]" data-node-id="I1:37677;7616:379264;7616:376076;82:2788">
+                      Olivia Rhye
+                    </p>
+                    <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862]" data-node-id="I1:37677;7616:379264;7616:376076;82:2789">
+                      olivia@untitledui.com
+                    </p>
+                  </div>
+                </div>
+                <div className="absolute content-stretch flex items-start right-[7px] top-[7px]" data-name="__Nav account card menu button" data-node-id="I1:37677;7616:379264;7616:375999">
+                  <div className="bg-[#fafafa] content-stretch flex items-center justify-center p-[6px] relative rounded-[8px] shrink-0" data-name="Buttons/Button utility" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312">
+                    <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-selector-vertical" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7659:379994">
+                      <div className="absolute inset-[16.67%_29.17%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7659:379994;3463:404555">
+                        <div className="absolute inset-[-6.25%_-10%]">
+                          <img alt="" className="block max-w-none size-full" src={imgNavAccountCard1} />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-1/2 shadow-[0px_12px_16px_0px_rgba(10,13,18,0.08),0px_4px_6px_0px_rgba(10,13,18,0.03),0px_2px_2px_0px_rgba(10,13,18,0.04)] top-[-38px]" data-name="Tooltip" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385899">
+                      <div className="bg-[#181d27] content-stretch flex flex-col items-start px-[12px] py-[8px] relative rounded-[8px] shrink-0 w-full" data-name="Content" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385899;1052:588">
+                        <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[12px] text-center text-white" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385899;1052:589">
+                          Tooltip
+                        </p>
+                      </div>
+                    </div>
+                    <div className="absolute bottom-[-10px] right-[-10px] shadow-[0px_1px_2px_0px_rgba(0,0,0,0.3)] size-[20px]" data-name="Cursor" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385904">
+                      <div className="absolute inset-[10.51%_9.39%_9.4%_15.32%]" data-name="Outline" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385904;10447:183373">
+                        <img alt="" className="absolute block inset-0 max-w-none" src={imgNavAccountCard2} />
+                      </div>
+                      <div className="absolute inset-[14.26%_13.14%_13.1%_19.07%]" data-name="Fill" data-node-id="I1:37677;7616:379264;7616:375999;7710:384312;7667:385904;10447:183374">
+                        <img alt="" className="absolute block inset-0 max-w-none" src={imgNavAccountCard3} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute bg-[#fafafa] border border-[rgba(0,0,0,0.08)] border-solid bottom-[-1px] content-stretch flex flex-col items-start overflow-clip right-[-273px] rounded-[12px] shadow-[0px_12px_16px_-4px_rgba(10,13,18,0.08),0px_4px_6px_-2px_rgba(10,13,18,0.03),0px_2px_2px_-1px_rgba(10,13,18,0.04)] w-[264px]" data-name="Menu" data-node-id="I1:37677;7616:379264;7616:375146">
+                  <div className="bg-white border border-[#e9eaeb] border-solid content-stretch flex flex-col items-start relative rounded-bl-[16px] rounded-br-[16px] rounded-tl-[12px] rounded-tr-[12px] shrink-0 w-full" data-name="Menu items wrapper" data-node-id="I1:37677;7616:379264;7616:375147">
+                    <div className="content-stretch flex flex-col gap-[2px] items-start overflow-clip py-[6px] relative shrink-0 w-full" data-name="Menu items" data-node-id="I1:37677;7616:379264;7616:375148">
+                      <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7616:375953">
+                        <div className="content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px overflow-clip p-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7616:375953;7616:373096">
+                          <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Icon and text" data-node-id="I1:37677;7616:379264;7616:375953;7616:373097">
+                            <div className="overflow-clip relative shrink-0 size-[24px]" data-name="user-01" data-node-id="I1:37677;7616:379264;7616:375953;7616:373098">
+                              <div className="absolute inset-[12.5%_16.67%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7616:375953;7616:373098;3463:405658">
+                                <div className="absolute inset-[-5.56%_-6.25%]">
+                                  <img alt="" className="block max-w-none size-full" src={imgNavAccountCard4} />
+                                </div>
+                              </div>
+                            </div>
+                            <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold h-[20px] leading-[20px] min-h-px min-w-px not-italic relative text-[#414651] text-[14px] text-left whitespace-pre-wrap" data-node-id="I1:37677;7616:379264;7616:375953;7616:373099">
+                              Placeholder
+                            </p>
+                          </div>
+                          <div className="border border-[#e9eaeb] border-solid content-stretch flex items-start mix-blend-multiply px-[4px] py-px relative rounded-[4px] shrink-0" data-name="Shortcut wrapper" data-node-id="I1:37677;7616:379264;7616:375953;7616:373100">
+                            <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#535862] text-[12px] text-left" data-node-id="I1:37677;7616:379264;7616:375953;7616:373101">
+                              ⌘C
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7616:375963">
+                        <div className="content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px overflow-clip p-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7616:375963;7616:373096">
+                          <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Icon and text" data-node-id="I1:37677;7616:379264;7616:375963;7616:373097">
+                            <div className="overflow-clip relative shrink-0 size-[24px]" data-name="settings-01" data-node-id="I1:37677;7616:379264;7616:375963;7616:373098">
+                              <div className="absolute inset-[8.33%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7616:375963;7616:373098;3463:405313">
+                                <div className="absolute inset-[-5%]">
+                                  <img alt="" className="block max-w-none size-full" src={imgNavItemBase} />
+                                </div>
+                              </div>
+                            </div>
+                            <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold h-[20px] leading-[20px] min-h-px min-w-px not-italic relative text-[#414651] text-[14px] text-left whitespace-pre-wrap" data-node-id="I1:37677;7616:379264;7616:375963;7616:373099">
+                              Placeholder
+                            </p>
+                          </div>
+                          <div className="border border-[#e9eaeb] border-solid content-stretch flex items-start mix-blend-multiply px-[4px] py-px relative rounded-[4px] shrink-0" data-name="Shortcut wrapper" data-node-id="I1:37677;7616:379264;7616:375963;7616:373100">
+                            <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#535862] text-[12px] text-left" data-node-id="I1:37677;7616:379264;7616:375963;7616:373101">
+                              ⌘C
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7616:376023">
+                        <div className="content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px overflow-clip p-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7616:376023;7616:373096">
+                          <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Icon and text" data-node-id="I1:37677;7616:379264;7616:376023;7616:373097">
+                            <div className="overflow-clip relative shrink-0 size-[24px]" data-name="book-open-01" data-node-id="I1:37677;7616:379264;7616:376023;7616:373098">
+                              <div className="absolute inset-[12.5%_8.33%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7616:376023;7616:373098;3463:404151">
+                                <div className="absolute inset-[-5.56%_-5%]">
+                                  <img alt="" className="block max-w-none size-full" src={imgNavAccountCard5} />
+                                </div>
+                              </div>
+                            </div>
+                            <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold h-[20px] leading-[20px] min-h-px min-w-px not-italic relative text-[#414651] text-[14px] text-left whitespace-pre-wrap" data-node-id="I1:37677;7616:379264;7616:376023;7616:373099">
+                              Placeholder
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="border-[#e9eaeb] border-solid border-t content-stretch flex flex-col gap-[2px] items-start overflow-clip py-[6px] relative shrink-0 w-full" data-name="Menu items" data-node-id="I1:37677;7616:379264;7616:375152">
+                      <div className="content-stretch flex items-start pb-[4px] pt-[6px] px-[12px] relative shrink-0 w-full" data-name="Text wrapper" data-node-id="I1:37677;7616:379264;7616:375153">
+                        <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold h-[18px] leading-[18px] min-h-px min-w-px not-italic relative text-[#535862] text-[12px] text-left whitespace-pre-wrap" data-node-id="I1:37677;7616:379264;7616:375154">
+                          Switch account
+                        </p>
+                      </div>
+                      <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7616:375910">
+                        <div className="bg-[#fafafa] content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px overflow-clip px-[8px] py-[6px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7616:375910;7616:373107">
+                          <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Avatar label group" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108">
+                            <div className="border border-[rgba(0,0,0,0.08)] border-solid relative rounded-[200px] shrink-0 size-[40px]" data-name="Avatar" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108;1034:778">
+                              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[200px] size-full" src={imgNavAccountCard} />
+                              <div className="absolute bg-[#17b26a] border-[1.5px] border-solid border-white bottom-[-1px] right-[-1px] rounded-[5px] size-[10px]" data-name="_Avatar online indicator" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108;1034:778;19:1085" />
+                            </div>
+                            <div className="content-stretch flex flex-col items-start leading-[20px] not-italic relative shrink-0 text-[14px] text-left" data-name="Text and supporting text" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108;82:2790">
+                              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#181d27]" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108;82:2788">
+                                Olivia Rhye
+                              </p>
+                              <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862]" data-node-id="I1:37677;7616:379264;7616:375910;7616:373108;82:2789">
+                                olivia@untitledui.com
+                              </p>
+                            </div>
+                          </div>
+                          <div className="absolute content-stretch flex items-center justify-center right-[8px] top-[8px]" data-name="Checkbox" data-node-id="I1:37677;7616:379264;7616:375910;7616:373109">
+                            <div className="bg-[#7f56d9] border border-[#7f56d9] border-solid overflow-clip relative rounded-[8px] shrink-0 size-[16px]" data-name="_Checkbox base" data-node-id="I1:37677;7616:379264;7616:375910;7616:373109;1100:895">
+                              <div className="absolute bg-white inset-[calc(31.25%-0.38px)] rounded-[9999px]" data-name="Check" data-node-id="I1:37677;7616:379264;7616:375910;7616:373109;1100:895;6018:6288" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7616:375922">
+                        <div className="content-stretch flex flex-[1_0_0] gap-[12px] items-start min-h-px min-w-px overflow-clip px-[8px] py-[6px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7616:375922;7616:373103">
+                          <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Avatar label group" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104">
+                            <div className="border border-[rgba(0,0,0,0.08)] border-solid relative rounded-[200px] shrink-0 size-[40px]" data-name="Avatar" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104;1034:778">
+                              <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[200px] size-full" src={imgNavAccountCard} />
+                              <div className="absolute bg-[#17b26a] border-[1.5px] border-solid border-white bottom-[-1px] right-[-1px] rounded-[5px] size-[10px]" data-name="_Avatar online indicator" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104;1034:778;19:1085" />
+                            </div>
+                            <div className="content-stretch flex flex-col items-start leading-[20px] not-italic relative shrink-0 text-[14px] text-left" data-name="Text and supporting text" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104;82:2790">
+                              <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#181d27]" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104;82:2788">
+                                Olivia Rhye
+                              </p>
+                              <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862]" data-node-id="I1:37677;7616:379264;7616:375922;7616:373104;82:2789">
+                                olivia@untitledui.com
+                              </p>
+                            </div>
+                          </div>
+                          <div className="absolute content-stretch flex items-center justify-center right-[8px] top-[8px]" data-name="Checkbox" data-node-id="I1:37677;7616:379264;7616:375922;7616:373105">
+                            <div className="border border-[#d5d7da] border-solid rounded-[8px] shrink-0 size-[16px]" data-name="_Checkbox base" data-node-id="I1:37677;7616:379264;7616:375922;7616:373105;1100:1031" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="content-stretch flex items-center justify-center pb-[8px] pt-[2px] px-[8px] relative shrink-0 w-full" data-name="Menu actions" data-node-id="I1:37677;7616:379264;7616:375157">
+                      <div className="bg-white border border-[#d5d7da] border-solid content-stretch flex flex-[1_0_0] gap-[4px] items-center justify-center min-h-px min-w-px overflow-clip px-[12px] py-[8px] relative rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)]" data-name="Buttons/Button" data-node-id="I1:37677;7616:379264;7616:375158">
+                        <div className="overflow-clip relative shrink-0 size-[24px]" data-name="plus" data-node-id="I1:37677;7616:379264;7616:375158;3466:438465">
+                          <div className="absolute inset-[20.83%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7616:375158;3466:438465;3463:405283">
+                            <div className="absolute inset-[-7.14%]">
+                              <img alt="" className="block max-w-none size-full" src={imgNavAccountCard6} />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="content-stretch flex items-center justify-center px-[2px] relative shrink-0" data-name="Text padding" data-node-id="I1:37677;7616:379264;7616:375158;6153:22815">
+                          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#414651] text-[14px] text-left" data-node-id="I1:37677;7616:379264;7616:375158;3287:433057">
+                            Button CTA
+                          </p>
+                        </div>
+                        <div className="absolute inset-0 pointer-events-none rounded-[inherit] shadow-[inset_0px_0px_0px_1px_rgba(10,13,18,0.18),inset_0px_-2px_0px_0px_rgba(10,13,18,0.05)]" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-start overflow-clip pb-[6px] pt-[4px] relative shrink-0 w-[264px]" data-name="Footer items" data-node-id="I1:37677;7616:379264;7616:375159">
+                    <div className="content-stretch flex items-center px-[6px] relative shrink-0 w-full" data-name="_Nav account card menu item" data-node-id="I1:37677;7616:379264;7725:77657">
+                      <div className="content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px overflow-clip p-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37677;7616:379264;7725:77657;7616:373096">
+                        <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Icon and text" data-node-id="I1:37677;7616:379264;7725:77657;7616:373097">
+                          <div className="overflow-clip relative shrink-0 size-[24px]" data-name="log-out-01" data-node-id="I1:37677;7616:379264;7725:77657;7616:373098">
+                            <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37677;7616:379264;7725:77657;7616:373098;3463:405223">
+                              <div className="absolute inset-[-5.56%]">
+                                <img alt="" className="block max-w-none size-full" src={imgNavAccountCard7} />
+                              </div>
+                            </div>
+                          </div>
+                          <p className="flex-[1_0_0] font-['Inter:Semi_Bold',sans-serif] font-semibold h-[20px] leading-[20px] min-h-px min-w-px not-italic relative text-[#414651] text-[14px] text-left whitespace-pre-wrap" data-node-id="I1:37677;7616:379264;7725:77657;7616:373099">
+                            Placeholder
+                          </p>
+                        </div>
+                        <div className="border border-[#e9eaeb] border-solid content-stretch flex items-start mix-blend-multiply px-[4px] py-px relative rounded-[4px] shrink-0" data-name="Shortcut wrapper" data-node-id="I1:37677;7616:379264;7725:77657;7616:373100">
+                          <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#535862] text-[12px] text-left" data-node-id="I1:37677;7616:379264;7725:77657;7616:373101">
+                            ⌘C
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="absolute left-[1168px] size-[240px] top-[135px] z-[3]" data-name="Progress circle" data-node-id="1:37678">
+          <div className="absolute h-[64px] leading-[0] left-[69px] not-italic text-center top-[88px] w-[102px] whitespace-nowrap" data-name="Number and label" data-node-id="1:37679">
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center left-[51px] text-[#535862] text-[14px] top-[10px]" data-node-id="1:37680">
+              <p className="leading-[20px]">Overall progress</p>
+            </div>
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute flex flex-col font-['Inter:Semi_Bold',sans-serif] font-semibold justify-center left-[51.5px] text-[#181d27] text-[36px] top-[42px] tracking-[-0.72px]" data-node-id="1:37681">
+              <p className="leading-[44px]">40%</p>
+            </div>
+          </div>
+          <div className="absolute left-[12px] size-[216px] top-[12px]" data-name="Ring" data-node-id="1:37682">
+            <div className="absolute inset-[-5.56%]">
+              <img alt="" className="block max-w-none size-full" src={imgRing} />
+            </div>
+          </div>
+        </div>
+        <div className="absolute bg-white border border-[#e9eaeb] border-solid content-stretch flex flex-col h-[332px] isolate items-start left-[876px] overflow-clip rounded-[8px] shadow-[0px_1px_2px_0px_rgba(10,13,18,0.05)] top-[604px] w-[532px] z-[2]" data-name="Table" data-node-id="1:37685">
+          <div className="absolute content-stretch flex flex-col isolate items-start left-[337px] top-[-1px] w-[194px] z-[3]" data-name="Column" data-node-id="1:37686">
+            <div className="bg-[var(---water,#e7f6f3)] border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[5]" data-name="Table header cell" data-node-id="1:37687">
+              <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="1:37688">
+                <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37688;1221:106781">
+                  Company
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[4]" data-name="Table cell" data-node-id="1:37689">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37689;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37689;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37690">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37692">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37694">
+                  $1,350,000.00
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37695">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37697">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37699">
+                  $150,000.00
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37700">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37700;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37700;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="absolute content-stretch flex flex-col isolate items-start left-[182px] top-[-1px] w-[164px] z-[2]" data-name="Column" data-node-id="1:37701">
+            <div className="bg-[var(---water,#e7f6f3)] border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[5]" data-name="Table header cell" data-node-id="1:37702">
+              <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="1:37703">
+                <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37703;1221:106781">
+                  Company
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[4]" data-name="Table cell" data-node-id="1:37704">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37706">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37708">
+                  09 Nov 2025
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37709">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37711">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37713">
+                  11 Nov 2025
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37714">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37716">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37718">
+                  20 Dec 2025
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37719">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="1:37721">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="1:37723">
+                  25 Dec 2025
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col h-[332px] isolate items-start relative shrink-0 w-[183px] z-[1]" data-name="Column" data-node-id="1:37724">
+            <div className="bg-white border-[#e9eaeb] border-b border-solid content-stretch flex h-[44px] items-center max-h-[44px] px-[24px] py-[12px] relative shrink-0 w-full z-[5]" data-name="Table header cell" data-node-id="1:37725">
+              <div className="content-stretch flex items-center relative shrink-0" data-name="_Table header label" data-node-id="I1:37725;1224:4556">
+                <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[18px] not-italic relative shrink-0 text-[#0c0d0e] text-[12px]" data-node-id="I1:37725;1224:4556;1221:106781">
+                  Company
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[4]" data-name="Table cell" data-node-id="1:37726">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37726;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37726;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[3]" data-name="Table cell" data-node-id="1:37727">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37727;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37727;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[2]" data-name="Table cell" data-node-id="1:37728">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37728;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37728;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+            <div className="border-[#e9eaeb] border-b border-solid content-stretch flex gap-[12px] h-[72px] items-center max-h-[72px] px-[24px] py-[16px] relative shrink-0 w-full z-[1]" data-name="Table cell" data-node-id="1:37729">
+              <div className="content-stretch flex flex-col items-start relative shrink-0" data-name="Text and supporting text" data-node-id="I1:37729;1222:107427">
+                <p className="font-['Inter:Regular',sans-serif] font-normal leading-[20px] not-italic relative shrink-0 text-[#535862] text-[14px]" data-node-id="I1:37729;1222:107429">
+                  olivia@untitledui.com
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute h-[96px] left-[296px] top-[87px] w-[1144px] z-[1]" data-name="Header section" data-node-id="1:37730">
+          <div className="absolute h-[96px] left-0 top-0 w-[1144px]" data-name="Container" data-node-id="1:37731">
+            <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[32px] top-0 w-[1216px]" data-name="Page header" data-node-id="1:37732">
+              <div className="content-start flex flex-wrap gap-[20px_16px] items-start relative shrink-0 w-full" data-name="Content" data-node-id="I1:37732;1239:122643">
+                <div className="content-stretch flex flex-[1_0_0] flex-col gap-[4px] items-start min-h-px min-w-[320px] relative" data-name="Text and supporting text" data-node-id="I1:37732;1239:122644">
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[32px] not-italic relative shrink-0 text-[#181d27] text-[24px] w-full whitespace-pre-wrap" data-node-id="I1:37732;1239:122645">
+                    Team members
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute contents left-[196px] top-[719px]" data-node-id="1:37733">
+        <div className="absolute bg-[var(--moss,#a0c0bb)] content-stretch flex h-[32px] items-center justify-center left-[196px] px-[8px] py-[2px] rounded-[16px] top-[719px] w-[70px]" data-name="Badge" data-node-id="1:37734">
+          <p className="font-['Inter:Medium',sans-serif] font-medium leading-[18px] not-italic relative shrink-0 text-[#414651] text-[12px] text-center" data-node-id="1:37735">
+            Buyer
+          </p>
+        </div>
+      </div>
+      <div className="absolute contents left-[320px] top-[133px]" data-name="Client details" data-node-id="1:37736">
+        <div className="absolute contents left-[320px] top-[133px]" data-name="Client information" data-node-id="1:37737">
+          <div className="absolute h-[209px] left-[320px] top-[133px] w-[530px]" data-node-id="1:37738">
+            <img alt="" className="absolute block inset-0 max-w-none" src={imgRectangle10} />
+          </div>
+          <div className="absolute contents left-[345.8px] top-[149px]" data-node-id="1:37739">
+            <div className="absolute contents font-['Inter:Regular',sans-serif] font-normal left-[346px] not-italic text-[#535862] top-[182.45px] whitespace-pre-wrap" data-node-id="1:37740">
+              <p className="absolute h-[18.697px] leading-[20px] left-[542.54px] text-[14px] top-[252.57px] w-[295.639px]" data-node-id="1:37741">
+                123 Street, Road, State, Postcode
+              </p>
+              <p className="absolute h-[18.697px] leading-[20px] left-[542.54px] text-[14px] top-[205.83px] w-[295.639px]" data-node-id="1:37742">
+                Mrs Olivia Rhye
+              </p>
+              <p className="absolute h-[18.697px] leading-[20px] left-[542.54px] text-[14px] top-[182.45px] w-[295.639px]" data-node-id="1:37743">
+                000001
+              </p>
+              <p className="absolute decoration-solid h-[18.697px] leading-[20px] left-[542.54px] text-[14px] top-[229.2px] underline w-[295.639px]" data-node-id="1:37744">
+                olivia@untitledui.com
+              </p>
+              <p className="absolute h-[18.697px] leading-[20px] left-[542.54px] text-[14px] top-[277.3px] w-[239.736px]" data-node-id="1:37745">
+                +614 859 06 541
+              </p>
+              <p className="absolute h-[19px] leading-[18px] left-[346px] text-[12px] top-[309px] w-[342px]" data-node-id="1:37746">
+                Please contact your conveyancer with any changes
+              </p>
+            </div>
+            <div className="absolute contents font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] left-[345.8px] not-italic text-[#535862] text-[14px] top-[182.45px] whitespace-pre-wrap" data-node-id="1:37747">
+              <p className="absolute h-[19.261px] left-[345.8px] top-[230.61px] w-[104.664px]" data-node-id="1:37748">
+                Email address
+              </p>
+              <p className="absolute h-[19.261px] left-[345.8px] top-[182.45px] w-[104.664px]" data-node-id="1:37749">
+                Matter number
+              </p>
+              <p className="absolute h-[19.261px] left-[345.8px] top-[254.69px] w-[123.694px]" data-node-id="1:37750">
+                Matter address
+              </p>
+              <p className="absolute h-[19.261px] left-[345.8px] top-[280.74px] w-[172.22px]" data-node-id="1:37751">
+                Contact phone number
+              </p>
+              <p className="absolute h-[19.261px] left-[345.8px] top-[206.53px] w-[125.898px]" data-node-id="1:37752">
+                Contact person
+              </p>
+            </div>
+            <div className="absolute h-[35.048px] left-[345.85px] top-[149px] w-[467.647px]" data-name="Heading and supporting text" data-node-id="1:37753">
+              <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[28px] left-0 not-italic text-[#181d27] text-[18px] top-0" data-node-id="1:37754">
+                Mrs Olivia and Mr James Rhye
+              </p>
+              <div className="absolute bg-[var(--moss,#a0c0bb)] h-[32px] left-[388.15px] rounded-[16px] top-0 w-[80.031px]" data-name="Badge" data-node-id="1:37755">
+                <p className="-translate-x-1/2 absolute font-['Inter:Medium',sans-serif] font-medium leading-[18px] left-[40px] not-italic text-[#414651] text-[12px] text-center top-[7px]" data-node-id="1:37756">
+                  Buyer
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bg-[var(--messaging,#c2e6e1)] border-10 border-[#fafafa] border-solid left-[1345px] rounded-[28px] shadow-[1px_1px_6.2px_0px_rgba(0,0,0,0.25)] size-[56px] top-[883px]" data-name="Featured icon/xl/green/Light outline" data-node-id="1:37757">
+        <div className="absolute left-[11px] overflow-clip size-[24px] top-[11px]" data-name="edit-05" data-node-id="I1:37757;14712:194273">
+          <div className="absolute inset-[7.83%_7.83%_8.33%_8.33%]" data-name="Icon" data-node-id="I1:37757;14712:194273;3463:405355">
+            <div className="absolute inset-[-4.97%]">
+              <img alt="" className="block max-w-none size-full" src={imgIcon4} />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute content-stretch flex gap-[8px] items-center left-[322px] top-[36px]" data-name="Breadcrumbs" data-node-id="1:37758">
+        <BreadcrumbButtonBase className="content-stretch flex items-start relative shrink-0" />
+        <div className="overflow-clip relative shrink-0 size-[16px]" data-name="chevron-right" data-node-id="I1:37758;1122:164">
+          <div className="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4" data-name="Icon" data-node-id="I1:37758;1122:164;3463:404546">
+            <div className="absolute inset-[-8.33%_-16.67%]">
+              <img alt="" className="block max-w-none size-full" src={imgIcon5} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex items-center justify-center relative shrink-0" data-name="_Breadcrumb button base" data-node-id="I1:37758;53:1181">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#0c0d0e] text-[14px]" data-node-id="I1:37758;53:1181;43:3234">
+            Projects
+          </p>
+        </div>
+        <div className="overflow-clip relative shrink-0 size-[16px]" data-name="chevron-right" data-node-id="I1:37758;1122:1073">
+          <div className="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4" data-name="Icon" data-node-id="I1:37758;1122:1073;3463:404546">
+            <div className="absolute inset-[-8.33%_-16.67%]">
+              <img alt="" className="block max-w-none size-full" src={imgIcon5} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex items-center justify-center relative shrink-0" data-name="_Breadcrumb button base" data-node-id="I1:37758;1122:346">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#0c0d0e] text-[14px]" data-node-id="I1:37758;1122:346;43:3234">
+            Projects
+          </p>
+        </div>
+        <div className="overflow-clip relative shrink-0 size-[16px]" data-name="chevron-right" data-node-id="I1:37758;1122:1133">
+          <div className="absolute bottom-1/4 left-[37.5%] right-[37.5%] top-1/4" data-name="Icon" data-node-id="I1:37758;1122:1133;3463:404546">
+            <div className="absolute inset-[-8.33%_-16.67%]">
+              <img alt="" className="block max-w-none size-full" src={imgIcon5} />
+            </div>
+          </div>
+        </div>
+        <div className="content-stretch flex items-center justify-center relative shrink-0" data-name="_Breadcrumb button base" data-node-id="I1:37758;53:1183">
+          <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] not-italic relative shrink-0 text-[#6941c6] text-[14px]" data-node-id="I1:37758;53:1183;1122:117">
+            Projects
+          </p>
+        </div>
+      </div>
+      <div className="absolute contents left-0 top-[132px]" data-node-id="1:37759">
+        <div className="absolute content-stretch flex flex-col h-[220px] items-start left-0 px-[16px] top-[132px] w-[296px]" data-name="Navigation" data-node-id="1:37760">
+          <button className="content-stretch cursor-pointer flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="1:37761">
+            <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37761;1153:89416">
+              <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37761;1153:89416;7596:276047">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37761;1153:89416;1152:89352">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37761;1153:89416;3479:464410">
+                    <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37761;1153:89416;3479:464410;3463:403900">
+                      <div className="absolute inset-[-5.56%]">
+                        <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37761;1153:89416;1152:89354">
+                    Dashboard
+                  </p>
+                </div>
+                <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37761;1153:89416;1152:89357">
+                  <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37761;1153:89416;1152:89357;3463:404534">
+                    <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                      <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button className="content-stretch cursor-pointer flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="1:37762">
+            <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37762;1153:89416">
+              <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37762;1153:89416;7596:276047">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37762;1153:89416;1152:89352">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37762;1153:89416;3479:464410">
+                    <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37762;1153:89416;3479:464410;3463:403900">
+                      <div className="absolute inset-[-5.56%]">
+                        <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37762;1153:89416;1152:89354">
+                    Dashboard
+                  </p>
+                </div>
+                <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37762;1153:89416;1152:89357">
+                  <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37762;1153:89416;1152:89357;3463:404534">
+                    <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                      <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button className="content-stretch cursor-pointer flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="1:37763">
+            <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37763;1153:89416">
+              <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37763;1153:89416;7596:276047">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37763;1153:89416;1152:89352">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37763;1153:89416;3479:464410">
+                    <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37763;1153:89416;3479:464410;3463:403900">
+                      <div className="absolute inset-[-5.56%]">
+                        <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37763;1153:89416;1152:89354">
+                    Dashboard
+                  </p>
+                </div>
+                <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37763;1153:89416;1152:89357">
+                  <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37763;1153:89416;1152:89357;3463:404534">
+                    <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                      <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button className="content-stretch cursor-pointer flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="1:37764">
+            <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="I1:37764;1153:89416">
+              <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37764;1153:89416;7596:276047">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37764;1153:89416;1152:89352">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bar-chart-square-02" data-node-id="I1:37764;1153:89416;3479:464410">
+                    <div className="absolute inset-[12.5%]" data-name="Icon" data-node-id="I1:37764;1153:89416;3479:464410;3463:403900">
+                      <div className="absolute inset-[-5.56%]">
+                        <img alt="" className="block max-w-none size-full" src={imgNavigation} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px] text-left" data-node-id="I1:37764;1153:89416;1152:89354">
+                    Dashboard
+                  </p>
+                </div>
+                <div className="overflow-clip relative shrink-0 size-[24px]" data-name="chevron-down" data-node-id="I1:37764;1153:89416;1152:89357">
+                  <div className="absolute bottom-[37.5%] left-1/4 right-1/4 top-[37.5%]" data-name="Icon" data-node-id="I1:37764;1153:89416;1152:89357;3463:404534">
+                    <div className="absolute inset-[-20.87%_-10.44%_-20.88%_-10.44%]">
+                      <img alt="" className="block max-w-none size-full" src={imgNavigation1} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <div className="content-stretch flex items-start relative shrink-0 w-full" data-name="_Nav item dropdown base" data-node-id="1:37765">
+            <div className="content-stretch flex flex-[1_0_0] items-center min-h-px min-w-px overflow-clip py-[2px] relative" data-name="_Nav item base" data-node-id="1:37766">
+              <div className="bg-white content-stretch flex flex-[1_0_0] gap-[12px] items-center min-h-px min-w-px px-[12px] py-[8px] relative rounded-[6px]" data-name="Content" data-node-id="I1:37766;7596:276047">
+                <div className="content-stretch flex flex-[1_0_0] gap-[8px] items-center min-h-px min-w-px relative" data-name="Text and icon" data-node-id="I1:37766;1152:89352">
+                  <div className="overflow-clip relative shrink-0 size-[20px]" data-name="bookmark-check" data-node-id="I1:37766;3479:464410">
+                    <div className="absolute inset-[12.5%_20.83%]" data-name="Icon" data-node-id="I1:37766;3479:464410;3463:404932">
+                      <div className="absolute inset-[-5.57%_-7.16%]">
+                        <img alt="" className="block max-w-none size-full" src={imgIcon6} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[24px] not-italic relative shrink-0 text-[#414651] text-[16px]" data-node-id="I1:37766;1152:89354">
+                    Dashboard
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute contents left-[28px] top-[720px]" data-node-id="1:37768">
+          <div className="absolute content-stretch flex flex-col gap-[4px] items-center left-[28px] top-[720px]" data-name="Progress circle" data-node-id="1:37769">
+            <div className="relative shrink-0 size-[64px]" data-name="Ring" data-node-id="I1:37769;1157:90229">
+              <div className="absolute inset-[4.69%]" data-name="Background" data-node-id="I1:37769;1157:90230">
+                <div className="absolute inset-[-5.17%]">
+                  <img alt="" className="block max-w-none size-full" src={imgBackground} />
+                </div>
+              </div>
+              <div className="absolute inset-[4.69%]" data-name="Line" data-node-id="I1:37769;1157:90231">
+                <div className="absolute inset-[-5.17%_-5.17%_4.38%_44.83%]">
+                  <img alt="" className="block max-w-none size-full" src={imgLine} />
+                </div>
+              </div>
+              <p className="-translate-x-1/2 absolute font-['Inter:Semi_Bold',sans-serif] font-semibold leading-[20px] left-[calc(50%+0.5px)] not-italic text-[#181d27] text-[14px] text-center top-[calc(50%-10px)]" data-node-id="I1:37769;1157:90232">
+                40%
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="absolute contents left-[876px] top-[448px]" data-name="Conveyancer details" data-node-id="1:37770">
+        <div className="absolute bg-[var(--linen,#ffece1)] h-[143px] left-[876px] rounded-[8px] top-[448px] w-[532px]" data-node-id="1:37771" />
+        <div className="absolute content-stretch flex flex-col font-['Inter:Regular',sans-serif] font-normal h-[64.69px] items-start leading-[20px] left-[1080px] not-italic pb-px text-[14px] top-[511px]" data-name="Text and supporting text" data-node-id="1:37772">
+          <p className="relative shrink-0 text-[#181d27]" data-node-id="1:37773">
+            Example Conveyancers
+          </p>
+          <p className="decoration-solid h-[20px] overflow-hidden relative shrink-0 text-[#535862] text-ellipsis underline w-[259px] whitespace-nowrap" data-node-id="1:37774">
+            clive@exampleconveyancers.com
+          </p>
+          <p className="[text-decoration-skip-ink:none] decoration-solid h-[20px] overflow-hidden relative shrink-0 text-[#535862] text-ellipsis underline w-[259px] whitespace-nowrap" data-node-id="1:37775">{` `}</p>
+        </div>
+        <div className="absolute border border-[rgba(0,0,0,0.08)] border-solid left-[908px] rounded-[200px] size-[64px] top-[467px]" data-name="Avatar" data-node-id="1:37776">
+          <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none rounded-[200px] size-full" src={imgNavAccountCard} />
+        </div>
+        <p className="absolute font-['Inter:Semi_Bold',sans-serif] font-semibold h-[28px] leading-[24px] left-[1080px] not-italic text-[#181d27] text-[16px] top-[486px] w-[118px] whitespace-pre-wrap" data-node-id="1:37777">
+          Clive Convay
+        </p>
+        <p className="absolute font-['Inter:Regular',sans-serif] font-normal h-[28px] leading-[18px] left-[1080px] not-italic text-[#181d27] text-[12px] top-[466px] w-[118px] whitespace-pre-wrap" data-node-id="1:37778">
+          File owner
+        </p>
+      </div>
+      <div className="absolute content-stretch flex flex-col items-start left-[876px] top-[132px] w-[343px]" data-name="Progress steps / Progress icons centered" data-node-id="1:37779">
+        <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full" data-name="_Step base" data-node-id="I1:37779;1254:142696">
+          <div className="content-stretch flex flex-col gap-[4px] isolate items-center pb-[4px] relative self-stretch shrink-0" data-name="Connector wrap" data-node-id="I1:37779;1254:142696;1254:140261">
+            <div className="bg-[#7f56d9] overflow-clip relative rounded-[12px] shrink-0 size-[24px] z-[2]" data-name="_Step icon base" data-node-id="I1:37779;1254:142696;1254:140262">
+              <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 overflow-clip size-[24px] top-1/2" data-name="check" data-node-id="I1:37779;1254:142696;1254:140262;10455:184552">
+                <div className="absolute bottom-[29.17%] left-[16.67%] right-[16.67%] top-1/4" data-name="Icon" data-node-id="I1:37779;1254:142696;1254:140262;10455:184552;3463:404965">
+                  <div className="absolute inset-[-9.09%_-6.25%]">
+                    <img alt="" className="block max-w-none size-full" src={imgStepBase} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px relative w-full z-[1]">
+              <div className="flex-none rotate-90 size-full">
+                <div className="relative size-full" data-name="Connector" data-node-id="I1:37779;1254:142696;10459:185761">
+                  <div className="absolute inset-[-1px_-2.94%]">
+                    <img alt="" className="block max-w-none size-full" src={imgStepBase1} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col items-start leading-[20px] min-h-px min-w-px not-italic pb-[24px] pt-[2px] relative text-[14px] whitespace-pre-wrap" data-name="Text and supporting text" data-node-id="I1:37779;1254:142696;1254:140264">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#414651] w-full" data-node-id="I1:37779;1254:142696;1254:140265">
+              Your details
+            </p>
+            <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862] w-full" data-node-id="I1:37779;1254:142696;1254:140266">
+              Please provide your name and email
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full" data-name="_Step base" data-node-id="I1:37779;1254:142697">
+          <div className="content-stretch flex flex-col gap-[4px] isolate items-center pb-[4px] relative self-stretch shrink-0" data-name="Connector wrap" data-node-id="I1:37779;1254:142697;1254:140081">
+            <div className="bg-[#7f56d9] overflow-clip relative rounded-[12px] shadow-[0px_0px_0px_2px_white,0px_0px_0px_4px_#9e77ed] shrink-0 size-[24px] z-[2]" data-name="_Step icon base" data-node-id="I1:37779;1254:142697;1254:140082">
+              <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 size-[8px] top-1/2" data-name="Dot" data-node-id="I1:37779;1254:142697;1254:140082;1139:79868">
+                <img alt="" className="absolute block inset-0 max-w-none" src={imgStepBase2} />
+              </div>
+            </div>
+            <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px relative w-full z-[1]">
+              <div className="flex-none rotate-90 size-full">
+                <div className="relative size-full" data-name="Connector" data-node-id="I1:37779;1254:142697;10459:185437">
+                  <div className="absolute inset-[-1px_-2.94%]">
+                    <img alt="" className="block max-w-none size-full" src={imgStepBase3} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col items-start leading-[20px] min-h-px min-w-px not-italic pb-[24px] pt-[2px] relative text-[14px] whitespace-pre-wrap" data-name="Text and supporting text" data-node-id="I1:37779;1254:142697;1254:140084">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#6941c6] w-full" data-node-id="I1:37779;1254:142697;1254:140085">
+              Your details
+            </p>
+            <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#7f56d9] w-full" data-node-id="I1:37779;1254:142697;1254:140086">
+              Please provide your name and email
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full" data-name="_Step base" data-node-id="I1:37779;1254:142698">
+          <div className="content-stretch flex flex-col gap-[4px] isolate items-center pb-[4px] relative self-stretch shrink-0" data-name="Connector wrap" data-node-id="I1:37779;1254:142698;1254:139606">
+            <div className="bg-white border-[#e9eaeb] border-[1.5px] border-solid overflow-clip relative rounded-[12px] shrink-0 size-[24px] z-[2]" data-name="_Step icon base" data-node-id="I1:37779;1254:142698;1254:139607">
+              <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 size-[8px] top-1/2" data-name="Dot" data-node-id="I1:37779;1254:142698;1254:139607;1139:80099">
+                <img alt="" className="absolute block inset-0 max-w-none" src={imgStepBase4} />
+              </div>
+            </div>
+            <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px relative w-full z-[1]">
+              <div className="flex-none rotate-90 size-full">
+                <div className="relative size-full" data-name="Connector" data-node-id="I1:37779;1254:142698;10459:185409">
+                  <div className="absolute inset-[-1px_-2.94%]">
+                    <img alt="" className="block max-w-none size-full" src={imgStepBase3} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col items-start leading-[20px] min-h-px min-w-px not-italic pb-[24px] pt-[2px] relative text-[14px] whitespace-pre-wrap" data-name="Text and supporting text" data-node-id="I1:37779;1254:142698;1139:74419">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#414651] w-full" data-node-id="I1:37779;1254:142698;1139:74420">
+              Your details
+            </p>
+            <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862] w-full" data-node-id="I1:37779;1254:142698;1139:74421">
+              Please provide your name and email
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full" data-name="_Step base" data-node-id="I1:37779;18590:81347">
+          <div className="content-stretch flex flex-col gap-[4px] isolate items-center pb-[4px] relative self-stretch shrink-0" data-name="Connector wrap" data-node-id="I1:37779;18590:81347;1254:139606">
+            <div className="bg-white border-[#e9eaeb] border-[1.5px] border-solid overflow-clip relative rounded-[12px] shrink-0 size-[24px] z-[2]" data-name="_Step icon base" data-node-id="I1:37779;18590:81347;1254:139607">
+              <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 size-[8px] top-1/2" data-name="Dot" data-node-id="I1:37779;18590:81347;1254:139607;1139:80099">
+                <img alt="" className="absolute block inset-0 max-w-none" src={imgStepBase4} />
+              </div>
+            </div>
+            <div className="flex flex-[1_0_0] items-center justify-center min-h-px min-w-px relative w-full z-[1]">
+              <div className="flex-none rotate-90 size-full">
+                <div className="relative size-full" data-name="Connector" data-node-id="I1:37779;18590:81347;10459:185409">
+                  <div className="absolute inset-[-1px_-2.94%]">
+                    <img alt="" className="block max-w-none size-full" src={imgStepBase3} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col items-start leading-[20px] min-h-px min-w-px not-italic pb-[24px] pt-[2px] relative text-[14px] whitespace-pre-wrap" data-name="Text and supporting text" data-node-id="I1:37779;18590:81347;1139:74419">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#414651] w-full" data-node-id="I1:37779;18590:81347;1139:74420">
+              Your details
+            </p>
+            <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862] w-full" data-node-id="I1:37779;18590:81347;1139:74421">
+              Please provide your name and email
+            </p>
+          </div>
+        </div>
+        <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full" data-name="_Step base" data-node-id="I1:37779;1254:142699">
+          <div className="content-stretch flex flex-col gap-[4px] isolate items-center pb-[4px] relative self-stretch shrink-0" data-name="Connector wrap" data-node-id="I1:37779;1254:142699;1254:139606">
+            <div className="bg-white border-[#e9eaeb] border-[1.5px] border-solid overflow-clip relative rounded-[12px] shrink-0 size-[24px] z-[2]" data-name="_Step icon base" data-node-id="I1:37779;1254:142699;1254:139607">
+              <div className="-translate-x-1/2 -translate-y-1/2 absolute left-1/2 size-[8px] top-1/2" data-name="Dot" data-node-id="I1:37779;1254:142699;1254:139607;1139:80099">
+                <img alt="" className="absolute block inset-0 max-w-none" src={imgStepBase4} />
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-[1_0_0] flex-col items-start leading-[20px] min-h-px min-w-px not-italic pb-[24px] pt-[2px] relative text-[14px] whitespace-pre-wrap" data-name="Text and supporting text" data-node-id="I1:37779;1254:142699;1139:74419">
+            <p className="font-['Inter:Semi_Bold',sans-serif] font-semibold relative shrink-0 text-[#414651] w-full" data-node-id="I1:37779;1254:142699;1139:74420">
+              Your details
+            </p>
+            <p className="font-['Inter:Regular',sans-serif] font-normal relative shrink-0 text-[#535862] w-full" data-node-id="I1:37779;1254:142699;1139:74421">
+              Please provide your name and email
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+### Content Block 2 (Text)
+SUPER CRITICAL: The generated React+Tailwind code MUST be converted to match the target project's technology stack and styling system.
+1. Analyze the target codebase to identify: technology stack, styling approach, component patterns, and design tokens
+2. Convert React syntax to the target framework/library
+3. Transform all Tailwind classes to the target styling system while preserving exact visual design
+4. Follow the project's existing patterns and conventions
+DO NOT install any Tailwind as a dependency unless the user instructs you to do so.
+
+
+### Content Block 3 (Text)
+Node ids have been added to the code as data attributes, e.g. `data-node-id="1:2"`.
+
+### Content Block 4 (Text)
+These styles are contained in the design: Gray/500: #717680,#000000,#000000,#000000,#000000,#000000,#000000,#000000,#000000,#000000,#000000, Text xs/Semibold: Font(family: "Inter", style: Semi Bold, size: 12, weight: 600, lineHeight: 18, letterSpacing: 0), Gray/50: #FAFAFA, Gray/200: #E9EAEB, Gray/900: #181D27, Text xs/Medium: Font(family: "Inter", style: Medium, size: 12, weight: 500, lineHeight: 18, letterSpacing: 0), Success/500: #17B26A, Gray/700: #414651, Base/White: #FFFFFF, Gray/300: #D5D7DA, Shadows/shadow-xs: Effect(type: DROP_SHADOW, color: #0A0D120D, offset: (0, 1), radius: 2, spread: 0), Warning/400: #FDB022, Base/Black: #000000, Text md/Semibold: Font(family: "Inter", style: Semi Bold, size: 16, weight: 600, lineHeight: 24, letterSpacing: 0), Text sm/Semibold: Font(family: "Inter", style: Semi Bold, size: 14, weight: 600, lineHeight: 20, letterSpacing: 0), Gradient/skeuemorphic-gradient-border: , Shadows/shadow-xs-skeuomorphic: Effect(type: DROP_SHADOW, color: #0A0D120D, offset: (0, 1), radius: 2, spread: 0); Effect(type: INNER_SHADOW, color: #0A0D120D, offset: (0, -2), radius: 0, spread: 0); Effect(type: INNER_SHADOW, color: #0A0D122E, offset: (0, 0), radius: 0, spread: 1), Gray/400: #A4A7AE, Gray/600: #535862, Text xs/Regular: Font(family: "Inter", style: Regular, size: 12, weight: 400, lineHeight: 18, letterSpacing: 0), Gray/100: #F5F5F5, Text md/Regular: Font(family: "Inter", style: Regular, size: 16, weight: 400, lineHeight: 24, letterSpacing: 0), Gray/800: #252B37, Text sm/Regular: Font(family: "Inter", style: Regular, size: 14, weight: 400, lineHeight: 20, letterSpacing: 0), Text sm/Medium: Font(family: "Inter", style: Medium, size: 14, weight: 500, lineHeight: 20, letterSpacing: 0), Display md/Semibold: Font(family: "Inter", style: Semi Bold, size: 36, weight: 600, lineHeight: 44, letterSpacing: -2), Display xs/Semibold: Font(family: "Inter", style: Semi Bold, size: 24, weight: 600, lineHeight: 32, letterSpacing: 0), Text lg/Semibold: Font(family: "Inter", style: Semi Bold, size: 18, weight: 600, lineHeight: 28, letterSpacing: 0), Pink/500: #EE46BC, Pink/700: #C11574, Pink/50: #FDF2FA, Pink/200: #FCCEEE, Focus rings/focus-ring: Effect(type: DROP_SHADOW, color: #9E77ED, offset: (0, 0), radius: 0, spread: 4); Effect(type: DROP_SHADOW, color: #FFFFFF, offset: (0, 0), radius: 0, spread: 2).
+
+### Content Block 5 (Text)
+Component descriptions: The following components have usage descriptions or documentation links defined in Figma. These descriptions provide important context about the intended usage, best practices, and any constraints for each component. Follow these guidelines when implementing or using these components.
+
+## search-lg
+**Node ID:** 1:2433
+
+search, search bar, searchbar, magnify, magnifying glass, filter
+
+## settings-01
+**Node ID:** 1:7185
+
+settings, preferences, cog
+
+## message-chat-circle
+**Node ID:** 1:9805
+
+message, chat, live chat
+
+## chevron-selector-vertical
+**Node ID:** 1:365
+
+chevron, selector, vertical, expand, open
+
+## edit-05
+**Node ID:** 1:10836
+
+edit, pencil, change, draw, design, write
+
+## home-line
+**Node ID:** 1:7193
+
+home, homepage, return, house, menu
+
+## chevron-right
+**Node ID:** 1:9808
+
+chevron, right
+
+## check-done-01
+**Node ID:** 1:10073
+
+check, done, tick, confirm, checklist, checkbox
+
+## rows-01
+**Node ID:** 1:10071
+
+columns, horizontal, divider, grid, table
+
+## users-01
+**Node ID:** 1:7197
+
+users, persona, account, people, team
+
+## bookmark-check
+**Node ID:** 1:10840
+
+bookmark, tag, save, check
+
+## check
+**Node ID:** 1:12
+
+check, tick, confirm
+
+### Content Block 6 (Text)
+Images and SVGs will be stored as constants, e.g. const image = 'https://www.figma.com/api/mcp/asset/550e8400-e29b-41d4-a716-446655440000'. These constants will be used in the code as the source for the image, ex: <img src={image} />. Image assets are stored on a remote server for 7 days and can be fetched using the provided URLs until they expire.
+
+### Content Block 7 (Text)
+IMPORTANT: After you call this tool, you MUST call get_screenshot to get a screenshot of the node for context.
+
+</mcp_external_output>

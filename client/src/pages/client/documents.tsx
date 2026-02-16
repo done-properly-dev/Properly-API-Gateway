@@ -1,18 +1,16 @@
 import React, { useRef } from 'react';
 import { useStore } from '@/lib/store';
 import { Layout } from '@/components/layout';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Trash2, Lock, UploadCloud } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { FileText, Download, Trash2, Lock, UploadCloud, File } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ClientDocuments() {
-  const { documents, uploadDocument, deleteDocument, currentUser } = useStore();
+  const { documents, uploadDocument, deleteDocument } = useStore();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter docs for this user's matter (mock logic: all docs for matter m1 which belongs to u1)
   const myDocs = documents.filter(d => d.matterId === 'm1'); 
 
   const handleUploadClick = () => {
@@ -22,7 +20,6 @@ export default function ClientDocuments() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Mock upload
       const newDoc = {
         id: `d${Date.now()}`,
         matterId: 'm1',
@@ -54,10 +51,10 @@ export default function ClientDocuments() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-heading font-bold">Document Vault</h1>
+            <h1 className="text-2xl font-heading font-bold text-foreground">Document Vault</h1>
             <p className="text-muted-foreground text-sm">Secure storage for your settlement.</p>
           </div>
-          <Button size="sm" onClick={handleUploadClick}>
+          <Button onClick={handleUploadClick} className="bg-primary text-white hover:bg-primary/90">
             <UploadCloud className="h-4 w-4 mr-2" /> Upload
           </Button>
           <input 
@@ -68,40 +65,46 @@ export default function ClientDocuments() {
           />
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-4">
           {myDocs.length === 0 ? (
-            <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
-              <FileText className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-              <p className="text-sm text-muted-foreground">No documents yet.</p>
+            <div className="text-center py-16 bg-muted/20 rounded-xl border-2 border-dashed border-muted">
+              <div className="bg-muted/50 p-4 rounded-full w-fit mx-auto mb-3">
+                 <File className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="font-bold text-lg mb-1">No documents yet</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
+                Documents shared by your conveyancer or uploaded by you will appear here.
+              </p>
+              <Button variant="outline" onClick={handleUploadClick}>Upload First Doc</Button>
             </div>
           ) : (
             myDocs.map((doc) => (
-              <Card key={doc.id} className="overflow-hidden">
-                <div className="p-4 flex items-center gap-3">
-                  <div className="bg-blue-50 p-2.5 rounded-lg text-blue-600">
-                    <FileText className="h-5 w-5" />
+              <Card key={doc.id} className="overflow-hidden border shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-4 flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${doc.locked ? 'bg-amber-50 text-amber-600' : 'bg-[#e7f6f3] text-primary'}`}>
+                    <FileText className="h-6 w-6" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <h4 className="font-medium text-sm truncate">{doc.name}</h4>
-                      {doc.locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-bold text-sm truncate text-foreground">{doc.name}</h4>
+                      {doc.locked && <Lock className="h-3 w-3 text-amber-500" />}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{doc.size}</span>
+                      <span className="bg-secondary px-2 py-0.5 rounded text-primary font-medium">{doc.size}</span>
                       <span>•</span>
                       <span>{new Date(doc.uploadedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-secondary">
                       <Download className="h-4 w-4" />
                     </Button>
                     {!doc.locked && (
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => handleDelete(doc.id)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -112,14 +115,6 @@ export default function ClientDocuments() {
               </Card>
             ))
           )}
-        </div>
-
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-800 flex gap-3">
-           <Lock className="h-4 w-4 shrink-0 mt-0.5" />
-           <p>
-             Some documents like the Contract of Sale are locked for your security. 
-             Contact your conveyancer if you need to update them.
-           </p>
         </div>
       </div>
     </Layout>

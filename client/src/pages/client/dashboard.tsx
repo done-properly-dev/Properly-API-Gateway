@@ -1,11 +1,11 @@
 import React from 'react';
 import { useStore } from '@/lib/store';
 import { Layout } from '@/components/layout';
-import { ProgressPillar } from '@/components/progress-pillar';
+import { ProgressCircle } from '@/components/progress-circle';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, FileText, Upload, ChevronRight, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, Upload, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 export default function ClientDashboard() {
@@ -19,12 +19,12 @@ export default function ClientDashboard() {
     return (
        <Layout role="CLIENT">
          <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-           <div className="bg-muted p-4 rounded-full">
-             <FileText className="h-8 w-8 text-muted-foreground" />
+           <div className="bg-secondary p-6 rounded-full">
+             <FileText className="h-10 w-10 text-primary" />
            </div>
-           <h2 className="text-xl font-bold">No active matters</h2>
-           <p className="text-muted-foreground">Ready to start? Upload a contract to begin.</p>
-           <Button>Upload Contract</Button>
+           <h2 className="text-2xl font-bold font-heading">Welcome to Properly</h2>
+           <p className="text-muted-foreground max-w-xs mx-auto">Your journey to settlement starts here. Upload your contract to get moving.</p>
+           <Button className="bg-primary hover:bg-primary/90 text-white">Upload Contract</Button>
          </div>
        </Layout>
     );
@@ -32,74 +32,114 @@ export default function ClientDashboard() {
 
   return (
     <Layout role="CLIENT">
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-heading font-bold">G'day, {currentUser?.name.split(' ')[0]}!</h1>
-          <p className="text-muted-foreground">Here's where your property settlement is at.</p>
-        </div>
-
-        {/* Progress */}
-        <Card className="border-none shadow-md bg-white/50 backdrop-blur-sm">
-           <CardHeader className="pb-2">
-             <div className="flex items-center justify-between">
-               <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Progress & Header */}
+        <div className="lg:col-span-8 space-y-8">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-heading font-bold text-foreground">
+              {matter.address}
+            </h1>
+            <div className="flex items-center gap-3">
+               <Badge variant="outline" className="bg-secondary border-secondary-foreground/10 text-primary font-medium px-3 py-1">
                  {matter.transactionType}
                </Badge>
-               <span className="text-xs font-mono text-muted-foreground">
-                 {matter.status}
+               <span className="text-sm text-muted-foreground flex items-center gap-1">
+                 <Calendar className="h-4 w-4" /> Settlement: {new Date(matter.settlementDate).toLocaleDateString()}
                </span>
-             </div>
-             <CardTitle className="text-lg mt-2">{matter.address}</CardTitle>
-           </CardHeader>
-           <CardContent>
-             <ProgressPillar percent={matter.milestonePercent} />
-           </CardContent>
-        </Card>
+            </div>
+          </div>
 
-        {/* Action Items */}
-        <div className="space-y-3">
-          <h3 className="font-heading font-bold text-lg flex items-center gap-2">
-            Your Tasks <Badge className="rounded-full h-5 px-1.5 min-w-5">{myTasks.filter(t => t.status !== 'COMPLETE').length}</Badge>
-          </h3>
-          
-          {myTasks.map(task => (
-            <Card key={task.id} className={`overflow-hidden transition-all active:scale-[0.98] ${task.status === 'COMPLETE' ? 'opacity-60 bg-muted/30' : 'border-l-4 border-l-primary shadow-sm'}`}>
-              <div className="p-4 flex items-start gap-3">
-                <div className={`mt-0.5 rounded-full p-1 ${task.status === 'COMPLETE' ? 'bg-green-100 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-                   {task.status === 'COMPLETE' ? <CheckCircle2 className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+          {/* Progress Card - "Buying tasks desktop" style */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <Card className="bg-white border shadow-sm overflow-hidden relative">
+               <CardHeader>
+                 <CardTitle>Milestone Progress</CardTitle>
+               </CardHeader>
+               <CardContent>
+                  <ProgressCircle percent={matter.milestonePercent} />
+               </CardContent>
+             </Card>
+
+             <Card className="bg-[#e7f6f3] border-none shadow-sm flex flex-col justify-center items-center text-center p-6">
+                <div className="bg-white p-4 rounded-full mb-4 shadow-sm">
+                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                 </div>
-                <div className="flex-1">
-                  <h4 className={`font-medium text-sm ${task.status === 'COMPLETE' && 'line-through'}`}>{task.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {task.status === 'COMPLETE' ? 'Completed' : `Due ${new Date(task.dueDate).toLocaleDateString()}`}
-                  </p>
+                <h3 className="font-heading font-bold text-lg mb-2">On Track</h3>
+                <p className="text-sm text-muted-foreground">Everything is looking good for your settlement date. No blockers detected.</p>
+             </Card>
+          </div>
+
+          {/* Tasks Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+               <h3 className="font-heading font-bold text-xl">Your Tasks</h3>
+               <Button variant="outline" size="sm">View All</Button>
+            </div>
+            
+            <div className="grid gap-3">
+              {myTasks.map(task => (
+                <div key={task.id} className="group bg-white border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all duration-200">
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${task.status === 'COMPLETE' ? 'bg-green-100 text-green-600' : 'bg-[#fac515]/20 text-yellow-700'}`}>
+                     {task.status === 'COMPLETE' ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className={`font-medium text-base ${task.status === 'COMPLETE' && 'text-muted-foreground line-through'}`}>{task.title}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {task.status === 'COMPLETE' ? 'Completed' : `Due by ${new Date(task.dueDate).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                  {task.status !== 'COMPLETE' && (
+                    <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-lg">
+                      {task.type === 'UPLOAD' ? 'Upload' : 'Start'}
+                    </Button>
+                  )}
                 </div>
-                {task.status !== 'COMPLETE' && (
-                  <Button size="sm" variant={task.type === 'UPLOAD' ? 'default' : 'outline'} className="h-8 text-xs">
-                    {task.type === 'UPLOAD' ? 'Upload' : 'View'}
-                  </Button>
-                )}
-              </div>
-            </Card>
-          ))}
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Conveyancer Contact */}
-        <Card className="bg-slate-900 text-slate-50 border-none">
-          <CardContent className="p-4 flex items-center gap-4">
-             <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center font-bold">
-               LE
-             </div>
-             <div>
-               <p className="font-medium text-sm">Legal Eagles Conveyancing</p>
-               <p className="text-xs text-slate-400">Your dedicated team</p>
-             </div>
-             <Button variant="ghost" size="icon" className="ml-auto text-slate-300 hover:text-white hover:bg-slate-800">
-               <ChevronRight className="h-5 w-5" />
-             </Button>
-          </CardContent>
-        </Card>
+        {/* Right Column: Key Contacts & Quick Actions */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card className="bg-white shadow-sm border">
+            <CardHeader>
+              <CardTitle className="text-base">Your Conveyancer</CardTitle>
+            </CardHeader>
+            <CardContent>
+               <div className="flex items-center gap-4 mb-6">
+                 <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center font-bold text-primary text-lg">
+                   LE
+                 </div>
+                 <div>
+                   <p className="font-bold">Legal Eagles</p>
+                   <p className="text-sm text-muted-foreground">Properly Partner</p>
+                 </div>
+               </div>
+               <div className="space-y-3">
+                 <Button variant="outline" className="w-full justify-start h-10">
+                   <span className="mr-2">📞</span> Call Team
+                 </Button>
+                 <Button variant="outline" className="w-full justify-start h-10">
+                   <span className="mr-2">✉️</span> Email Support
+                 </Button>
+               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-none shadow-md">
+            <CardContent className="p-6">
+              <h3 className="font-bold text-lg mb-2">Need Help?</h3>
+              <p className="text-primary-foreground/80 text-sm mb-4">
+                Check our playbook for guides on what to expect during settlement.
+              </p>
+              <Button variant="secondary" className="w-full bg-white text-primary hover:bg-white/90 border-none">
+                Read Guides
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
     </Layout>
   );
