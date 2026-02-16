@@ -153,7 +153,7 @@ export async function registerRoutes(
     },
   };
 
-  const DEMO_MATTERS: Record<string, { address: string; transactionType: string; settlementDate: string; status: string; milestonePercent: number; pillarPreSettlement: string; pillarExchange: string; currentPillar: string; contractPrice: number; depositAmount: number; depositPaid: boolean }> = {
+  const DEMO_MATTERS: Record<string, any> = {
     "james@buyer.com.au": {
       address: "14 Bronte Road, Bondi Junction NSW 2022",
       transactionType: "Purchase",
@@ -163,9 +163,11 @@ export async function registerRoutes(
       pillarPreSettlement: "complete",
       pillarExchange: "in_progress",
       currentPillar: "exchange",
-      contractPrice: 1250000,
-      depositAmount: 125000,
+      contractPrice: 135000000,
+      depositAmount: 15000000,
       depositPaid: true,
+      coolingOffDate: new Date("2025-11-11"),
+      financeDate: new Date("2025-12-20"),
     },
   };
 
@@ -228,8 +230,9 @@ export async function registerRoutes(
           const matterConfig = DEMO_MATTERS[email];
           if (matterConfig && demo.role === 'CLIENT') {
             const existing = await storage.getMattersByClient(user.id);
+            let demoMatter: any;
             if (existing.length === 0) {
-              const matter = await storage.createMatter({
+              demoMatter = await storage.createMatter({
                 address: matterConfig.address,
                 clientUserId: user.id,
                 transactionType: matterConfig.transactionType,
@@ -242,10 +245,12 @@ export async function registerRoutes(
                 depositAmount: matterConfig.depositAmount,
                 depositPaid: matterConfig.depositPaid,
                 settlementDate: new Date(matterConfig.settlementDate),
+                coolingOffDate: matterConfig.coolingOffDate,
+                financeDate: matterConfig.financeDate,
               });
 
               await storage.createTask({
-                matterId: matter.id,
+                matterId: demoMatter.id,
                 title: "Sign Contract of Sale",
                 status: "COMPLETE",
                 type: "SIGN",
@@ -253,7 +258,7 @@ export async function registerRoutes(
                 assignedTo: user.id,
               });
               await storage.createTask({
-                matterId: matter.id,
+                matterId: demoMatter.id,
                 title: "Pay deposit to trust account",
                 status: "COMPLETE",
                 type: "PAYMENT",
@@ -261,7 +266,7 @@ export async function registerRoutes(
                 assignedTo: user.id,
               });
               await storage.createTask({
-                matterId: matter.id,
+                matterId: demoMatter.id,
                 title: "Complete identity verification (VOI)",
                 status: "TODO",
                 type: "ACTION",
@@ -269,7 +274,7 @@ export async function registerRoutes(
                 assignedTo: user.id,
               });
               await storage.createTask({
-                matterId: matter.id,
+                matterId: demoMatter.id,
                 title: "Upload proof of finance approval",
                 status: "TODO",
                 type: "UPLOAD",
@@ -278,13 +283,46 @@ export async function registerRoutes(
                 dueDate: new Date("2026-03-01"),
               });
               await storage.createTask({
-                matterId: matter.id,
+                matterId: demoMatter.id,
                 title: "Review Section 32 Vendor Statement",
                 status: "TODO",
                 type: "REVIEW",
                 pillar: "exchange",
                 assignedTo: user.id,
                 dueDate: new Date("2026-03-10"),
+              });
+            } else {
+              demoMatter = existing[0];
+              await storage.updateMatter(demoMatter.id, {
+                contractPrice: matterConfig.contractPrice,
+                depositAmount: matterConfig.depositAmount,
+                coolingOffDate: matterConfig.coolingOffDate,
+                financeDate: matterConfig.financeDate,
+              });
+            }
+
+            const existingDocs = await storage.getDocumentsByMatter(demoMatter.id);
+            if (existingDocs.length === 0) {
+              await storage.createDocument({
+                matterId: demoMatter.id,
+                name: "Purchase Agreement.pdf",
+                size: "2.4 MB",
+                category: "contract",
+                uploadedBy: user.id,
+              });
+              await storage.createDocument({
+                matterId: demoMatter.id,
+                name: "Pest Inspection.pdf",
+                size: "1.1 MB",
+                category: "inspection",
+                uploadedBy: user.id,
+              });
+              await storage.createDocument({
+                matterId: demoMatter.id,
+                name: "Pool Safety.jpg",
+                size: "850 KB",
+                category: "compliance",
+                uploadedBy: user.id,
               });
             }
           }

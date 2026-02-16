@@ -2,20 +2,93 @@ import React, { useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
-import { FivePillars } from '@/components/five-pillars';
 import { OnboardingAlert } from '@/components/onboarding-alert';
-import { PropertyMap } from '@/components/property-map';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, FileText, Upload, BookOpen, Calendar } from 'lucide-react';
+import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3 } from 'lucide-react';
 import { Link } from 'wouter';
 import type { Matter, Task, Document } from '@shared/schema';
+
+function ProgressDonut({ percent }: { percent: number }) {
+  const r = 54;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (percent / 100) * circ;
+  return (
+    <div className="relative" data-testid="progress-donut">
+      <svg width="140" height="140" viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r={r} fill="none" stroke="#e5e7eb" strokeWidth="10" />
+        <circle cx="65" cy="65" r={r} fill="none" stroke="#425b58" strokeWidth="10"
+          strokeDasharray={circ} strokeDashoffset={offset}
+          strokeLinecap="round" transform="rotate(-90 65 65)"
+          className="transition-all duration-1000"
+        />
+        <text x="65" y="60" textAnchor="middle" className="text-[13px] fill-gray-500 font-medium">Overall progress</text>
+        <text x="65" y="82" textAnchor="middle" className="text-[28px] font-bold fill-foreground">{percent}%</text>
+      </svg>
+    </div>
+  );
+}
+
+function VerticalTimeline({ matter }: { matter: Matter }) {
+  const steps = [
+    { key: 'pillarPreSettlement' as const, label: 'Sign contract' },
+    { key: 'pillarExchange' as const, label: 'Conditional Contract' },
+    { key: 'pillarConditions' as const, label: 'Unconditional exchange' },
+    { key: 'pillarPreCompletion' as const, label: 'Pre-settlement' },
+    { key: 'pillarSettlement' as const, label: 'Complete!' },
+  ];
+
+  return (
+    <div className="space-y-0" data-testid="vertical-timeline">
+      {steps.map((step, i) => {
+        const status = matter[step.key] as string;
+        const isComplete = status === 'complete';
+        const isActive = status === 'in_progress';
+        const isLast = i === steps.length - 1;
+
+        return (
+          <div key={step.key} className="flex items-start gap-3">
+            <div className="flex flex-col items-center">
+              {isComplete ? (
+                <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-white" />
+                </div>
+              ) : isActive ? (
+                <div className="h-6 w-6 rounded-full bg-orange-400 border-2 border-orange-400 flex items-center justify-center">
+                  <Circle className="h-3 w-3 text-white fill-white" />
+                </div>
+              ) : (
+                <div className="h-6 w-6 rounded-full border-2 border-gray-300 bg-white" />
+              )}
+              {!isLast && (
+                <div className={`w-0.5 h-6 ${isComplete ? 'bg-primary' : 'bg-gray-200'}`} />
+              )}
+            </div>
+            <span className={`text-sm pt-0.5 ${
+              isComplete ? 'text-primary font-medium' :
+              isActive ? 'text-orange-500 font-semibold' :
+              'text-gray-400'
+            }`}>
+              {step.label}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatusDot({ status }: { status: string }) {
+  if (status === 'COMPLETE') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-green-500"></span> Complete</span>;
+  if (status === 'IN_REVIEW') return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-orange-400"></span> In review</span>;
+  return <span className="flex items-center gap-1.5 text-sm"><span className="h-2 w-2 rounded-full bg-gray-400"></span> To do</span>;
+}
 
 export default function ClientDashboard() {
   const { user } = useAuth();
   const [alertDismissed, setAlertDismissed] = useState(false);
-  
+
   const { data: matters, isLoading: mattersLoading } = useQuery<Matter[]>({
     queryKey: ["/api/matters"],
   });
@@ -44,42 +117,52 @@ export default function ClientDashboard() {
 
   if (!matter) {
     return (
-       <Layout role="CLIENT">
-         <div className="space-y-6 px-4">
-           {user && !alertDismissed && (
-             <OnboardingAlert user={user} onDismiss={() => setAlertDismissed(true)} />
-           )}
-           <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-6">
-             <div className="bg-[#e7f6f3] p-8 rounded-full">
-               <FileText className="h-12 w-12 text-primary" />
-             </div>
-             <div className="space-y-2">
-               <h2 className="text-3xl font-bold font-heading" data-testid="empty-state-heading">G'day, {user?.name?.split(' ')[0]}!</h2>
-               <p className="text-muted-foreground max-w-md mx-auto text-lg">
-                 Your settlement journey starts here. Once your conveyancer sets things up, 
-                 you'll see your progress, tasks, and key dates right on this dashboard.
-               </p>
-             </div>
-             <div className="flex flex-col sm:flex-row gap-3">
-               <Button className="bg-primary hover:bg-primary/90 text-white px-6" data-testid="button-upload-contract">
-                 <Upload className="mr-2 h-4 w-4" /> Upload Contract
-               </Button>
-               <Link href="/client/playbook">
-                 <Button variant="outline" className="px-6" data-testid="button-browse-playbook">
-                   <BookOpen className="mr-2 h-4 w-4" /> Browse The Playbook
-                 </Button>
-               </Link>
-             </div>
-             <p className="text-sm text-muted-foreground">
-               New to property settlement? Check out our guides — they're written in plain English, promise.
-             </p>
-           </div>
-         </div>
-       </Layout>
+      <Layout role="CLIENT">
+        <div className="space-y-6 px-4">
+          {user && !alertDismissed && (
+            <OnboardingAlert user={user} onDismiss={() => setAlertDismissed(true)} />
+          )}
+          <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-6">
+            <div className="bg-[#e7f6f3] p-8 rounded-full">
+              <FileText className="h-12 w-12 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold font-heading" data-testid="empty-state-heading">G'day, {user?.name?.split(' ')[0]}!</h2>
+              <p className="text-muted-foreground max-w-md mx-auto text-lg">
+                Your settlement journey starts here. Once your conveyancer sets things up,
+                you'll see your progress, tasks, and key dates right on this dashboard.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button className="bg-primary hover:bg-primary/90 text-white px-6" data-testid="button-upload-contract">
+                <Upload className="mr-2 h-4 w-4" /> Upload Contract
+              </Button>
+              <Link href="/client/playbook">
+                <Button variant="outline" className="px-6" data-testid="button-browse-playbook">
+                  <BookOpen className="mr-2 h-4 w-4" /> Browse The Playbook
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   const tasks = myTasks || [];
+  const documents = myDocuments || [];
+  const completedPillars = [matter.pillarPreSettlement, matter.pillarExchange, matter.pillarConditions, matter.pillarPreCompletion, matter.pillarSettlement].filter(s => s === 'complete').length;
+  const progressPercent = Math.round((completedPillars / 5) * 100);
+
+  const contractDate = matter.createdAt ? new Date(matter.createdAt).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+  const settlementDate = matter.settlementDate ? new Date(matter.settlementDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+  const coolingOffDate = matter.coolingOffDate ? new Date(matter.coolingOffDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+  const financeDate = matter.financeDate ? new Date(matter.financeDate).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+
+  const formatCurrency = (amount: number | null) => {
+    if (!amount) return '-';
+    return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', minimumFractionDigits: 2 }).format(amount / 100);
+  };
 
   return (
     <Layout role="CLIENT">
@@ -88,110 +171,198 @@ export default function ClientDashboard() {
           <OnboardingAlert user={user} hasDocuments={(myDocuments?.length ?? 0) > 0} onDismiss={() => setAlertDismissed(true)} />
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-8">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-3xl font-heading font-bold text-foreground" data-testid="text-property-address">
-                {matter.address}
-              </h1>
-              <div className="flex items-center gap-3">
-                 <Badge variant="outline" className="bg-secondary border-secondary-foreground/10 text-primary font-medium px-3 py-1" data-testid="badge-transaction-type">
-                   {matter.transactionType}
-                 </Badge>
-                 <span className="text-sm text-muted-foreground flex items-center gap-1" data-testid="text-settlement-date">
-                   <Calendar className="h-4 w-4" /> Settlement: {matter.settlementDate ? new Date(matter.settlementDate).toLocaleDateString() : 'TBD'}
-                 </span>
-              </div>
-            </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Home className="h-4 w-4" />
+          <ChevronRight className="h-3 w-3" />
+          <span className="text-primary font-medium">Dashboard</span>
+        </div>
 
-            <Card className="bg-white border shadow-sm p-6">
-              <FivePillars matter={matter} variant="full" />
+        <h1 className="text-2xl font-heading font-bold text-foreground" data-testid="text-dashboard-title">
+          Your Dashboard
+        </h1>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-7 space-y-6">
+            <Card className="bg-[#e7f6f3]/40 border border-[#c8e0db] p-5 rounded-xl" data-testid="matter-info-card">
+              <div className="flex items-start justify-between mb-4">
+                <h2 className="text-lg font-heading font-bold text-foreground" data-testid="text-property-address">
+                  {user?.name || 'Client'}
+                </h2>
+                <Badge className="bg-[#e7f6f3] text-primary border-[#c8e0db] text-xs font-semibold" data-testid="badge-transaction-type">
+                  {matter.transactionType === 'Purchase' ? 'Buyer' : 'Seller'}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+                <span className="text-gray-500 font-medium">Matter number</span>
+                <span className="text-foreground">{matter.id.slice(0, 6).toUpperCase()}</span>
+
+                <span className="text-gray-500 font-medium">Contact person</span>
+                <span className="text-foreground">{user?.name}</span>
+
+                <span className="text-gray-500 font-medium">Email address</span>
+                <span className="text-primary">{user?.email}</span>
+
+                <span className="text-gray-500 font-medium">Matter address</span>
+                <span className="text-foreground">{matter.address}</span>
+
+                <span className="text-gray-500 font-medium">Contact phone number</span>
+                <span className="text-foreground">{user?.phone || '-'}</span>
+              </div>
+
+              <p className="text-xs text-gray-400 mt-4 italic">
+                Please contact your conveyancer with any changes
+              </p>
             </Card>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                 <h3 className="font-heading font-bold text-xl">Your Tasks</h3>
-                 <Button variant="outline" size="sm">View All</Button>
+            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="tasks-card">
+              <div className="p-5 pb-0">
+                <h3 className="text-lg font-heading font-bold text-foreground mb-4">Tasks</h3>
               </div>
-              
               {tasksLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
               ) : tasks.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground px-5">
                   <p>No tasks yet. Check back soon!</p>
                 </div>
               ) : (
-                <div className="grid gap-3">
-                  {tasks.map(task => (
-                    <div key={task.id} className="group bg-white border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all duration-200" data-testid={`task-row-${task.id}`}>
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${task.status === 'COMPLETE' ? 'bg-green-100 text-green-600' : 'bg-[#fac515]/20 text-yellow-700'}`}>
-                         {task.status === 'COMPLETE' ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className={`font-medium text-base ${task.status === 'COMPLETE' && 'text-muted-foreground line-through'}`}>{task.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {task.status === 'COMPLETE' ? 'Completed' : task.dueDate ? `Due by ${new Date(task.dueDate).toLocaleDateString()}` : 'No due date'}
-                        </p>
-                      </div>
-                      {task.status !== 'COMPLETE' && (
-                        <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-lg">
-                          {task.type === 'UPLOAD' ? 'Upload' : 'Start'}
-                        </Button>
-                      )}
-                    </div>
-                  ))}
+                <div className="px-5">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide">Action</th>
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-28">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {tasks.slice(0, 4).map(task => (
+                        <tr key={task.id} className="border-b border-gray-50 last:border-0" data-testid={`task-row-${task.id}`}>
+                          <td className="py-3 text-foreground">{task.title}</td>
+                          <td className="py-3"><StatusDot status={task.status} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 space-y-6">
-            <PropertyMap address={matter.address} />
-
-            <Card className="bg-white shadow-sm border">
-              <CardHeader>
-                <CardTitle className="text-base">Your Conveyancer</CardTitle>
-              </CardHeader>
-              <CardContent>
-                 <div className="flex items-center gap-4 mb-6">
-                   <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center font-bold text-primary text-lg">
-                     LE
-                   </div>
-                   <div>
-                     <p className="font-bold">Legal Eagles</p>
-                     <p className="text-sm text-muted-foreground">Properly Partner</p>
-                   </div>
-                 </div>
-                 <div className="space-y-3">
-                   <Button variant="outline" className="w-full justify-start h-10">
-                     <span className="mr-2">📞</span> Call Team
-                   </Button>
-                   <Button variant="outline" className="w-full justify-start h-10">
-                     <span className="mr-2">✉️</span> Email Support
-                   </Button>
-                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-primary to-primary/80 text-white border-none shadow-md">
-              <CardContent className="p-6">
-                <BookOpen className="h-8 w-8 mb-3 text-white/80" />
-                <h3 className="font-bold text-lg mb-2">The Playbook</h3>
-                <p className="text-primary-foreground/80 text-sm mb-4">
-                  Your go-to guide for understanding the settlement process. No jargon, just helpful info.
-                </p>
-                <Link href="/client/playbook">
-                  <Button variant="secondary" className="w-full bg-white text-primary hover:bg-white/90 border-none" data-testid="button-read-playbook">
-                    Read Guides
+              <div className="px-5 py-3 flex justify-end">
+                <Link href="/client/tasks">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full px-5 text-xs font-semibold" data-testid="button-see-all-tasks">
+                    See all
                   </Button>
                 </Link>
-              </CardContent>
+              </div>
+            </Card>
+
+            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="document-vault-card">
+              <div className="p-5 pb-0">
+                <h3 className="text-lg font-heading font-bold text-foreground mb-4">Document Vault</h3>
+              </div>
+              {documents.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground px-5">
+                  <p>No documents uploaded yet.</p>
+                </div>
+              ) : (
+                <div className="px-5">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide">File name</th>
+                        <th className="text-left py-2.5 font-semibold text-gray-500 text-xs uppercase tracking-wide w-32">Date uploaded</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {documents.slice(0, 4).map(doc => (
+                        <tr key={doc.id} className="border-b border-gray-50 last:border-0" data-testid={`doc-row-${doc.id}`}>
+                          <td className="py-3 flex items-center gap-2 text-foreground">
+                            <FileText className="h-4 w-4 text-red-400 shrink-0" />
+                            {doc.name}
+                          </td>
+                          <td className="py-3 text-gray-500">
+                            {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <div className="px-5 py-3 flex justify-end">
+                <Link href="/client/documents">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full px-5 text-xs font-semibold" data-testid="button-see-all-docs">
+                    See all
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-5 space-y-6">
+            <Card className="bg-white border rounded-xl p-5" data-testid="progress-card">
+              <div className="flex items-start gap-6">
+                <VerticalTimeline matter={matter} />
+                <div className="flex-1 flex justify-center">
+                  <ProgressDonut percent={progressPercent} />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-white border rounded-xl p-5" data-testid="conveyancer-card">
+              <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">File owner</p>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm">
+                  CC
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">Clive Conway</p>
+                  <p className="text-sm text-gray-500">Example Conveyancers</p>
+                  <p className="text-sm text-primary">clive@exampleconveyancers.com</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="bg-white border rounded-xl overflow-hidden" data-testid="key-dates-card">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 bg-gray-50/50">
+                    <th className="text-left px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Key dates</th>
+                    <th className="text-left px-3 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Date due</th>
+                    <th className="text-right px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-50">
+                    <td className="px-5 py-3 text-foreground">Contract date</td>
+                    <td className="px-3 py-3 text-gray-600">{contractDate}</td>
+                    <td className="px-5 py-3 text-right text-gray-400">-</td>
+                  </tr>
+                  <tr className="border-b border-gray-50">
+                    <td className="px-5 py-3 text-foreground">Initial deposit due</td>
+                    <td className="px-3 py-3 text-gray-600">{coolingOffDate !== '-' ? coolingOffDate : contractDate}</td>
+                    <td className="px-5 py-3 text-right text-foreground font-medium">{formatCurrency(matter.contractPrice)}</td>
+                  </tr>
+                  <tr className="border-b border-gray-50">
+                    <td className="px-5 py-3 text-foreground">Balance deposit due</td>
+                    <td className="px-3 py-3 text-gray-600">{financeDate !== '-' ? financeDate : '-'}</td>
+                    <td className="px-5 py-3 text-right text-foreground font-medium">{formatCurrency(matter.depositAmount)}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-5 py-3 text-foreground">Settlement date</td>
+                    <td className="px-3 py-3 text-gray-600" data-testid="text-settlement-date">{settlementDate}</td>
+                    <td className="px-5 py-3 text-right text-gray-400">-</td>
+                  </tr>
+                </tbody>
+              </table>
             </Card>
           </div>
         </div>
       </div>
+
+      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
+        <Edit3 className="h-5 w-5" />
+      </button>
     </Layout>
   );
 }

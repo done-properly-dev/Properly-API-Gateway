@@ -1,11 +1,13 @@
 import React from 'react';
 import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell, BookOpen } from 'lucide-react';
+import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Logo } from '@/components/logo';
+import type { Matter } from '@shared/schema';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -29,76 +31,12 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Unified layout for Clients (Mobile & Web)
   if (role === 'CLIENT') {
-    return (
-      <div className="min-h-screen bg-[#fafafa]">
-        {/* Desktop Header */}
-        <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
-          <div className="flex h-16 items-center px-4 max-w-5xl mx-auto justify-between">
-            <div className="flex items-center gap-8">
-               <Logo variant="color" />
-               
-               {/* Desktop Nav Links */}
-               <nav className="hidden md:flex items-center gap-6">
-                 <Link href="/client/dashboard" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>Dashboard</Link>
-                 <Link href="/client/documents" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground'}`}>Documents</Link>
-                 <Link href="/client/playbook" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/playbook' ? 'text-primary' : 'text-muted-foreground'}`}>Playbook</Link>
-                 <Link href="/client/settings" className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground'}`}>Settings</Link>
-               </nav>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="hidden md:flex items-center gap-2 mr-2">
-                 <span className="text-sm font-medium text-foreground">{user?.name}</span>
-                 <Button variant="ghost" size="sm" onClick={handleLogout}>Log out</Button>
-              </div>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Bell className="h-5 w-5 text-foreground/70" />
-              </Button>
-            </div>
-          </div>
-        </header>
-
-        <main className="container max-w-5xl mx-auto p-4 md:p-8 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 md:pb-8">
-          {children}
-        </main>
-
-        {/* Mobile Bottom Nav - Only visible on small screens */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-white h-20 flex items-start justify-around z-50 pt-3 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
-           <Link href="/client/dashboard">
-             <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-               <Home className={`h-6 w-6 ${location === '/client/dashboard' ? 'fill-current' : ''}`} />
-               <span className="text-[10px] font-medium">Home</span>
-             </div>
-           </Link>
-           <Link href="/client/documents">
-             <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-               <FileText className={`h-6 w-6 ${location === '/client/documents' ? 'fill-current' : ''}`} />
-               <span className="text-[10px] font-medium">Vault</span>
-             </div>
-           </Link>
-           <Link href="/client/playbook">
-             <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/playbook' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-               <BookOpen className={`h-6 w-6 ${location === '/client/playbook' ? 'fill-current' : ''}`} />
-               <span className="text-[10px] font-medium">Playbook</span>
-             </div>
-           </Link>
-           <Link href="/client/settings">
-             <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-               <Settings className={`h-6 w-6 ${location === '/client/settings' ? 'fill-current' : ''}`} />
-               <span className="text-[10px] font-medium">Settings</span>
-             </div>
-           </Link>
-        </nav>
-      </div>
-    );
+    return <ClientSidebarLayout user={user} location={location} handleLogout={handleLogout}>{children}</ClientSidebarLayout>;
   }
 
-  // Desktop/Sidebar layout for Pros (Figma Inspired) - Remains unchanged
   return (
     <div className="min-h-screen bg-[#fafafa] flex">
-      {/* Sidebar - Hidden on mobile */}
       <aside className="hidden md:flex w-72 flex-col border-r bg-white text-sidebar-foreground fixed inset-y-0 left-0 z-30">
         <div className="p-6 h-20 flex items-center border-b border-transparent">
           <Logo variant="color" />
@@ -132,7 +70,6 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
         </div>
       </aside>
 
-      {/* Mobile Header for Pros */}
       <div className="flex-1 flex flex-col min-h-0 md:pl-72 transition-all">
          <header className="md:hidden h-16 border-b bg-white flex items-center px-4 sticky top-0 z-50">
            <Sheet>
@@ -156,6 +93,172 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
               {children}
             </div>
          </main>
+      </div>
+    </div>
+  );
+}
+
+function ClientSidebarLayout({ children, user, location, handleLogout }: { children: React.ReactNode; user: any; location: string; handleLogout: () => void }) {
+  const { data: matters } = useQuery<Matter[]>({ queryKey: ["/api/matters"] });
+  const matter = matters?.find((m: Matter) => m.clientUserId === user?.id) || matters?.[0];
+
+  const completedPillars = matter ? [matter.pillarPreSettlement, matter.pillarExchange, matter.pillarConditions, matter.pillarPreCompletion, matter.pillarSettlement].filter(s => s === 'complete').length : 0;
+  const progressPercent = matter ? Math.round((completedPillars / 5) * 100) : 0;
+
+  const clientLinkClass = (path: string) =>
+    `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+      location === path
+        ? 'bg-[#e7f6f3] text-primary font-semibold'
+        : 'hover:bg-gray-50 text-gray-600 hover:text-foreground'
+    }`;
+
+  const sidebarContent = (
+    <>
+      <div className="p-5 pb-4">
+        <Logo variant="color" />
+      </div>
+
+      <div className="px-4 pb-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search" className="pl-9 pr-12 bg-gray-50 border-gray-200 rounded-lg h-9 text-sm" data-testid="input-search" />
+          <span className="absolute right-3 top-2 text-xs text-muted-foreground bg-white border rounded px-1.5 py-0.5">⌘K</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-3 space-y-0.5 mt-1" data-testid="client-sidebar-nav">
+        <Link href="/client/dashboard">
+          <div className={clientLinkClass('/client/dashboard')} data-testid="link-dashboard">
+            <Home className="h-[18px] w-[18px]" /> Dashboard
+          </div>
+        </Link>
+        <Link href="/client/tasks">
+          <div className={clientLinkClass('/client/tasks')} data-testid="link-tasks">
+            <CheckSquare className="h-[18px] w-[18px]" /> Tasks
+          </div>
+        </Link>
+        <Link href="/client/documents">
+          <div className={clientLinkClass('/client/documents')} data-testid="link-document-vault">
+            <FileText className="h-[18px] w-[18px]" /> Document Vault
+          </div>
+        </Link>
+        <Link href="/client/messages">
+          <div className={clientLinkClass('/client/messages')} data-testid="link-messages">
+            <MessageSquare className="h-[18px] w-[18px]" /> Messages
+            <span className="ml-auto bg-[#e7f6f3] text-primary text-xs font-semibold px-2 py-0.5 rounded-full" data-testid="badge-message-count">8</span>
+          </div>
+        </Link>
+        <Link href="/client/playbook">
+          <div className={clientLinkClass('/client/playbook')} data-testid="link-playbook">
+            <BookOpen className="h-[18px] w-[18px]" /> Properly Playbook
+          </div>
+        </Link>
+      </nav>
+
+      <div className="px-3 space-y-0.5 mt-2">
+        <Link href="/client/settings">
+          <div className={clientLinkClass('/client/settings')} data-testid="link-settings">
+            <Settings className="h-[18px] w-[18px]" /> Settings
+          </div>
+        </Link>
+        <div className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 cursor-pointer hover:bg-gray-50 rounded-lg" data-testid="link-support">
+          <Headphones className="h-[18px] w-[18px]" /> Support
+          <span className="ml-auto flex items-center gap-1.5 text-xs text-green-600" data-testid="status-support-online">
+            <span className="h-2 w-2 rounded-full bg-green-500"></span>
+            Online
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-auto border-t border-gray-100">
+        <div className="px-5 py-4">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative">
+              <svg className="h-12 w-12" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#e5e7eb" strokeWidth="3" />
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#425b58" strokeWidth="3"
+                  strokeDasharray={`${progressPercent * 1.256} 125.6`}
+                  strokeLinecap="round" transform="rotate(-90 24 24)" />
+                <text x="24" y="26" textAnchor="middle" className="text-[10px] font-bold fill-foreground">{progressPercent}%</text>
+              </svg>
+            </div>
+            <span className="bg-[#e7f6f3] text-primary text-xs font-semibold px-2.5 py-1 rounded-full" data-testid="badge-role">Buyer</span>
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            Your <span className="text-primary font-bold">buying</span> journey
+          </p>
+          <p className="text-xs text-muted-foreground">You are {progressPercent}% complete!</p>
+        </div>
+
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors group" onClick={handleLogout} data-testid="button-user-menu">
+            <div className="h-9 w-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-sm">
+              {user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-semibold text-foreground truncate" data-testid="text-user-name">{user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate" data-testid="text-user-email">{user?.email}</p>
+            </div>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#fafafa] flex">
+      <aside className="hidden md:flex w-64 flex-col border-r border-gray-200 bg-white fixed inset-y-0 left-0 z-30">
+        {sidebarContent}
+      </aside>
+
+      <header className="md:hidden h-14 border-b bg-white flex items-center px-4 sticky top-0 z-50">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="bg-white p-0 w-64">
+            {sidebarContent}
+          </SheetContent>
+        </Sheet>
+        <div className="ml-3">
+          <Logo variant="color" />
+        </div>
+      </header>
+
+      <div className="flex-1 flex flex-col min-h-0 md:pl-64 transition-all">
+        <main className="flex-1 overflow-auto p-5 md:p-8 animate-in fade-in duration-500 pb-24 md:pb-8">
+          <div className="max-w-[1200px] mx-auto">
+            {children}
+          </div>
+        </main>
+
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-white h-16 flex items-center justify-around z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
+          <Link href="/client/dashboard">
+            <div className={`flex flex-col items-center gap-1 p-2 ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Home className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Home</span>
+            </div>
+          </Link>
+          <Link href="/client/documents">
+            <div className={`flex flex-col items-center gap-1 p-2 ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <FileText className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Vault</span>
+            </div>
+          </Link>
+          <Link href="/client/playbook">
+            <div className={`flex flex-col items-center gap-1 p-2 ${location === '/client/playbook' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <BookOpen className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Playbook</span>
+            </div>
+          </Link>
+          <Link href="/client/settings">
+            <div className={`flex flex-col items-center gap-1 p-2 ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Settings className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Settings</span>
+            </div>
+          </Link>
+        </nav>
       </div>
     </div>
   );
