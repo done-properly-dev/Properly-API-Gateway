@@ -25,25 +25,48 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Mobile layout for clients
+  // Unified layout for Clients (Mobile & Web)
   if (role === 'CLIENT') {
     return (
-      <div className="min-h-screen bg-[#fafafa] pb-20">
+      <div className="min-h-screen bg-[#fafafa]">
+        {/* Desktop Header */}
         <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
-          <div className="flex h-16 items-center px-4 max-w-md mx-auto justify-between">
-            <div className="font-heading font-extrabold text-2xl text-primary tracking-tight">Properly.</div>
+          <div className="flex h-16 items-center px-4 max-w-5xl mx-auto justify-between">
+            <div className="flex items-center gap-8">
+               <div className="font-heading font-extrabold text-2xl text-primary tracking-tight">Properly.</div>
+               
+               {/* Desktop Nav Links */}
+               <nav className="hidden md:flex items-center gap-6">
+                 <Link href="/client/dashboard">
+                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground'}`}>Dashboard</a>
+                 </Link>
+                 <Link href="/client/documents">
+                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/documents' ? 'text-primary' : 'text-muted-foreground'}`}>Documents</a>
+                 </Link>
+                 <Link href="/client/settings">
+                   <a className={`text-sm font-medium transition-colors hover:text-primary ${location === '/client/settings' ? 'text-primary' : 'text-muted-foreground'}`}>Settings</a>
+                 </Link>
+               </nav>
+            </div>
+
             <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2 mr-2">
+                 <span className="text-sm font-medium text-foreground">{currentUser?.name}</span>
+                 <Button variant="ghost" size="sm" onClick={handleLogout}>Log out</Button>
+              </div>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Bell className="h-5 w-5 text-foreground/70" />
               </Button>
             </div>
           </div>
         </header>
-        <main className="container max-w-md mx-auto p-4 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+        <main className="container max-w-5xl mx-auto p-4 md:p-8 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 md:pb-8">
           {children}
         </main>
-        {/* Bottom Nav for Mobile */}
-        <nav className="fixed bottom-0 left-0 right-0 border-t bg-white h-20 flex items-start justify-around z-50 pt-3 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
+
+        {/* Mobile Bottom Nav - Only visible on small screens */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-white h-20 flex items-start justify-around z-50 pt-3 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
            <Link href="/client/dashboard">
              <div className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${location === '/client/dashboard' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
                <Home className={`h-6 w-6 ${location === '/client/dashboard' ? 'fill-current' : ''}`} />
@@ -67,7 +90,7 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
     );
   }
 
-  // Desktop/Sidebar layout for Pros (Figma Inspired)
+  // Desktop/Sidebar layout for Pros (Figma Inspired) - Remains unchanged
   return (
     <div className="min-h-screen bg-[#fafafa] flex">
       {/* Sidebar - Hidden on mobile */}
