@@ -13,6 +13,7 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbS
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { Send, QrCode, Copy, MessageSquare, Monitor, Download, Check, Upload, ChevronDown, Home } from 'lucide-react';
+import { AddressAutocomplete } from '@/components/address-autocomplete';
 import QRCode from 'qrcode';
 
 type Channel = 'PORTAL' | 'SMS' | 'QR';
@@ -324,6 +325,19 @@ export default function ReferrerCreate() {
                     <SelectItem value="NT" data-testid="select-item-nt">NT</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="propertyAddress" className={labelStyles}>Property address</Label>
+                <AddressAutocomplete
+                  id="propertyAddress"
+                  placeholder="123 Smith Street, Sydney NSW 2000"
+                  value={propertyAddress}
+                  onChange={setPropertyAddress}
+                  onSelect={result => setPropertyAddress(result.address)}
+                  className={inputStyles}
+                  data-testid="input-property-address"
+                />
               </div>
 
               <div className="space-y-1.5">

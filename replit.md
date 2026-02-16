@@ -117,6 +117,23 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 12. Empty states with "Make a Referral" CTA for new brokers
 13. All 13 Sprint 3 items checked off in Notion
 
+## Sprint 4 Features (Complete)
+1. Schema: smokeballMatterId and pexaWorkspaceId fields on matters table
+2. Schema: Enhanced notifications table (recipientUserId, matterId, sentAt, body, subject, status)
+3. Schema: notification_templates table (name, channel, subject, body, trigger, active)
+4. Schema: notification_logs table (templateId, recipientUserId, channel, status, error)
+5. Smokeball mock API service (4 realistic Aus matters with stages, tasks, documents)
+6. Smokeball sync endpoint — maps mock data to local matters/tasks with pillar mapping
+7. Admin Smokeball test dashboard (trigger sync events, see results)
+8. PEXA mock API service (workspace details, settlement feed updates)
+9. PEXA settlement feed panel on referrer and conveyancer dashboards (auto-refresh 30s)
+10. Notification delivery hooks (email via Resend, SMS via Twilio, push placeholder)
+11. Admin notification template editor (CRUD with channel, trigger, variable substitution)
+12. Admin notification log/history view with filtering
+13. Apple Maps address autocomplete component (MapKit JS, debounced, Australia-biased)
+14. Address autocomplete integrated into client onboarding and referral creation forms
+15. All 12 Sprint 4 items checked off in Notion
+
 ## Supabase Configuration
 - Email confirmation: DISABLED (required for demo accounts)
 - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
@@ -138,6 +155,7 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Sprint 4 complete - Mock Integrations & Notifications (Smokeball/PEXA mock APIs, notification system, Apple Maps address autocomplete)
 - 2026-02-16: Sprint 3 complete - Referrer Portal Expansion & Payments (multi-channel referrals, QR codes, SMS, payments tracking, team pipeline)
 - 2026-02-16: Sprint 2 complete - Document Vault & Task Completion (file upload, drag-and-drop, auto-complete tasks, document preview)
 - 2026-02-16: Sprint 1 and Sprint 2 todos checked off in Notion developer documentation

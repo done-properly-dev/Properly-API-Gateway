@@ -6,8 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, AlertCircle, Upload, FileText, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, Filter, AlertCircle, Upload, FileText, ChevronLeft, ChevronRight, X, RefreshCw } from 'lucide-react';
 import { ProperlyLoader } from '@/components/properly-loader';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { format } from 'date-fns';
 import type { Matter } from '@shared/schema';
+import { PexaFeed } from '@/components/pexa-feed';
 
 type TabKey = 'profile' | 'tasks' | 'documents';
 
@@ -50,6 +52,7 @@ const placeholderDocuments = [
 ];
 
 export default function ConveyancerDashboard() {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('tasks');
   const [selectedMatterIndex, setSelectedMatterIndex] = useState<number | null>(null);
@@ -58,6 +61,20 @@ export default function ConveyancerDashboard() {
 
   const { data: matters, isLoading } = useQuery<Matter[]>({
     queryKey: ["/api/matters"],
+  });
+
+  const syncFromSmokeball = useMutation({
+    mutationFn: async (smokeballMatterId: string) => {
+      const res = await apiRequest("POST", `/api/smokeball/sync/${smokeballMatterId}`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matters"] });
+      toast({ title: "Sync complete", description: `Matter synced: ${data.matter?.address || 'Unknown'}` });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Sync failed", description: error.message, variant: "destructive" });
+    },
   });
 
   const updateMatter = useMutation({
@@ -110,13 +127,33 @@ export default function ConveyancerDashboard() {
             </div>
             <p className="text-sm text-muted-foreground mt-0.5" data-testid="text-case-number">Case number: 000001</p>
           </div>
-          <Button
-            className="bg-[#415b58] hover:bg-[#344a47] text-white gap-2"
-            data-testid="button-upload-document"
-          >
-            <Upload className="h-4 w-4" />
-            Upload document
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={!selectedMatter?.smokeballMatterId || syncFromSmokeball.isPending}
+              onClick={() => {
+                if (selectedMatter?.smokeballMatterId) {
+                  syncFromSmokeball.mutate(selectedMatter.smokeballMatterId);
+                }
+              }}
+              data-testid="button-sync-smokeball"
+            >
+              {syncFromSmokeball.isPending ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              Sync from Smokeball
+            </Button>
+            <Button
+              className="bg-[#415b58] hover:bg-[#344a47] text-white gap-2"
+              data-testid="button-upload-document"
+            >
+              <Upload className="h-4 w-4" />
+              Upload document
+            </Button>
+          </div>
         </div>
 
         <div className="border-b border-[#d5d7da] mb-6">
@@ -342,6 +379,12 @@ export default function ConveyancerDashboard() {
                 </Card>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'tasks' && (
+          <div className="mt-6">
+            <PexaFeed />
           </div>
         )}
 

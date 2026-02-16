@@ -3,7 +3,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { supabase } from "./supabase";
-import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema, insertPaymentSchema, insertOrganisationSchema, insertOrganisationMemberSchema, payments, organisations, organisationMembers } from "@shared/schema";
+import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema, insertPaymentSchema, insertOrganisationSchema, insertOrganisationMemberSchema, insertNotificationTemplateSchema, insertNotificationLogSchema, payments, organisations, organisationMembers } from "@shared/schema";
 import crypto from "crypto";
 import { z } from "zod";
 import { db } from "./db";
@@ -15,6 +15,8 @@ import * as resendService from "./services/resend";
 import * as twilioService from "./services/twilio";
 import * as diditService from "./services/didit";
 import * as appleMapsService from "./services/apple-maps";
+import * as smokeballService from "./services/smokeball";
+import * as pexaService from "./services/pexa";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
@@ -584,7 +586,7 @@ export async function registerRoutes(
     try {
       const fileKey = req.params.fileKey;
 
-      const sanitizedKey = path.basename(fileKey);
+      const sanitizedKey = path.basename(fileKey as string);
       if (sanitizedKey !== fileKey || fileKey.includes('..')) {
         return res.status(400).json({ message: "Invalid file key" });
       }
@@ -1069,6 +1071,185 @@ export async function registerRoutes(
     }
   });
 
+  // ─── Smokeball Integration ───
+  app.get("/api/smokeball/matters", requireAuth, async (req, res) => {
+    try {
+      if (!smokeballService.isConfigured()) {
+        return res.status(503).json({ message: "Smokeball integration not configured" });
+      }
+      const matters = smokeballService.getMatters();
+      res.json(matters);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/smokeball/matters/:id", requireAuth, async (req, res) => {
+    try {
+      if (!smokeballService.isConfigured()) {
+        return res.status(503).json({ message: "Smokeball integration not configured" });
+      }
+      const matter = smokeballService.getMatter(paramId(req, "id"));
+      if (!matter) return res.status(404).json({ message: "Smokeball matter not found" });
+      res.json(matter);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/smokeball/sync/:smokeballMatterId", requireAuth, async (req, res) => {
+    try {
+      const smokeballMatterId = paramId(req, "smokeballMatterId");
+      const sbMatter = smokeballService.syncMatter(smokeballMatterId);
+      if (!sbMatter) {
+        return res.status(404).json({ message: "Smokeball matter not found" });
+      }
+
+      const stageToPillars: Record<string, Partial<{
+        pillarPreSettlement: string;
+        pillarExchange: string;
+        pillarConditions: string;
+        pillarPreCompletion: string;
+        pillarSettlement: string;
+        currentPillar: string;
+        milestonePercent: number;
+      }>> = {
+        "Pre-Exchange": {
+          pillarPreSettlement: "in_progress",
+          pillarExchange: "not_started",
+          pillarConditions: "not_started",
+          pillarPreCompletion: "not_started",
+          pillarSettlement: "not_started",
+          currentPillar: "pre_settlement",
+          milestonePercent: 10,
+        },
+        "Exchanged": {
+          pillarPreSettlement: "completed",
+          pillarExchange: "completed",
+          pillarConditions: "not_started",
+          pillarPreCompletion: "not_started",
+          pillarSettlement: "not_started",
+          currentPillar: "exchange",
+          milestonePercent: 40,
+        },
+        "Pre-Completion": {
+          pillarPreSettlement: "completed",
+          pillarExchange: "completed",
+          pillarConditions: "completed",
+          pillarPreCompletion: "in_progress",
+          pillarSettlement: "not_started",
+          currentPillar: "pre_completion",
+          milestonePercent: 70,
+        },
+        "Settled": {
+          pillarPreSettlement: "completed",
+          pillarExchange: "completed",
+          pillarConditions: "completed",
+          pillarPreCompletion: "completed",
+          pillarSettlement: "completed",
+          currentPillar: "settlement",
+          milestonePercent: 100,
+        },
+      };
+
+      const pillarData = stageToPillars[sbMatter.stage] || stageToPillars["Pre-Exchange"];
+
+      let existingMatter = await storage.getMatterBySmokeballId(smokeballMatterId);
+
+      const settlementKeyDate = sbMatter.keyDates.find(kd => kd.label === "Settlement Date");
+      const coolingOffKeyDate = sbMatter.keyDates.find(kd => kd.label === "Cooling Off Expires");
+      const financeKeyDate = sbMatter.keyDates.find(kd => kd.label === "Finance Due");
+
+      if (existingMatter) {
+        existingMatter = await storage.updateMatter(existingMatter.id, {
+          address: sbMatter.propertyAddress,
+          transactionType: sbMatter.matterType,
+          status: sbMatter.status === "Completed" ? "Settled" : "Active",
+          ...pillarData,
+          settlementDate: settlementKeyDate ? new Date(settlementKeyDate.date) : undefined,
+          coolingOffDate: coolingOffKeyDate ? new Date(coolingOffKeyDate.date) : undefined,
+          financeDate: financeKeyDate ? new Date(financeKeyDate.date) : undefined,
+        });
+      } else {
+        existingMatter = await storage.createMatter({
+          address: sbMatter.propertyAddress,
+          clientUserId: req.userId!,
+          transactionType: sbMatter.matterType,
+          status: sbMatter.status === "Completed" ? "Settled" : "Active",
+          smokeballMatterId: smokeballMatterId,
+          ...pillarData,
+          settlementDate: settlementKeyDate ? new Date(settlementKeyDate.date) : undefined,
+          coolingOffDate: coolingOffKeyDate ? new Date(coolingOffKeyDate.date) : undefined,
+          financeDate: financeKeyDate ? new Date(financeKeyDate.date) : undefined,
+        });
+      }
+
+      if (existingMatter) {
+        const pillarMap: Record<string, string> = {
+          "Compliance": "pre_settlement",
+          "Finance": "exchange",
+          "Settlement": "settlement",
+        };
+
+        for (const sbTask of sbMatter.tasks) {
+          await storage.createTask({
+            matterId: existingMatter.id,
+            title: sbTask.title,
+            status: sbTask.status === "COMPLETE" ? "COMPLETE" : "TODO",
+            type: "ACTION",
+            pillar: pillarMap[sbTask.category] || "pre_settlement",
+            dueDate: new Date(sbTask.dueDate),
+          });
+        }
+      }
+
+      res.json({ matter: existingMatter, source: sbMatter });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/smokeball/test/trigger", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const sbMatter = smokeballService.syncMatter("sb-matter-001");
+      if (!sbMatter) {
+        return res.status(500).json({ message: "Failed to get test matter data" });
+      }
+
+      let existingMatter = await storage.getMatterBySmokeballId("sb-matter-001");
+
+      if (existingMatter) {
+        existingMatter = await storage.updateMatter(existingMatter.id, {
+          address: sbMatter.propertyAddress,
+          status: "Active",
+          pillarPreSettlement: "in_progress",
+        });
+      } else {
+        existingMatter = await storage.createMatter({
+          address: sbMatter.propertyAddress,
+          clientUserId: req.userId!,
+          transactionType: sbMatter.matterType,
+          status: "Active",
+          smokeballMatterId: "sb-matter-001",
+          pillarPreSettlement: "in_progress",
+        });
+      }
+
+      res.json({
+        event: "smokeball.matter.updated",
+        matter: existingMatter,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   // ─── Apple Maps Token ───
   app.get("/api/maps/token", requireAuth, async (req, res) => {
     try {
@@ -1077,6 +1258,251 @@ export async function registerRoutes(
       }
       const token = appleMapsService.generateMapToken();
       res.json({ token });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── PEXA Settlement ───
+  app.get("/api/pexa/workspace/:workspaceId", requireAuth, async (req, res) => {
+    try {
+      const workspace = pexaService.getWorkspace(paramId(req, "workspaceId"));
+      if (!workspace) return res.status(404).json({ message: "Workspace not found" });
+      res.json(workspace);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/pexa/feed", requireAuth, async (req, res) => {
+    try {
+      const workspaceId = req.query.workspaceId as string | undefined;
+      const feed = pexaService.getSettlementFeed(workspaceId);
+      res.json(feed);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Notification Templates CRUD ───
+  app.get("/api/notification-templates", requireAuth, async (req, res) => {
+    try {
+      const templates = await storage.getNotificationTemplates();
+      res.json(templates);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/notification-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const template = await storage.getNotificationTemplate(paramId(req, "id"));
+      if (!template) return res.status(404).json({ message: "Template not found" });
+      res.json(template);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/notification-templates", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") return res.status(403).json({ message: "Admin access required" });
+      const parsed = insertNotificationTemplateSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.issues[0].message });
+      }
+      const template = await storage.createNotificationTemplate(parsed.data);
+      res.status(201).json(template);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.patch("/api/notification-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") return res.status(403).json({ message: "Admin access required" });
+      const template = await storage.updateNotificationTemplate(paramId(req, "id"), req.body);
+      if (!template) return res.status(404).json({ message: "Template not found" });
+      res.json(template);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.delete("/api/notification-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") return res.status(403).json({ message: "Admin access required" });
+      await storage.deleteNotificationTemplate(paramId(req, "id"));
+      res.json({ message: "Deleted" });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Notification Delivery ───
+  app.post("/api/notifications/send", requireAuth, async (req, res) => {
+    try {
+      const sendSchema = z.object({
+        templateId: z.string(),
+        recipientUserId: z.string(),
+        matterId: z.string().optional(),
+        data: z.record(z.string()).optional(),
+      });
+      const parsed = sendSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.issues[0].message });
+      }
+
+      const { templateId, recipientUserId, matterId, data } = parsed.data;
+      const template = await storage.getNotificationTemplate(templateId);
+      if (!template) return res.status(404).json({ message: "Template not found" });
+
+      const recipient = await storage.getUser(recipientUserId);
+      if (!recipient) return res.status(404).json({ message: "Recipient not found" });
+
+      let bodyText = template.body;
+      let subjectText = template.subject || "";
+      if (data) {
+        for (const [key, value] of Object.entries(data)) {
+          bodyText = bodyText.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+          subjectText = subjectText.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+        }
+      }
+
+      const logEntry = await storage.createNotificationLog({
+        templateId,
+        recipientUserId,
+        matterId: matterId || null,
+        channel: template.channel,
+        subject: subjectText || null,
+        body: bodyText,
+        status: "pending",
+        sentAt: null,
+        error: null,
+      });
+
+      try {
+        if (template.channel === "EMAIL" && resendService.isConfigured()) {
+          await resendService.sendEmail({
+            to: recipient.email,
+            subject: subjectText,
+            html: bodyText,
+          });
+        } else if (template.channel === "SMS" && twilioService.isConfigured() && recipient.phone) {
+          await twilioService.sendSms({
+            to: recipient.phone,
+            body: bodyText,
+          });
+        }
+
+        const updatedLog = await storage.updateNotificationLog(logEntry.id, {
+          status: "sent",
+          sentAt: new Date(),
+        });
+        res.json(updatedLog);
+      } catch (sendErr: any) {
+        const updatedLog = await storage.updateNotificationLog(logEntry.id, {
+          status: "failed",
+          error: sendErr.message,
+        });
+        res.json(updatedLog);
+      }
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/notifications/test", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const testSchema = z.object({
+        templateId: z.string(),
+        channel: z.string().optional(),
+      });
+      const parsed = testSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.issues[0].message });
+      }
+
+      const { templateId } = parsed.data;
+      const template = await storage.getNotificationTemplate(templateId);
+      if (!template) return res.status(404).json({ message: "Template not found" });
+
+      const channel = parsed.data.channel || template.channel;
+      const subjectText = template.subject || "Test Notification";
+      const bodyText = template.body
+        .replace(/\{\{clientName\}\}/g, user.name)
+        .replace(/\{\{matterAddress\}\}/g, "123 Test Street")
+        .replace(/\{\{taskTitle\}\}/g, "Sample Task");
+
+      const logEntry = await storage.createNotificationLog({
+        templateId,
+        recipientUserId: user.id,
+        matterId: null,
+        channel,
+        subject: subjectText,
+        body: bodyText,
+        status: "pending",
+        sentAt: null,
+        error: null,
+      });
+
+      try {
+        if (channel === "EMAIL" && resendService.isConfigured()) {
+          await resendService.sendEmail({
+            to: user.email,
+            subject: `[TEST] ${subjectText}`,
+            html: bodyText,
+          });
+        } else if (channel === "SMS" && twilioService.isConfigured() && user.phone) {
+          await twilioService.sendSms({
+            to: user.phone,
+            body: `[TEST] ${bodyText}`,
+          });
+        }
+
+        const updatedLog = await storage.updateNotificationLog(logEntry.id, {
+          status: "sent",
+          sentAt: new Date(),
+        });
+        res.json(updatedLog);
+      } catch (sendErr: any) {
+        const updatedLog = await storage.updateNotificationLog(logEntry.id, {
+          status: "failed",
+          error: sendErr.message,
+        });
+        res.json(updatedLog);
+      }
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Notification Logs ───
+  app.get("/api/notification-logs", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user || user.role !== "ADMIN") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      const logs = await storage.getNotificationLogs();
+      res.json(logs);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/notification-logs/matter/:matterId", requireAuth, async (req, res) => {
+    try {
+      const logs = await storage.getNotificationLogsByMatter(paramId(req, "matterId"));
+      res.json(logs);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

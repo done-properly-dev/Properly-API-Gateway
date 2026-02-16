@@ -13,6 +13,9 @@ import ReferrerCreate from '@/pages/referrer/create';
 import BrokerPayments from '@/pages/referrer/payments';
 import BrokerTeam from '@/pages/referrer/team';
 import AdminDashboard from '@/pages/admin/dashboard';
+import SmokeballTestPage from '@/pages/admin/smokeball-test';
+import NotificationTemplatesPage from '@/pages/admin/notification-templates';
+import NotificationLogsPage from '@/pages/admin/notification-logs';
 import ConveyancerDashboard from '@/pages/conveyancer/dashboard';
 import ReferralLanding from '@/pages/referral-landing';
 import NotFound from "@/pages/not-found";
@@ -86,6 +89,15 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin/dashboard">
           <PrivateRoute component={AdminDashboard} allowedRoles={['ADMIN']} />
+        </Route>
+        <Route path="/admin/smokeball-test">
+          <PrivateRoute component={SmokeballTestPage} allowedRoles={['ADMIN']} />
+        </Route>
+        <Route path="/admin/notification-templates">
+          <PrivateRoute component={NotificationTemplatesPage} allowedRoles={['ADMIN']} />
+        </Route>
+        <Route path="/admin/notification-logs">
+          <PrivateRoute component={NotificationLogsPage} allowedRoles={['ADMIN']} />
         </Route>
 
         {/* Fallback */}

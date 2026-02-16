@@ -12,6 +12,7 @@ import { useLocation, useSearch } from 'wouter';
 import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper, Loader2, AlertCircle, ExternalLink, Smartphone, Monitor } from 'lucide-react';
 import { ProperlyLoader } from '@/components/properly-loader';
 import { QRCodeSVG } from 'qrcode.react';
+import { AddressAutocomplete } from '@/components/address-autocomplete';
 
 const STEPS = [
   { id: 'welcome', title: "G'day!", icon: PartyPopper },
@@ -248,11 +249,12 @@ export default function OnboardingPage() {
                 </div>
                 <div>
                   <Label htmlFor="address">Residential Address</Label>
-                  <Input
+                  <AddressAutocomplete
                     id="address"
                     placeholder="123 Smith Street, Sydney"
                     value={formData.address}
-                    onChange={e => setFormData({ ...formData, address: e.target.value })}
+                    onChange={address => setFormData({ ...formData, address })}
+                    onSelect={result => setFormData({ ...formData, address: result.address })}
                     data-testid="input-address"
                   />
                 </div>

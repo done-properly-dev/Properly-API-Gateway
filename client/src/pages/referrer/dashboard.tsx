@@ -9,6 +9,7 @@ import { Link, useLocation } from 'wouter';
 import { ProperlyLoader } from '@/components/properly-loader';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Referral } from '@shared/schema';
+import { PexaFeed } from '@/components/pexa-feed';
 
 const TIME_FILTERS = ['12 months', '30 days', '7 days', '24 hours'] as const;
 const ITEMS_PER_PAGE = 10;
@@ -365,6 +366,7 @@ export default function ReferrerDashboard() {
             </div>
           )}
         </div>
+        <PexaFeed />
       </div>
     </Layout>
   );

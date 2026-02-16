@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Settings, Users, Menu, Search, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown } from 'lucide-react';
+import { Home, FileText, Settings, Users, Menu, Search, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown, Bell, ScrollText } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from '@/components/logo';
 import type { Matter } from '@shared/schema';
@@ -83,6 +83,21 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
               <span className="ml-auto bg-red-500 text-white text-[10px] font-bold min-w-[20px] h-5 flex items-center justify-center rounded-full" data-testid="badge-message-count">8</span>
             </div>
           </Link>
+        )}
+
+        {role === 'ADMIN' && (
+          <>
+            <Link href="/admin/notification-templates">
+              <div className={navLinkClass('/admin/notification-templates', location)} data-testid="link-notification-templates">
+                <Bell className="h-[18px] w-[18px]" /> Templates
+              </div>
+            </Link>
+            <Link href="/admin/notification-logs">
+              <div className={navLinkClass('/admin/notification-logs', location)} data-testid="link-notification-logs">
+                <ScrollText className="h-[18px] w-[18px]" /> Notification Log
+              </div>
+            </Link>
+          </>
         )}
       </nav>
 

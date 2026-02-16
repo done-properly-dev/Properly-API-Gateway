@@ -1,8 +1,8 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, desc } from "drizzle-orm";
 import { db } from "./db";
 import {
   users, matters, tasks, documents, referrals, notifications, playbookArticles,
-  payments, organisations, organisationMembers,
+  payments, organisations, organisationMembers, notificationTemplates, notificationLogs,
   type User, type InsertUser,
   type Matter, type InsertMatter,
   type Task, type InsertTask,
@@ -13,6 +13,8 @@ import {
   type Payment, type InsertPayment,
   type Organisation, type InsertOrganisation,
   type OrganisationMember, type InsertOrganisationMember,
+  type NotificationTemplate, type InsertNotificationTemplate,
+  type NotificationLog, type InsertNotificationLog,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -57,7 +59,23 @@ export interface IStorage {
   createOrganisationMember(member: InsertOrganisationMember): Promise<OrganisationMember>;
 
   getNotifications(): Promise<Notification[]>;
+  getNotificationsByUser(userId: string): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
   updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined>;
+
+  getMatterBySmokeballId(smokeballMatterId: string): Promise<Matter | undefined>;
+  getMatterByPexaId(pexaWorkspaceId: string): Promise<Matter | undefined>;
+
+  getNotificationTemplates(): Promise<NotificationTemplate[]>;
+  getNotificationTemplate(id: string): Promise<NotificationTemplate | undefined>;
+  createNotificationTemplate(template: InsertNotificationTemplate): Promise<NotificationTemplate>;
+  updateNotificationTemplate(id: string, data: Partial<NotificationTemplate>): Promise<NotificationTemplate | undefined>;
+  deleteNotificationTemplate(id: string): Promise<void>;
+
+  getNotificationLogs(): Promise<NotificationLog[]>;
+  getNotificationLogsByMatter(matterId: string): Promise<NotificationLog[]>;
+  createNotificationLog(log: InsertNotificationLog): Promise<NotificationLog>;
+  updateNotificationLog(id: string, data: Partial<NotificationLog>): Promise<NotificationLog | undefined>;
 
   getPlaybookArticles(): Promise<PlaybookArticle[]>;
   getPlaybookArticleBySlug(slug: string): Promise<PlaybookArticle | undefined>;
@@ -229,9 +247,69 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(notifications);
   }
 
+  async getNotificationsByUser(userId: string): Promise<Notification[]> {
+    return db.select().from(notifications).where(eq(notifications.recipientUserId, userId));
+  }
+
+  async createNotification(data: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values(data).returning();
+    return notification;
+  }
+
   async updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined> {
     const [notification] = await db.update(notifications).set(data).where(eq(notifications.id, id)).returning();
     return notification;
+  }
+
+  async getMatterBySmokeballId(smokeballMatterId: string): Promise<Matter | undefined> {
+    const [matter] = await db.select().from(matters).where(eq(matters.smokeballMatterId, smokeballMatterId));
+    return matter;
+  }
+
+  async getMatterByPexaId(pexaWorkspaceId: string): Promise<Matter | undefined> {
+    const [matter] = await db.select().from(matters).where(eq(matters.pexaWorkspaceId, pexaWorkspaceId));
+    return matter;
+  }
+
+  async getNotificationTemplates(): Promise<NotificationTemplate[]> {
+    return db.select().from(notificationTemplates);
+  }
+
+  async getNotificationTemplate(id: string): Promise<NotificationTemplate | undefined> {
+    const [template] = await db.select().from(notificationTemplates).where(eq(notificationTemplates.id, id));
+    return template;
+  }
+
+  async createNotificationTemplate(data: InsertNotificationTemplate): Promise<NotificationTemplate> {
+    const [template] = await db.insert(notificationTemplates).values(data).returning();
+    return template;
+  }
+
+  async updateNotificationTemplate(id: string, data: Partial<NotificationTemplate>): Promise<NotificationTemplate | undefined> {
+    const [template] = await db.update(notificationTemplates).set(data).where(eq(notificationTemplates.id, id)).returning();
+    return template;
+  }
+
+  async deleteNotificationTemplate(id: string): Promise<void> {
+    await db.delete(notificationTemplates).where(eq(notificationTemplates.id, id));
+  }
+
+  async getNotificationLogs(): Promise<NotificationLog[]> {
+    return db.select().from(notificationLogs).orderBy(desc(notificationLogs.createdAt));
+  }
+
+  async getNotificationLogsByMatter(matterId: string): Promise<NotificationLog[]> {
+    return db.select().from(notificationLogs).where(eq(notificationLogs.matterId, matterId)).orderBy(desc(notificationLogs.createdAt));
+  }
+
+  async createNotificationLog(data: InsertNotificationLog): Promise<NotificationLog> {
+    const [log] = await db.insert(notificationLogs).values(data).returning();
+    return log;
+  }
+
+  async updateNotificationLog(id: string, data: Partial<NotificationLog>): Promise<NotificationLog | undefined> {
+    const [log] = await db.update(notificationLogs).set(data).where(eq(notificationLogs.id, id)).returning();
+    return log;
   }
 
   async getPlaybookArticles(): Promise<PlaybookArticle[]> {

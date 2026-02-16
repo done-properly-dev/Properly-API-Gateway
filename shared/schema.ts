@@ -63,6 +63,8 @@ export const matters = pgTable("matters", {
   coolingOffDate: timestamp("cooling_off_date"),
   financeDate: timestamp("finance_date"),
   buildingPestDate: timestamp("building_pest_date"),
+  smokeballMatterId: text("smokeball_matter_id"),
+  pexaWorkspaceId: text("pexa_workspace_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -142,6 +144,12 @@ export const notifications = pgTable("notifications", {
   templateName: text("template_name").notNull(),
   channel: text("channel").notNull(),
   active: boolean("active").notNull().default(true),
+  recipientUserId: varchar("recipient_user_id").references(() => users.id),
+  matterId: varchar("matter_id").references(() => matters.id),
+  subject: text("subject"),
+  body: text("body"),
+  sentAt: timestamp("sent_at"),
+  status: text("status").notNull().default("pending"),
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
@@ -149,6 +157,45 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 });
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+export const notificationTemplates = pgTable("notification_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  channel: text("channel").notNull(),
+  subject: text("subject"),
+  body: text("body").notNull(),
+  trigger: text("trigger").notNull(),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertNotificationTemplate = z.infer<typeof insertNotificationTemplateSchema>;
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+
+export const notificationLogs = pgTable("notification_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => notificationTemplates.id),
+  recipientUserId: varchar("recipient_user_id").references(() => users.id),
+  matterId: varchar("matter_id").references(() => matters.id),
+  channel: text("channel").notNull(),
+  subject: text("subject"),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("pending"),
+  sentAt: timestamp("sent_at"),
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNotificationLogSchema = createInsertSchema(notificationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertNotificationLog = z.infer<typeof insertNotificationLogSchema>;
+export type NotificationLog = typeof notificationLogs.$inferSelect;
 
 export const playbookArticles = pgTable("playbook_articles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
