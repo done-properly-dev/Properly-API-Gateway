@@ -3,12 +3,14 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { OnboardingAlert } from '@/components/onboarding-alert';
+import { PropertyMap } from '@/components/property-map';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3 } from 'lucide-react';
+import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3, Check } from 'lucide-react';
 import { Link } from 'wouter';
 import type { Matter, Task, Document } from '@shared/schema';
+import clivePhoto from '@/assets/images/clive-conway.jpg';
 
 function ProgressDonut({ percent }: { percent: number }) {
   const r = 54;
@@ -16,15 +18,15 @@ function ProgressDonut({ percent }: { percent: number }) {
   const offset = circ - (percent / 100) * circ;
   return (
     <div className="relative" data-testid="progress-donut">
-      <svg width="140" height="140" viewBox="0 0 130 130">
-        <circle cx="65" cy="65" r={r} fill="none" stroke="#e5e7eb" strokeWidth="10" />
-        <circle cx="65" cy="65" r={r} fill="none" stroke="#425b58" strokeWidth="10"
+      <svg width="160" height="160" viewBox="0 0 130 130">
+        <circle cx="65" cy="65" r={r} fill="none" stroke="#e5e7eb" strokeWidth="12" />
+        <circle cx="65" cy="65" r={r} fill="none" stroke="#425b58" strokeWidth="12"
           strokeDasharray={circ} strokeDashoffset={offset}
           strokeLinecap="round" transform="rotate(-90 65 65)"
           className="transition-all duration-1000"
         />
-        <text x="65" y="60" textAnchor="middle" className="text-[13px] fill-gray-500 font-medium">Overall progress</text>
-        <text x="65" y="82" textAnchor="middle" className="text-[28px] font-bold fill-foreground">{percent}%</text>
+        <text x="65" y="55" textAnchor="middle" className="fill-gray-400" style={{ fontSize: '11px', fontWeight: 500 }}>Overall progress</text>
+        <text x="65" y="82" textAnchor="middle" className="fill-[#1a2e2b]" style={{ fontSize: '32px', fontWeight: 700 }}>{percent}%</text>
       </svg>
     </div>
   );
@@ -51,23 +53,23 @@ function VerticalTimeline({ matter }: { matter: Matter }) {
           <div key={step.key} className="flex items-start gap-3">
             <div className="flex flex-col items-center">
               {isComplete ? (
-                <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-white" />
+                <div className="h-7 w-7 rounded-full bg-[#e8946a] flex items-center justify-center">
+                  <Check className="h-4 w-4 text-white" strokeWidth={3} />
                 </div>
               ) : isActive ? (
-                <div className="h-6 w-6 rounded-full bg-orange-400 border-2 border-orange-400 flex items-center justify-center">
-                  <Circle className="h-3 w-3 text-white fill-white" />
+                <div className="h-7 w-7 rounded-full border-[3px] border-[#e8946a] bg-white flex items-center justify-center">
+                  <div className="h-3 w-3 rounded-full bg-[#e8946a]" />
                 </div>
               ) : (
-                <div className="h-6 w-6 rounded-full border-2 border-gray-300 bg-white" />
+                <div className="h-7 w-7 rounded-full border-2 border-gray-300 bg-white" />
               )}
               {!isLast && (
-                <div className={`w-0.5 h-6 ${isComplete ? 'bg-primary' : 'bg-gray-200'}`} />
+                <div className={`w-0.5 h-8 ${isComplete || isActive ? 'bg-[#e8946a]' : 'bg-gray-200'}`} />
               )}
             </div>
-            <span className={`text-sm pt-0.5 ${
-              isComplete ? 'text-primary font-medium' :
-              isActive ? 'text-orange-500 font-semibold' :
+            <span className={`text-sm pt-1 ${
+              isComplete ? 'text-foreground font-medium' :
+              isActive ? 'text-[#e8946a] font-semibold' :
               'text-gray-400'
             }`}>
               {step.label}
@@ -207,13 +209,19 @@ export default function ClientDashboard() {
                 <span className="text-foreground">{matter.address}</span>
 
                 <span className="text-gray-500 font-medium">Contact phone number</span>
-                <span className="text-foreground">{user?.phone || '-'}</span>
+                <span className="text-foreground">{user?.phone || '0412 345 678'}</span>
               </div>
 
               <p className="text-xs text-gray-400 mt-4 italic">
                 Please contact your conveyancer with any changes
               </p>
             </Card>
+
+            {matter.address && (
+              <div data-testid="property-map-section">
+                <PropertyMap address={matter.address} />
+              </div>
+            )}
 
             <Card className="bg-white border rounded-xl overflow-hidden" data-testid="tasks-card">
               <div className="p-5 pb-0">
@@ -301,7 +309,7 @@ export default function ClientDashboard() {
 
           <div className="lg:col-span-5 space-y-6">
             <Card className="bg-white border rounded-xl p-5" data-testid="progress-card">
-              <div className="flex items-start gap-6">
+              <div className="flex items-start gap-4">
                 <VerticalTimeline matter={matter} />
                 <div className="flex-1 flex justify-center">
                   <ProgressDonut percent={progressPercent} />
@@ -309,16 +317,21 @@ export default function ClientDashboard() {
               </div>
             </Card>
 
-            <Card className="bg-white border rounded-xl p-5" data-testid="conveyancer-card">
-              <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-2">File owner</p>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm">
-                  CC
-                </div>
+            <Card className="bg-[#ffece1]/40 border border-[#f5d6c5] rounded-xl p-5" data-testid="conveyancer-card">
+              <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-3">File owner</p>
+              <div className="flex items-center gap-4">
+                <img
+                  src={clivePhoto}
+                  alt="Clive Conway"
+                  className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-sm"
+                  data-testid="img-conveyancer-photo"
+                />
                 <div>
-                  <p className="font-bold text-foreground">Clive Conway</p>
+                  <p className="font-bold text-foreground text-base">Clive Conway</p>
                   <p className="text-sm text-gray-500">Example Conveyancers</p>
-                  <p className="text-sm text-primary">clive@exampleconveyancers.com</p>
+                  <a href="mailto:clive@exampleconveyancers.com" className="text-sm text-primary hover:underline">
+                    clive@exampleconveyancers.com
+                  </a>
                 </div>
               </div>
             </Card>
@@ -326,32 +339,32 @@ export default function ClientDashboard() {
             <Card className="bg-white border rounded-xl overflow-hidden" data-testid="key-dates-card">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="text-left px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Key dates</th>
-                    <th className="text-left px-3 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Date due</th>
-                    <th className="text-right px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wide">Amount</th>
+                  <tr className="bg-[#e7f6f3]/60 border-b border-[#c8e0db]">
+                    <th className="text-left px-5 py-3 font-bold text-foreground text-xs tracking-wide">Key dates</th>
+                    <th className="text-left px-3 py-3 font-bold text-foreground text-xs tracking-wide">Date due</th>
+                    <th className="text-right px-5 py-3 font-bold text-foreground text-xs tracking-wide">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-gray-50">
-                    <td className="px-5 py-3 text-foreground">Contract date</td>
-                    <td className="px-3 py-3 text-gray-600">{contractDate}</td>
-                    <td className="px-5 py-3 text-right text-gray-400">-</td>
+                  <tr className="border-b border-gray-100">
+                    <td className="px-5 py-4 text-foreground font-semibold">Contract date</td>
+                    <td className="px-3 py-4 text-gray-600">{contractDate}</td>
+                    <td className="px-5 py-4 text-right text-gray-400">-</td>
                   </tr>
-                  <tr className="border-b border-gray-50">
-                    <td className="px-5 py-3 text-foreground">Initial deposit due</td>
-                    <td className="px-3 py-3 text-gray-600">{coolingOffDate !== '-' ? coolingOffDate : contractDate}</td>
-                    <td className="px-5 py-3 text-right text-foreground font-medium">{formatCurrency(matter.contractPrice)}</td>
+                  <tr className="border-b border-gray-100 bg-[#ffece1]/20">
+                    <td className="px-5 py-4 text-foreground font-semibold">Initial deposit due</td>
+                    <td className="px-3 py-4 text-gray-600">{coolingOffDate !== '-' ? coolingOffDate : contractDate}</td>
+                    <td className="px-5 py-4 text-right text-foreground font-semibold">{formatCurrency(matter.contractPrice)}</td>
                   </tr>
-                  <tr className="border-b border-gray-50">
-                    <td className="px-5 py-3 text-foreground">Balance deposit due</td>
-                    <td className="px-3 py-3 text-gray-600">{financeDate !== '-' ? financeDate : '-'}</td>
-                    <td className="px-5 py-3 text-right text-foreground font-medium">{formatCurrency(matter.depositAmount)}</td>
+                  <tr className="border-b border-gray-100 bg-[#e7f6f3]/20">
+                    <td className="px-5 py-4 text-foreground font-semibold">Balance deposit due</td>
+                    <td className="px-3 py-4 text-gray-600">{financeDate !== '-' ? financeDate : '-'}</td>
+                    <td className="px-5 py-4 text-right text-foreground font-semibold">{formatCurrency(matter.depositAmount)}</td>
                   </tr>
                   <tr>
-                    <td className="px-5 py-3 text-foreground">Settlement date</td>
-                    <td className="px-3 py-3 text-gray-600" data-testid="text-settlement-date">{settlementDate}</td>
-                    <td className="px-5 py-3 text-right text-gray-400">-</td>
+                    <td className="px-5 py-4 text-foreground font-semibold">Settlement date</td>
+                    <td className="px-3 py-4 text-gray-600" data-testid="text-settlement-date">{settlementDate}</td>
+                    <td className="px-5 py-4 text-right text-gray-400">-</td>
                   </tr>
                 </tbody>
               </table>
@@ -360,7 +373,7 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 flex items-center justify-center z-40 md:bottom-8 md:right-8" data-testid="fab-edit">
+      <button className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-[#e7f6f3] text-primary shadow-lg hover:bg-[#d5ece7] flex items-center justify-center z-40 md:bottom-8 md:right-8 border border-[#c8e0db]" data-testid="fab-edit">
         <Edit3 className="h-5 w-5" />
       </button>
     </Layout>
