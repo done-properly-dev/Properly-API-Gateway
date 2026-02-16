@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell } from 'lucide-react';
@@ -14,12 +14,15 @@ interface LayoutProps {
 }
 
 export function Layout({ children, role, showNav = true }: LayoutProps) {
-  const { logout, currentUser } = useStore();
+  const { logout, user } = useAuth();
   const [location, setLocation] = useLocation();
 
   const handleLogout = () => {
-    logout();
-    setLocation('/');
+    logout.mutate(undefined, {
+      onSuccess: () => {
+        setLocation('/');
+      }
+    });
   };
 
   if (!showNav) {
@@ -52,7 +55,7 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
 
             <div className="flex items-center gap-2">
               <div className="hidden md:flex items-center gap-2 mr-2">
-                 <span className="text-sm font-medium text-foreground">{currentUser?.name}</span>
+                 <span className="text-sm font-medium text-foreground">{user?.name}</span>
                  <Button variant="ghost" size="sm" onClick={handleLogout}>Log out</Button>
               </div>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -115,11 +118,11 @@ export function Layout({ children, role, showNav = true }: LayoutProps) {
         <div className="p-4 border-t border-sidebar-border mt-auto bg-gray-50/50">
           <div className="flex items-center gap-3 mb-4 p-2 rounded-lg hover:bg-white transition-colors cursor-pointer border border-transparent hover:border-gray-100 hover:shadow-sm">
              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-               {currentUser?.name.charAt(0)}
+               {user?.name?.charAt(0)}
              </div>
              <div className="flex-1 overflow-hidden">
-               <p className="text-sm font-bold text-foreground truncate">{currentUser?.name}</p>
-               <p className="text-xs text-muted-foreground truncate">{currentUser?.email}</p>
+               <p className="text-sm font-bold text-foreground truncate">{user?.name}</p>
+               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
              </div>
           </div>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>

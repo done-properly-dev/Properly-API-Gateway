@@ -1,13 +1,16 @@
 import React from 'react';
-import { useStore } from '@/lib/store';
+import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { SovereigntyWidget } from '@/components/sovereignty-widget';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import type { Notification } from '@shared/schema';
 
 export default function AdminDashboard() {
-  const { toggleQuietHours } = useStore();
+  const { data: notifications, isLoading } = useQuery<Notification[]>({
+    queryKey: ["/api/notifications"],
+  });
 
   return (
     <Layout role="ADMIN">
@@ -36,7 +39,7 @@ export default function AdminDashboard() {
                     <Label htmlFor="quiet-mode">Enforce Quiet Hours</Label>
                     <p className="text-xs text-muted-foreground">No SMS sent between 9pm - 8am local time.</p>
                   </div>
-                  <Switch id="quiet-mode" defaultChecked onCheckedChange={toggleQuietHours} />
+                  <Switch id="quiet-mode" defaultChecked />
                 </div>
               </CardContent>
             </Card>

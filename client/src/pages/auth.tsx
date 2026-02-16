@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useStore } from '@/lib/store';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/lib/auth';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,33 +12,56 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('CLIENT');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const { login } = useStore();
+  const [error, setError] = useState('');
+  const [autoSubmit, setAutoSubmit] = useState(false);
+  const { login, signup, user, isAuthenticated } = useAuth();
   const [_, setLocation] = useLocation();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const loading = login.isPending || signup.isPending;
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      redirectByRole(user.role);
+    }
+  }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    if (autoSubmit && email && password) {
+      setAutoSubmit(false);
+      handleSubmit();
+    }
+  }, [autoSubmit, email, password]);
+
+  const redirectByRole = (userRole: string) => {
+    if (userRole === 'BROKER') setLocation('/referrer/dashboard');
+    else if (userRole === 'CONVEYANCER') setLocation('/conveyancer/dashboard');
+    else if (userRole === 'ADMIN') setLocation('/admin/dashboard');
+    else setLocation('/client/dashboard');
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError('');
     
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, we'll still use the "magic link" flow or direct login
-      // but visually it looks like a password login now.
-      // If we want to maintain the "magic link" feeling, we can show the "Check email" state.
-      // If we want to match the "Sign in" button behavior from the design which implies immediate login:
-      
-      login(email);
-    
-      // Redirect based on role (simple heuristic for demo)
-      if (email.includes('broker')) setLocation('/referrer/dashboard');
-      else if (email.includes('conv')) setLocation('/conveyancer/dashboard');
-      else if (email.includes('admin')) setLocation('/admin/dashboard');
-      else setLocation('/client/dashboard');
-      
-      setLoading(false);
-    }, 1000);
+    try {
+      if (authMode === 'signup') {
+        await signup.mutateAsync({ email, password, name, role });
+      } else {
+        await login.mutateAsync({ email, password });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed');
+    }
+  };
+
+  const handleDemoLogin = (demoEmail: string, demoPassword: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setAuthMode('login');
+    setAutoSubmit(true);
   };
 
   const GoogleIcon = () => (
@@ -108,8 +131,12 @@ export default function AuthPage() {
             </div>
             
             <div className="space-y-2">
-              <h1 className="text-3xl font-heading font-bold text-slate-900">Log in to your account</h1>
-              <p className="text-slate-500">Welcome back! Please enter your details.</p>
+              <h1 className="text-3xl font-heading font-bold text-slate-900">
+                {authMode === 'signup' ? 'Create your account' : 'Log in to your account'}
+              </h1>
+              <p className="text-slate-500">
+                {authMode === 'signup' ? 'Get started with Properly today.' : 'Welcome back! Please enter your details.'}
+              </p>
             </div>
 
             {/* Toggle */}
@@ -129,8 +156,45 @@ export default function AuthPage() {
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-4">
+              {authMode === 'signup' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-slate-700 font-medium">Full Name</Label>
+                    <Input 
+                      id="name" 
+                      type="text" 
+                      placeholder="Enter your name" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="h-11 bg-white border-slate-200 focus:border-[#425b58] focus:ring-[#425b58]/20 transition-all"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="text-slate-700 font-medium">Role</Label>
+                    <select
+                      id="role"
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:border-[#425b58] focus:ring-[#425b58]/20 transition-all"
+                    >
+                      <option value="CLIENT">Client / Buyer</option>
+                      <option value="BROKER">Broker / Referrer</option>
+                      <option value="CONVEYANCER">Conveyancer</option>
+                      <option value="ADMIN">Admin</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-slate-700 font-medium">Email</Label>
                 <Input 
@@ -152,55 +216,61 @@ export default function AuthPage() {
                   placeholder="••••••••" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  // required - Optional for demo since we just click button
+                  required
                   className="h-11 bg-white border-slate-200 focus:border-[#425b58] focus:ring-[#425b58]/20 transition-all"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" className="border-slate-300 data-[state=checked]:bg-[#425b58] data-[state=checked]:border-[#425b58]" />
-                <label
-                  htmlFor="remember"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
-                >
-                  Remember for 30 days
-                </label>
+            {authMode === 'login' && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="remember" className="border-slate-300 data-[state=checked]:bg-[#425b58] data-[state=checked]:border-[#425b58]" />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
+                  >
+                    Remember for 30 days
+                  </label>
+                </div>
+                <a href="#" className="text-sm font-bold text-slate-900 hover:underline">Forgot password</a>
               </div>
-              <a href="#" className="text-sm font-bold text-slate-900 hover:underline">Forgot password</a>
-            </div>
+            )}
 
             <div className="space-y-4 pt-2">
               <Button type="submit" className="w-full h-11 bg-[#425b58] hover:bg-[#2d3f3d] text-white font-semibold text-base shadow-sm" disabled={loading}>
-                {loading ? 'Signing in...' : 'Sign in'}
+                {loading ? (authMode === 'signup' ? 'Creating account...' : 'Signing in...') : (authMode === 'signup' ? 'Sign up' : 'Sign in')}
               </Button>
               
               <Button type="button" variant="outline" className="w-full h-11 bg-white border-slate-200 text-slate-700 font-medium hover:bg-slate-50">
                 <GoogleIcon />
-                Sign in with Google
+                {authMode === 'signup' ? 'Sign up with Google' : 'Sign in with Google'}
               </Button>
             </div>
           </form>
 
           <div className="text-center text-sm text-slate-500">
-            Don't have an account? <a href="#" className="font-bold text-slate-900 hover:underline" onClick={() => setAuthMode('signup')}>Sign up</a>
+            {authMode === 'login' ? (
+              <>Don't have an account? <a href="#" className="font-bold text-slate-900 hover:underline" onClick={() => setAuthMode('signup')}>Sign up</a></>
+            ) : (
+              <>Already have an account? <a href="#" className="font-bold text-slate-900 hover:underline" onClick={() => setAuthMode('login')}>Log in</a></>
+            )}
           </div>
 
           {/* Quick Demo Login Helpers */}
           <div className="pt-8 border-t border-slate-100 mt-8">
             <p className="text-xs text-center text-slate-400 mb-4 uppercase tracking-wider font-semibold">Demo Access</p>
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => { setEmail('sarah@example.com'); setPassword('password'); }}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('sarah@example.com', 'password')}>
                 Login as Buyer
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => { setEmail('mike@broker.com.au'); setPassword('password'); }}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('mike@broker.com.au', 'password')}>
                 Login as Broker
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => { setEmail('admin@legaleagles.com.au'); setPassword('password'); }}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@legaleagles.com.au', 'password')}>
                 Login as Conveyancer
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => { setEmail('admin@properly.com.au'); setPassword('password'); }}>
+              <Button variant="ghost" size="sm" className="text-xs h-auto py-2 border border-dashed border-slate-200 text-slate-500 hover:text-slate-900 hover:border-slate-400" onClick={() => handleDemoLogin('admin@properly.com.au', 'password')}>
                 Login as Admin
               </Button>
             </div>

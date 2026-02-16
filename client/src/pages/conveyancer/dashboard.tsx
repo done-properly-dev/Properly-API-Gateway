@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useStore } from '@/lib/store';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,25 +16,53 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from 'date-fns';
+import type { Matter } from '@shared/schema';
 
 export default function ConveyancerDashboard() {
-  const { matters, updateMatterStatus } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [simulating, setSimulating] = useState<string | null>(null);
 
-  const filteredMatters = matters.filter(m => 
+  const { data: matters, isLoading } = useQuery<Matter[]>({
+    queryKey: ["/api/matters"],
+  });
+
+  const updateMatter = useMutation({
+    mutationFn: async ({ id, status, milestonePercent }: { id: string; status: string; milestonePercent: number }) => {
+      await apiRequest("PATCH", `/api/matters/${id}`, { status, milestonePercent });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/matters"] });
+    },
+  });
+
+  const allMatters = matters || [];
+
+  const filteredMatters = allMatters.filter(m => 
     m.address.toLowerCase().includes(searchTerm.toLowerCase()) || 
     m.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSimulatePEXA = (id: string) => {
     setSimulating(id);
-    // Mock PEXA webhook event
-    setTimeout(() => {
-       updateMatterStatus(id, 'Settled', 100);
-       setSimulating(null);
-    }, 2000);
+    updateMatter.mutate(
+      { id, status: 'Settled', milestonePercent: 100 },
+      {
+        onSettled: () => {
+          setSimulating(null);
+        },
+      }
+    );
   };
+
+  if (isLoading) {
+    return (
+      <Layout role="CONVEYANCER">
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout role="CONVEYANCER">
@@ -85,53 +114,61 @@ export default function ConveyancerDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMatters.map((matter) => (
-                <TableRow key={matter.id}>
-                  <TableCell className="font-mono text-xs">{matter.id}</TableCell>
-                  <TableCell className="font-medium">{matter.address}</TableCell>
-                  <TableCell>Sarah Jenkins</TableCell> {/* Mocked for now */}
-                  <TableCell>
-                    <Badge variant="outline" className={
-                      matter.status === 'Settled' ? 'bg-green-50 text-green-700 border-green-200' :
-                      matter.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
-                      'bg-slate-50 text-slate-700'
-                    }>
-                      {matter.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{format(new Date(matter.settlementDate), 'dd MMM yyyy')}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-16 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: `${matter.milestonePercent}%` }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">{matter.milestonePercent}%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {matter.status !== 'Settled' ? (
-                       <Button 
-                         size="sm" 
-                         variant="ghost" 
-                         className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                         disabled={simulating === matter.id}
-                         onClick={() => handleSimulatePEXA(matter.id)}
-                       >
-                         {simulating === matter.id ? (
-                           <RefreshCw className="h-3 w-3 animate-spin mr-1" />
-                         ) : (
-                           <AlertCircle className="h-3 w-3 mr-1" />
-                         )}
-                         Simulate PEXA
-                       </Button>
-                    ) : (
-                      <span className="flex items-center justify-end text-xs text-green-600 font-medium">
-                        <CheckCircle2 className="h-3 w-3 mr-1" /> Done
-                      </span>
-                    )}
+              {filteredMatters.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    No matters found.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredMatters.map((matter) => (
+                  <TableRow key={matter.id}>
+                    <TableCell className="font-mono text-xs">{matter.id.substring(0, 8)}</TableCell>
+                    <TableCell className="font-medium">{matter.address}</TableCell>
+                    <TableCell>Client</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={
+                        matter.status === 'Settled' ? 'bg-green-50 text-green-700 border-green-200' :
+                        matter.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                        'bg-slate-50 text-slate-700'
+                      }>
+                        {matter.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{matter.settlementDate ? format(new Date(matter.settlementDate), 'dd MMM yyyy') : 'TBD'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-16 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary" style={{ width: `${matter.milestonePercent}%` }} />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{matter.milestonePercent}%</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {matter.status !== 'Settled' ? (
+                         <Button 
+                           size="sm" 
+                           variant="ghost" 
+                           className="text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                           disabled={simulating === matter.id}
+                           onClick={() => handleSimulatePEXA(matter.id)}
+                         >
+                           {simulating === matter.id ? (
+                             <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                           ) : (
+                             <AlertCircle className="h-3 w-3 mr-1" />
+                           )}
+                           Simulate PEXA
+                         </Button>
+                      ) : (
+                        <span className="flex items-center justify-end text-xs text-green-600 font-medium">
+                          <CheckCircle2 className="h-3 w-3 mr-1" /> Done
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </Card>

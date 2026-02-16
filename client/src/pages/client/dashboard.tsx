@@ -1,5 +1,6 @@
 import React from 'react';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { ProgressCircle } from '@/components/progress-circle';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,13 +8,31 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Clock, FileText, Upload, ChevronRight, AlertCircle, Calendar } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import type { Matter, Task } from '@shared/schema';
 
 export default function ClientDashboard() {
-  const { currentUser, matters, tasks } = useStore();
+  const { user } = useAuth();
   
-  // For MVP, just grab the first matter for this user
-  const matter = matters.find(m => m.clientUserId === currentUser?.id);
-  const myTasks = tasks.filter(t => t.matterId === matter?.id);
+  const { data: matters, isLoading: mattersLoading } = useQuery<Matter[]>({
+    queryKey: ["/api/matters"],
+  });
+
+  const matter = matters?.find(m => m.clientUserId === user?.id) || matters?.[0];
+
+  const { data: myTasks, isLoading: tasksLoading } = useQuery<Task[]>({
+    queryKey: ["/api/matters", matter?.id, "tasks"],
+    enabled: !!matter?.id,
+  });
+
+  if (mattersLoading) {
+    return (
+      <Layout role="CLIENT">
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!matter) {
     return (
@@ -30,6 +49,8 @@ export default function ClientDashboard() {
     );
   }
 
+  const tasks = myTasks || [];
+
   return (
     <Layout role="CLIENT">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -45,7 +66,7 @@ export default function ClientDashboard() {
                  {matter.transactionType}
                </Badge>
                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                 <Calendar className="h-4 w-4" /> Settlement: {new Date(matter.settlementDate).toLocaleDateString()}
+                 <Calendar className="h-4 w-4" /> Settlement: {matter.settlementDate ? new Date(matter.settlementDate).toLocaleDateString() : 'TBD'}
                </span>
             </div>
           </div>
@@ -77,26 +98,36 @@ export default function ClientDashboard() {
                <Button variant="outline" size="sm">View All</Button>
             </div>
             
-            <div className="grid gap-3">
-              {myTasks.map(task => (
-                <div key={task.id} className="group bg-white border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all duration-200">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${task.status === 'COMPLETE' ? 'bg-green-100 text-green-600' : 'bg-[#fac515]/20 text-yellow-700'}`}>
-                     {task.status === 'COMPLETE' ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+            {tasksLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              </div>
+            ) : tasks.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No tasks yet. Check back soon!</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                {tasks.map(task => (
+                  <div key={task.id} className="group bg-white border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all duration-200">
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${task.status === 'COMPLETE' ? 'bg-green-100 text-green-600' : 'bg-[#fac515]/20 text-yellow-700'}`}>
+                       {task.status === 'COMPLETE' ? <CheckCircle2 className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`font-medium text-base ${task.status === 'COMPLETE' && 'text-muted-foreground line-through'}`}>{task.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {task.status === 'COMPLETE' ? 'Completed' : task.dueDate ? `Due by ${new Date(task.dueDate).toLocaleDateString()}` : 'No due date'}
+                      </p>
+                    </div>
+                    {task.status !== 'COMPLETE' && (
+                      <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-lg">
+                        {task.type === 'UPLOAD' ? 'Upload' : 'Start'}
+                      </Button>
+                    )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`font-medium text-base ${task.status === 'COMPLETE' && 'text-muted-foreground line-through'}`}>{task.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {task.status === 'COMPLETE' ? 'Completed' : `Due by ${new Date(task.dueDate).toLocaleDateString()}`}
-                    </p>
-                  </div>
-                  {task.status !== 'COMPLETE' && (
-                    <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-lg">
-                      {task.type === 'UPLOAD' ? 'Upload' : 'Start'}
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

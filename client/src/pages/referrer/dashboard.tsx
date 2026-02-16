@@ -1,5 +1,6 @@
 import React from 'react';
-import { useStore } from '@/lib/store';
+import { useAuth } from '@/lib/auth';
+import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,14 +8,28 @@ import { Plus, Search, DollarSign, Users, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
+import type { Referral } from '@shared/schema';
 
 export default function ReferrerDashboard() {
-  const { referrals, currentUser } = useStore();
+  const { user } = useAuth();
   
-  // Filter referrals by this broker
-  const myReferrals = referrals.filter(r => r.brokerId === currentUser?.id);
+  const { data: referrals, isLoading } = useQuery<Referral[]>({
+    queryKey: ["/api/referrals"],
+  });
+
+  const myReferrals = referrals?.filter(r => r.brokerId === user?.id) || [];
   
   const totalCommission = myReferrals.reduce((sum, r) => sum + r.commission, 0);
+
+  if (isLoading) {
+    return (
+      <Layout role="BROKER">
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout role="BROKER">
@@ -89,25 +104,33 @@ export default function ReferrerDashboard() {
                    </tr>
                  </thead>
                  <tbody>
-                   {myReferrals.map((referral) => (
-                     <tr key={referral.id} className="border-b last:border-0 hover:bg-muted/10 transition-colors">
-                       <td className="p-4 font-medium">{referral.clientName}</td>
-                       <td className="p-4">
-                         <Badge variant="secondary" className={
-                           referral.status === 'Settled' ? 'bg-green-100 text-green-700' : 
-                           referral.status === 'Converted' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
-                         }>
-                           {referral.status}
-                         </Badge>
-                       </td>
-                       <td className="p-4 text-muted-foreground">
-                         {referral.commission > 0 ? `$${referral.commission}` : '-'}
-                       </td>
-                       <td className="p-4 text-right">
-                         <Button variant="ghost" size="sm">View</Button>
+                   {myReferrals.length === 0 ? (
+                     <tr>
+                       <td colSpan={4} className="p-8 text-center text-muted-foreground">
+                         No referrals yet. Create your first referral to get started.
                        </td>
                      </tr>
-                   ))}
+                   ) : (
+                     myReferrals.map((referral) => (
+                       <tr key={referral.id} className="border-b last:border-0 hover:bg-muted/10 transition-colors">
+                         <td className="p-4 font-medium">{referral.clientName}</td>
+                         <td className="p-4">
+                           <Badge variant="secondary" className={
+                             referral.status === 'Settled' ? 'bg-green-100 text-green-700' : 
+                             referral.status === 'Converted' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                           }>
+                             {referral.status}
+                           </Badge>
+                         </td>
+                         <td className="p-4 text-muted-foreground">
+                           {referral.commission > 0 ? `$${referral.commission}` : '-'}
+                         </td>
+                         <td className="p-4 text-right">
+                           <Button variant="ghost" size="sm">View</Button>
+                         </td>
+                       </tr>
+                     ))
+                   )}
                  </tbody>
                </table>
              </div>
