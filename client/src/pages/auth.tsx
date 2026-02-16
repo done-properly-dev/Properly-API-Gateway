@@ -126,8 +126,8 @@ export default function AuthPage() {
         <div className="w-full max-w-[440px] space-y-8">
           
           <div className="flex flex-col items-center text-center space-y-6">
-            <div className="h-12 w-12 flex items-center justify-center">
-              <img src="/images/logo-icon.png" alt="Logo" className="h-10 w-10 object-contain" />
+            <div className="flex items-center justify-center">
+              <img src="/images/properly-logo-stacked.png" alt="Properly" className="h-24 w-auto object-contain" />
             </div>
             
             <div className="space-y-2">
