@@ -1,0 +1,436 @@
+You are building an MVP for “Properly”, an API driven communication and transparency platform for Australian property transactions.
+
+Properly mirrors matter data and milestones from Smokeball plus live settlement status from PEXA, then presents it to four ring fenced user groups:
+	1.	Buyer or Seller client (mobile first)
+	2.	Broker or Agent referrer (mobile friendly portal, MFA required)
+	3.	Aggregator or Referrer Admin (hierarchical view across a team)
+	4.	Conveyancing Principal and team (master view across their firm)
+
+The initial build must use a Mock Smokeball API because no sandbox is available yet, and it must be designed so swapping in the real Smokeball API later is straightforward.
+
+Data sovereignty requirement: production architecture must be constrained to AWS Sydney region ap southeast 2. In this Replit MVP, implement the code and configuration patterns that make the region lock explicit, plus create a simple diagram page in app that demonstrates the intended Sydney only deployment pattern.
+
+Mobile is the primary route for Buyers and Sellers. Web is primary for Referrers and Partners. The app must work seamlessly on iOS, Android, and web with one shared codebase.
+
+Tone: Australian vernacular, playful and encouraging, but no emojis.
+
+What to build in Replit
+
+Stack decision (use this unless impossible)
+
+Use a single TypeScript monorepo with:
+
+Client
+Expo React Native with expo router so the same app runs on iOS, Android, and web
+React Query for API data
+Zustand for lightweight client state
+NativeWind or Tamagui for consistent styling across platforms
+
+Server
+Node TypeScript API using Fastify
+Postgres database (Replit Postgres if available, otherwise a standard Postgres connection string)
+Prisma ORM
+OpenAPI schema generated from routes and used to generate a typed client
+
+Auth and security
+Auth0 for authentication
+Magic link flow for Clients (passwordless for first 24 hours)
+Email and password plus MFA for Referrers, Aggregators, Conveyancers
+JWT based session for API access
+Role based access control plus hierarchical permissions for referrer org structure
+
+Files
+Abstraction layer for storage with an implementation for local dev and an implementation ready for S3 Sydney
+Document vault endpoints and UI
+
+Notifications
+Notification service abstraction with providers for Resend (email) and Twilio (SMS)
+In MVP, implement both adapters with environment toggles and stub delivery if keys missing
+Quiet hours logic by property state time zone (no SMS 9pm to 8am local)
+
+Integrations
+Mock Smokeball API service that follows Smokeball docs shape
+Mock PEXA feed service that simulates settlement updates and webhook like events
+Integration boundary layer so real APIs can replace mocks later with minimal changes
+
+Repo structure
+
+Create a monorepo like:
+
+apps
+mobile  Expo app for iOS Android web
+api  Fastify server
+packages
+shared  shared types validation utilities RBAC helpers milestone mapping
+smokeball mock and real client interface
+pexa mock and real client interface
+notifications provider abstraction and templates
+storage provider abstraction
+
+Core product requirements (MVP)
+
+1) Buyer or Seller experience (mobile first)
+
+Entry
+Client receives SMS or Email with a magic link
+Magic link logs them in without a password for 24 hours
+After first login they set a PIN or enable FaceID style local auth (use device secure store, fall back to PIN)
+
+Onboarding flow
+Screen 1 Transaction Type: Buying or Selling and contract status
+Screen 2 Cost Summary: dynamic summary based on state and transaction type (use placeholder pricing rules configurable in admin)
+Screen 3 ID Verification: build a hook for VOI provider, simulate success fail
+Screen 4 Contract Upload: upload contract of sale image or PDF
+If contract uploaded, create a new Matter in Mock Smokeball
+If no contract, place user in Nurture state
+
+Dashboard
+Show a five pillar progress bar at 20 percent increments
+Kick off 20
+Review 40
+Diligence 60
+Commitment 80
+Settlement 100
+Show key dates contract deposit settlement
+Show file owner contact details
+
+Tasks
+Display tasks pushed from Smokeball with statuses
+To do
+Overdue
+In review
+Complete
+Task detail includes
+Conveyancer notes
+Upload supporting docs
+Ask a question (linked to task)
+Acknowledge button
+Actions post back to API and create an audit event
+
+Document vault
+List all matter documents with size and upload date
+System critical docs locked
+User uploaded docs deletable unless verified
+
+Playbook content
+Placeholder educational articles
+Show when in Nurture state and also as a section during active matters
+Structure so content can be replaced later
+
+2) Referrer portal (brokers agents and aggregators)
+
+Registration
+Public sign up for referrers with role and state
+Mandatory MFA on login
+Start with SMS based MFA in Auth0
+
+Hierarchy and permissions
+Model organizations like
+Aggregator
+Firm
+Team (optional)
+Individual broker
+Permissions rules
+Broker sees only their referrals
+Manager sees team referrals
+Aggregator admin sees all referrals for their org
+
+Referral creation
+Button Make a Referral
+Enter client details, or generate QR code and personal link, and send SMS or Email invite
+Generating invites creates a Referral record and sends magic link to client
+
+Dashboard
+Performance stats total income total referrals (use placeholder calc)
+Kanban or list view by stage
+Invited
+Onboarded
+In progress
+Unconditional
+Settled
+Show live PEXA feed events for each matter (mocked)
+
+Payouts
+Bank details
+Payout frequency per transaction or monthly
+Payout history list (MVP uses fixed Properly fee 100 per settled)
+
+Messaging
+Referrer can message conveyancer through portal
+In MVP, store messages in database and show in conveyancer view
+Also create a webhook style stub to “push into Smokeball” later
+
+3) Conveyancer portal (master view)
+
+Firm invite and setup
+Ability to create a conveyancing firm and invite users
+Principal role can see all firm matters and referral volumes
+
+Dashboard
+Searchable list of active Properly clients
+Status, state, progress, last active date
+Highlight stuck files (no movement for 5 days)
+
+Client profile
+See progress
+See mirrored tasks and docs
+Manual overrides
+Move milestone
+Send nudge to client
+Add internal note
+
+Integrations settings
+Toggle Smokeball and PEXA connections
+In MVP, show connection status for mocks
+
+Payments screen
+Track Properly fees and invoices
+Generate a basic PDF invoice or downloadable receipt for each settled matter (simple template)
+
+4) Notifications and admin editing
+
+Notification templates
+Store all notification templates in database with variables like [Name] [Broker Name] [Link] [Date]
+Create an Admin UI to edit templates visually
+Preview rendered output with sample data
+Support channels SMS Email Push (push can be mocked)
+
+Trigger engine
+Implement event driven triggers based on:
+New referral received
+Onboarding not started 24 hours
+VOI complete
+Contract uploaded
+Smokeball milestone hit
+Stale file 5 days
+Settlement booked
+Settlement successful
+Payment sent
+
+Quiet hours
+No SMS between 9pm and 8am in local time based on property state
+If within quiet hours, queue and send at 8am
+
+Stale file nudge logic
+When stale file triggers, email broker and also flag in internal admin dashboard
+
+Data model you must implement
+
+Use Prisma schema with at least:
+
+User
+id, email, phone, role, auth0Id, firmId, referrerOrgId, createdAt
+
+Role enum
+CLIENT
+BROKER
+MANAGER
+AGGREGATOR_ADMIN
+CONVEYANCER
+CONVEYANCER_PRINCIPAL
+PROPERLY_ADMIN
+
+ReferrerOrg
+id, name
+
+ReferrerTeam
+id, orgId, name, managerUserId
+
+Firm
+id, name, state
+
+Matter
+id, externalSmokeballMatterId, externalPexaId, firmId, clientUserId, state, transactionType, hasContract, nurtureState, milestonePercent, status, keyDatesJson, createdAt, updatedAt, lastActivityAt
+
+Referral
+id, createdByUserId, orgId, teamId nullable, clientName, clientPhone, clientEmail, inviteLink, status, matterId nullable, createdAt
+
+Task
+id, matterId, externalTaskId, title, description, status, dueAt, lastUpdatedFromSourceAt
+
+Document
+id, matterId, name, type, storageKey, size, uploadedByUserId, locked, verified, createdAt
+
+Message
+id, matterId, senderUserId, recipientRole, body, createdAt
+
+NotificationTemplate
+id, key, channel, subject nullable, body, enabled
+
+NotificationEvent
+id, type, matterId, referralId nullable, payloadJson, status queued sent failed, scheduledAt, sentAt
+
+Payout
+id, referralId, amount, status, paidAt nullable, method, bankLast4 nullable
+
+AuditEvent
+id, actorUserId, entityType, entityId, action, metadataJson, createdAt
+
+API requirements
+
+Implement REST endpoints with OpenAPI docs, including:
+
+Auth
+GET auth magic link callback (handled by Auth0)
+GET me
+
+Matters
+GET matters (scoped by role)
+GET matters id
+POST matters create from contract upload (client flow)
+PATCH matters id manual milestone override (conveyancer principal only)
+
+Tasks
+GET matters id tasks
+POST tasks id acknowledge
+POST tasks id question
+POST tasks id upload
+
+Documents
+GET matters id documents
+POST matters id documents upload
+DELETE documents id (only if not locked and uploadedBy current user and not verified)
+
+Referrals
+POST referrals create
+GET referrals (scoped by hierarchy)
+POST referrals id send invite (sms or email)
+GET referrals id qr
+
+PEXA feed
+GET matters id pexa events
+POST pexa mock webhook to update matter settlement status
+
+Notifications
+GET templates
+PATCH templates id
+POST notifications test send preview
+GET admin stale flags list
+
+Admin
+GET audit events
+GET data sovereignty diagram info (see below)
+
+Mock integrations
+
+Mock Smokeball API
+Create a module that can:
+Create a matter
+Return matter stages and tasks
+Return documents list
+Simulate milestone progression over time
+Expose endpoints under /mock smokeball for testing only
+
+Mock PEXA feed
+Create a module that can:
+Create a settlement timeline
+Emit events like settlement booked, settlement successful
+Expose a webhook endpoint the mock can call into the main app
+Provide a UI button in conveyancer portal to simulate PEXA events for a matter
+
+Milestone mapping
+Use the generic bridge map for now
+New Matter 20
+Contract Received 40
+Searches Ordered 60
+Unconditional Exchange 80
+PEXA Settled 100
+Implement as a config table so the AELS mapping sheet can be inserted later without code changes
+
+Data sovereignty evidence (in app)
+
+Create a simple “Data Sovereignty” page available to Properly Admin and Conveyancer Principal that includes:
+	1.	A diagram style view showing intended production deployment in AWS ap southeast 2 only
+	2.	A table listing services and region constraints
+	3.	A configuration readout showing AWS region environment variables defaulting to ap southeast 2
+	4.	A unit test or startup check that fails if AWS region is not ap southeast 2 when PRODUCTION true
+
+In MVP, this is evidence and design intent, not actual AWS deployment from Replit.
+
+UX and tone requirements
+
+Buyer and Seller copy should feel encouraging and gamified
+No emojis
+Use Australian vernacular
+Keep the experience light but professional
+
+Empty states
+Implement empty states for broker with zero referrals and clear Make a Referral call to action
+
+Animations
+Add subtle progress animations for the five pillar bar and task completion confetti style effect but no emojis
+
+Non functional requirements
+
+Security
+Enforce RBAC and hierarchy checks on every endpoint
+Validate inputs with Zod
+Rate limit auth related endpoints
+Log audit events for key actions
+
+Quality
+Seed script with demo users for each role and demo matters and referrals
+End to end happy path demo works without external credentials
+
+Environment variables
+Provide a .env.example with everything needed
+Auth0 settings placeholders
+Resend and Twilio keys placeholders
+Storage settings placeholders
+AWS region defaults to ap southeast 2
+
+Deliverables checklist
+	1.	Running Expo app in Replit that supports web preview plus mobile builds via Expo
+	2.	Running API server in Replit with OpenAPI docs at /docs
+	3.	Prisma schema and migrations
+	4.	Seed data and demo login instructions
+	5.	Mock Smokeball and Mock PEXA working with UI buttons to simulate progress and settlement
+	6.	Role based screens for Client, Referrer, Aggregator, Conveyancer, Properly Admin
+	7.	Notification template editor and trigger queue with quiet hours logic
+	8.	Data sovereignty evidence page and production region guard
+
+Build order
+
+Phase A foundations
+Monorepo scaffold
+Prisma models
+Auth0 integration
+RBAC middleware
+Seed data
+
+Phase B client experience
+Magic link entry
+Onboarding flow
+Dashboard tasks documents
+
+Phase C referrer portal
+Registration MFA
+Referral creation invites
+Dashboard kanban
+
+Phase D conveyancer portal
+Master dashboard
+Client profile overrides
+Integration mocks controls
+
+Phase E notifications and admin
+Templates editor
+Trigger engine
+Quiet hours and stale flags
+
+Phase F sovereignty evidence and hardening
+Sovereignty page
+Region guard
+Audit events polish
+
+Definition of done for MVP
+
+A demo can be run end to end:
+	1.	Broker signs up, logs in with MFA, creates referral, sends invite SMS or email (stub ok)
+	2.	Client uses magic link, completes onboarding, uploads contract, matter created in mock Smokeball
+	3.	Client sees tasks, acknowledges one, uploads a doc, asks a question
+	4.	Conveyancer sees the matter, manually moves milestone once, sends a nudge
+	5.	Mock PEXA marks settlement booked then settled, system updates to 100 percent, triggers celebration notifications
+	6.	Broker sees settled status and payout record created
+	7.	Admin edits a notification template and sends a test preview
+	8.	Sovereignty page shows Sydney region lock design and guard
