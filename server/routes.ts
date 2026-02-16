@@ -1,22 +1,38 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import bcrypt from "bcryptjs";
 import { storage } from "./storage";
-import { pool } from "./db";
-import { insertUserSchema, insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema } from "@shared/schema";
+import { supabase } from "./supabase";
+import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema } from "@shared/schema";
 
-declare module "express-session" {
-  interface SessionData {
-    userId: string;
+function paramId(req: Request, key: string): string {
+  const val = req.params[key];
+  return Array.isArray(val) ? val[0] : val;
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+      supabaseToken?: string;
+    }
   }
 }
 
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
+async function requireAuth(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Not authenticated" });
   }
+
+  const token = authHeader.slice(7);
+  const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+
+  if (error || !authUser) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+
+  req.userId = authUser.id;
+  req.supabaseToken = token;
   next();
 }
 
@@ -24,76 +40,66 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  const PgStore = connectPgSimple(session);
-  app.use(
-    session({
-      store: new PgStore({ pool, createTableIfMissing: true }),
-      secret: process.env.SESSION_SECRET || "properly-dev-secret-change-in-prod",
-      resave: false,
-      saveUninitialized: false,
-      cookie: { secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 },
-    })
-  );
-
-  // ─── Auth ───
-  app.post("/api/auth/signup", async (req, res) => {
-    try {
-      const parsed = insertUserSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return res.status(400).json({ message: parsed.error.issues[0].message });
-      }
-      const existing = await storage.getUserByEmail(parsed.data.email);
-      if (existing) {
-        return res.status(409).json({ message: "Email already registered" });
-      }
-      const hashed = await bcrypt.hash(parsed.data.password, 10);
-      const user = await storage.createUser({ ...parsed.data, password: hashed });
-      req.session.userId = user.id;
-      const { password: _, ...safe } = user;
-      res.status(201).json(safe);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password required" });
-      }
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      const valid = await bcrypt.compare(password, user.password);
-      if (!valid) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      req.session.userId = user.id;
-      const { password: _, ...safe } = user;
-      res.json(safe);
-    } catch (err: any) {
-      res.status(500).json({ message: err.message });
-    }
-  });
-
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) return res.status(500).json({ message: "Logout failed" });
-      res.clearCookie("connect.sid");
-      res.json({ message: "Logged out" });
-    });
-  });
 
   app.get("/api/auth/me", async (req, res) => {
-    if (!req.session.userId) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Not authenticated" });
     }
-    const user = await storage.getUser(req.session.userId);
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
+
+    const token = authHeader.slice(7);
+    const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+
+    if (error || !authUser) {
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
+
+    let user = await storage.getUser(authUser.id);
+
+    if (!user) {
+      const metadata = authUser.user_metadata || {};
+      user = await storage.createUser({
+        id: authUser.id,
+        email: authUser.email || "",
+        password: "supabase-managed",
+        name: metadata.name || authUser.email?.split("@")[0] || "User",
+        role: metadata.role || "CLIENT",
+      });
+    }
+
+    const { password: _, ...safe } = user;
+    res.json(safe);
+  });
+
+  app.post("/api/auth/profile", async (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const token = authHeader.slice(7);
+    const { data: { user: authUser }, error } = await supabase.auth.getUser(token);
+
+    if (error || !authUser) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    const { name, role } = req.body;
+
+    let user = await storage.getUser(authUser.id);
+    if (user) {
+      user = await storage.updateUser(authUser.id, { name, role });
+    } else {
+      user = await storage.createUser({
+        id: authUser.id,
+        email: authUser.email || "",
+        password: "supabase-managed",
+        name: name || authUser.email?.split("@")[0] || "User",
+        role: role || "CLIENT",
+      });
+    }
+
+    if (!user) return res.status(500).json({ message: "Failed to create profile" });
     const { password: _, ...safe } = user;
     res.json(safe);
   });
@@ -101,7 +107,7 @@ export async function registerRoutes(
   // ─── Matters ───
   app.get("/api/matters", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
+      const user = await storage.getUser(req.userId!);
       if (!user) return res.status(401).json({ message: "User not found" });
 
       let result;
@@ -120,7 +126,7 @@ export async function registerRoutes(
 
   app.get("/api/matters/:id", requireAuth, async (req, res) => {
     try {
-      const matter = await storage.getMatter(req.params.id);
+      const matter = await storage.getMatter(paramId(req, "id"));
       if (!matter) return res.status(404).json({ message: "Matter not found" });
       res.json(matter);
     } catch (err: any) {
@@ -143,7 +149,7 @@ export async function registerRoutes(
 
   app.patch("/api/matters/:id", requireAuth, async (req, res) => {
     try {
-      const matter = await storage.updateMatter(req.params.id, req.body);
+      const matter = await storage.updateMatter(paramId(req, "id"), req.body);
       if (!matter) return res.status(404).json({ message: "Matter not found" });
       res.json(matter);
     } catch (err: any) {
@@ -154,7 +160,7 @@ export async function registerRoutes(
   // ─── Tasks ───
   app.get("/api/matters/:matterId/tasks", requireAuth, async (req, res) => {
     try {
-      const result = await storage.getTasksByMatter(req.params.matterId);
+      const result = await storage.getTasksByMatter(paramId(req, "matterId"));
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -176,7 +182,7 @@ export async function registerRoutes(
 
   app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
     try {
-      const task = await storage.updateTask(req.params.id, req.body);
+      const task = await storage.updateTask(paramId(req, "id"), req.body);
       if (!task) return res.status(404).json({ message: "Task not found" });
       res.json(task);
     } catch (err: any) {
@@ -187,7 +193,7 @@ export async function registerRoutes(
   // ─── Documents ───
   app.get("/api/matters/:matterId/documents", requireAuth, async (req, res) => {
     try {
-      const result = await storage.getDocumentsByMatter(req.params.matterId);
+      const result = await storage.getDocumentsByMatter(paramId(req, "matterId"));
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -209,7 +215,7 @@ export async function registerRoutes(
 
   app.delete("/api/documents/:id", requireAuth, async (req, res) => {
     try {
-      await storage.deleteDocument(req.params.id);
+      await storage.deleteDocument(paramId(req, "id"));
       res.json({ message: "Deleted" });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -219,7 +225,7 @@ export async function registerRoutes(
   // ─── Referrals ───
   app.get("/api/referrals", requireAuth, async (req, res) => {
     try {
-      const user = await storage.getUser(req.session.userId!);
+      const user = await storage.getUser(req.userId!);
       if (!user) return res.status(401).json({ message: "User not found" });
 
       let result;
@@ -259,7 +265,7 @@ export async function registerRoutes(
 
   app.patch("/api/notifications/:id", requireAuth, async (req, res) => {
     try {
-      const notification = await storage.updateNotification(req.params.id, req.body);
+      const notification = await storage.updateNotification(paramId(req, "id"), req.body);
       if (!notification) return res.status(404).json({ message: "Notification not found" });
       res.json(notification);
     } catch (err: any) {

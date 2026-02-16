@@ -43,3 +43,9 @@ waitForPort = 5000
 stack = "MOCKUP_JS"
 mockupState = "FULLSTACK"
 integrations = ["notion:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://sditwjusrecrqhxyuwfc.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkaXR3anVzcmVjcnFoeHl1d2ZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEyMjM1MjgsImV4cCI6MjA4Njc5OTUyOH0.CDisyM5sctzfrXS22hhw0A-4LuwQuzWrzKi8pZKr2N0"
