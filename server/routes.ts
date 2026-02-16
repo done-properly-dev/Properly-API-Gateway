@@ -117,6 +117,96 @@ export async function registerRoutes(
     res.json(safe);
   });
 
+  // ─── Demo Login ───
+  const DEMO_ACCOUNTS: Record<string, { name: string; role: string }> = {
+    "sarah@example.com": { name: "Sarah Johnson", role: "CLIENT" },
+    "mike@broker.com.au": { name: "Mike Thompson", role: "BROKER" },
+    "admin@legaleagles.com.au": { name: "Legal Eagles", role: "CONVEYANCER" },
+    "admin@properly.com.au": { name: "Admin", role: "ADMIN" },
+  };
+
+  const DEMO_SUPABASE_EMAIL_MAP: Record<string, string> = {
+    "sarah@example.com": "demo-buyer@properly-app.com.au",
+    "mike@broker.com.au": "demo-broker@properly-app.com.au",
+    "admin@legaleagles.com.au": "demo-conveyancer@properly-app.com.au",
+    "admin@properly.com.au": "demo-admin@properly-app.com.au",
+  };
+
+  app.post("/api/auth/demo-login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const demo = DEMO_ACCOUNTS[email];
+      if (!demo) {
+        return res.status(400).json({ message: "Not a demo account" });
+      }
+
+      const supabaseEmail = DEMO_SUPABASE_EMAIL_MAP[email] || email;
+      const demoPassword = "DemoPass123!";
+
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ 
+        email: supabaseEmail, 
+        password: demoPassword 
+      });
+
+      if (!signInError && signInData.session) {
+        let user = await storage.getUser(signInData.user.id);
+        if (!user) {
+          user = await storage.createUser({
+            id: signInData.user.id,
+            email,
+            password: "supabase-managed",
+            name: demo.name,
+            role: demo.role,
+          });
+        }
+        return res.json({ session: signInData.session });
+      }
+
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: supabaseEmail,
+        password: demoPassword,
+        options: { data: { name: demo.name, role: demo.role } },
+      });
+
+      if (signUpError) {
+        return res.status(400).json({ message: signUpError.message });
+      }
+
+      if (signUpData.session) {
+        await storage.createUser({
+          id: signUpData.user!.id,
+          email,
+          password: "supabase-managed",
+          name: demo.name,
+          role: demo.role,
+        });
+        return res.json({ session: signUpData.session });
+      }
+
+      const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({ 
+        email: supabaseEmail, 
+        password: demoPassword 
+      });
+      if (retryError) {
+        return res.status(400).json({ message: retryError.message });
+      }
+
+      let user = await storage.getUser(retryData.user.id);
+      if (!user) {
+        user = await storage.createUser({
+          id: retryData.user.id,
+          email,
+          password: "supabase-managed",
+          name: demo.name,
+          role: demo.role,
+        });
+      }
+      return res.json({ session: retryData.session });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   // ─── Matters ───
   app.get("/api/matters", requireAuth, async (req, res) => {
     try {

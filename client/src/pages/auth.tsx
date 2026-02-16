@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+import { queryClient } from '@/lib/queryClient';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,24 +18,17 @@ export default function AuthPage() {
   const [role, setRole] = useState('CLIENT');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [error, setError] = useState('');
-  const [autoSubmit, setAutoSubmit] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const { login, signup, user, isAuthenticated } = useAuth();
   const [_, setLocation] = useLocation();
 
-  const loading = login.isPending || signup.isPending;
+  const loading = login.isPending || signup.isPending || demoLoading;
 
   useEffect(() => {
     if (isAuthenticated && user) {
       redirectByRole(user.role);
     }
   }, [isAuthenticated, user]);
-
-  useEffect(() => {
-    if (autoSubmit && email && password) {
-      setAutoSubmit(false);
-      handleSubmit();
-    }
-  }, [autoSubmit, email, password]);
 
   const redirectByRole = (userRole: string) => {
     if (userRole === 'BROKER') setLocation('/referrer/dashboard');
@@ -57,11 +52,35 @@ export default function AuthPage() {
     }
   };
 
-  const handleDemoLogin = (demoEmail: string, demoPassword: string) => {
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string) => {
     setEmail(demoEmail);
     setPassword(demoPassword);
     setAuthMode('login');
-    setAutoSubmit(true);
+    setError('');
+    setDemoLoading(true);
+    
+    try {
+      const res = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: demoEmail, password: demoPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Demo login failed');
+      
+      if (data.session) {
+        const { data: sessionData, error } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+        if (error) throw new Error(error.message);
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Demo login failed');
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
   const GoogleIcon = () => (
