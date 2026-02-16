@@ -70,7 +70,12 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - GET `/api/matters/:matterId/documents` - Documents for matter
 - POST `/api/documents` - Create document
 - DELETE `/api/documents/:id` - Delete document
-- GET/POST `/api/referrals` - List/create referrals
+- GET/POST `/api/referrals` - List/create referrals (supports channel: PORTAL|SMS|QR)
+- POST `/api/referrals/sms` - Create SMS referral with Twilio integration
+- GET `/api/referrals/qr/:token` - Public QR code referral landing (no auth)
+- GET/POST `/api/payments` - List/create payments (broker sees own, admin sees all)
+- PATCH `/api/payments/:id` - Update payment status
+- GET `/api/organisations/me` - Current user's organisation + members
 - GET `/api/notifications` - List notifications
 - PATCH `/api/notifications/:id` - Update notification
 - GET `/api/playbook` - List playbook articles (public, supports ?category and ?pillar filters)
@@ -97,6 +102,21 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 9. Task completion UX linked to uploads (required uploads section)
 10. Document viewer for uploaded files (real image/PDF preview for uploaded files)
 
+## Sprint 3 Features (Complete)
+1. Payments table (matterId, referralId, brokerId, amount, properlyFee, netAmount, status)
+2. Organisations + organisation_members tables for team management
+3. Referrals extended with channel (PORTAL|SMS|QR) and qrToken fields
+4. Multi-channel referral creation (portal form, SMS link, QR code generator)
+5. Payments CRUD with $100 Properly fee deducted on settlement
+6. Organisation-scoped referral listing (managers see team, members see own)
+7. QR code public endpoint for walk-in referral submission
+8. Broker payments & commission tracking page
+9. QR code generation and display with download/copy link
+10. SMS referral link sharing UI with Twilio integration
+11. Aggregator team pipeline view (hierarchical dashboard)
+12. Empty states with "Make a Referral" CTA for new brokers
+13. All 13 Sprint 3 items checked off in Notion
+
 ## Supabase Configuration
 - Email confirmation: DISABLED (required for demo accounts)
 - VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY set as shared env vars
@@ -118,6 +138,7 @@ Demo login buttons on /auth page auto-create Supabase Auth accounts:
 - **Service Status**: GET /api/services/status - Returns configuration status of all services
 
 ## Recent Changes
+- 2026-02-16: Sprint 3 complete - Referrer Portal Expansion & Payments (multi-channel referrals, QR codes, SMS, payments tracking, team pipeline)
 - 2026-02-16: Sprint 2 complete - Document Vault & Task Completion (file upload, drag-and-drop, auto-complete tasks, document preview)
 - 2026-02-16: Sprint 1 and Sprint 2 todos checked off in Notion developer documentation
 - 2026-02-16: Onboarding alert bar - shows incomplete steps on dashboard with resume links, checks actual data not onboardingComplete flag

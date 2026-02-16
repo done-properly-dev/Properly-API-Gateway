@@ -125,6 +125,8 @@ export const referrals = pgTable("referrals", {
   commission: integer("commission").notNull().default(0),
   propertyAddress: text("property_address"),
   transactionType: text("transaction_type"),
+  channel: text("channel").notNull().default("PORTAL"),
+  qrToken: text("qr_token").unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -168,3 +170,52 @@ export const insertPlaybookArticleSchema = createInsertSchema(playbookArticles).
 });
 export type InsertPlaybookArticle = z.infer<typeof insertPlaybookArticleSchema>;
 export type PlaybookArticle = typeof playbookArticles.$inferSelect;
+
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  matterId: varchar("matter_id").references(() => matters.id),
+  referralId: varchar("referral_id").references(() => referrals.id),
+  brokerId: varchar("broker_id").notNull().references(() => users.id),
+  amount: integer("amount").notNull(),
+  properlyFee: integer("properly_fee").notNull().default(10000),
+  netAmount: integer("net_amount").notNull(),
+  status: text("status").notNull().default("pending"),
+  settledAt: timestamp("settled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+
+export const organisations = pgTable("organisations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOrganisationSchema = createInsertSchema(organisations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertOrganisation = z.infer<typeof insertOrganisationSchema>;
+export type Organisation = typeof organisations.$inferSelect;
+
+export const organisationMembers = pgTable("organisation_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  orgId: varchar("org_id").notNull().references(() => organisations.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  role: text("role").notNull().default("MEMBER"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertOrganisationMemberSchema = createInsertSchema(organisationMembers).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertOrganisationMember = z.infer<typeof insertOrganisationMemberSchema>;
+export type OrganisationMember = typeof organisationMembers.$inferSelect;

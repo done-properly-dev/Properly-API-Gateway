@@ -10,8 +10,11 @@ import ClientOnboarding from '@/pages/client/onboarding';
 import ClientPlaybook from '@/pages/client/playbook';
 import ReferrerDashboard from '@/pages/referrer/dashboard';
 import ReferrerCreate from '@/pages/referrer/create';
+import BrokerPayments from '@/pages/referrer/payments';
+import BrokerTeam from '@/pages/referrer/team';
 import AdminDashboard from '@/pages/admin/dashboard';
 import ConveyancerDashboard from '@/pages/conveyancer/dashboard';
+import ReferralLanding from '@/pages/referral-landing';
 import NotFound from "@/pages/not-found";
 import { Toaster } from "@/components/ui/toaster";
 import { ProperlyLoader } from '@/components/properly-loader';
@@ -45,6 +48,7 @@ function App() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/auth" component={AuthPage} />
+        <Route path="/referral/qr/:token" component={ReferralLanding} />
         
         {/* Client Routes */}
         <Route path="/client/onboarding">
@@ -66,6 +70,12 @@ function App() {
         </Route>
         <Route path="/referrer/create">
           <PrivateRoute component={ReferrerCreate} allowedRoles={['BROKER']} />
+        </Route>
+        <Route path="/referrer/payments">
+          <PrivateRoute component={BrokerPayments} allowedRoles={['BROKER']} />
+        </Route>
+        <Route path="/referrer/team">
+          <PrivateRoute component={BrokerTeam} allowedRoles={['BROKER']} />
         </Route>
 
         {/* Conveyancer Routes */}

@@ -3,7 +3,7 @@ import { useAuth } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown } from 'lucide-react';
+import { Home, FileText, Settings, Users, Shield, LogOut, Menu, Search, Bell, BookOpen, CheckSquare, MessageSquare, Headphones, ChevronDown, DollarSign } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Logo } from '@/components/logo';
@@ -288,6 +288,16 @@ function NavLinks({ role, location }: { role: any, location: string }) {
           <Link href="/referrer/create">
             <div className={linkClass('/referrer/create')}>
               <Users className="h-5 w-5" /> New Referral
+            </div>
+          </Link>
+          <Link href="/referrer/payments">
+            <div className={linkClass('/referrer/payments')}>
+              <DollarSign className="h-5 w-5" /> Payments
+            </div>
+          </Link>
+          <Link href="/referrer/team">
+            <div className={linkClass('/referrer/team')} data-testid="link-team">
+              <Users className="h-5 w-5" /> Team
             </div>
           </Link>
         </>

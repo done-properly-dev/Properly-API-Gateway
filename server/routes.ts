@@ -3,7 +3,8 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import { storage } from "./storage";
 import { supabase } from "./supabase";
-import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema } from "@shared/schema";
+import { insertMatterSchema, insertTaskSchema, insertReferralSchema, insertDocumentSchema, insertPlaybookArticleSchema, insertPaymentSchema, insertOrganisationSchema, insertOrganisationMemberSchema, payments, organisations, organisationMembers } from "@shared/schema";
+import crypto from "crypto";
 import { z } from "zod";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
@@ -661,7 +662,19 @@ export async function registerRoutes(
 
       let result;
       if (user.role === "BROKER") {
-        result = await storage.getReferralsByBroker(user.id);
+        const orgData = await storage.getOrganisationByUser(user.id);
+        if (orgData && (orgData.member.role === "MANAGER" || orgData.member.role === "OWNER")) {
+          const members = await storage.getOrganisationMembers(orgData.org.id);
+          const memberIds = members.map(m => m.userId);
+          const allReferrals: any[] = [];
+          for (const memberId of memberIds) {
+            const memberReferrals = await storage.getReferralsByBroker(memberId);
+            allReferrals.push(...memberReferrals);
+          }
+          result = allReferrals;
+        } else {
+          result = await storage.getReferralsByBroker(user.id);
+        }
       } else {
         result = await storage.getAllReferrals();
       }
@@ -673,12 +686,126 @@ export async function registerRoutes(
 
   app.post("/api/referrals", requireAuth, async (req, res) => {
     try {
-      const parsed = insertReferralSchema.safeParse(req.body);
+      const data = { ...req.body };
+      if (data.channel === "QR") {
+        data.qrToken = crypto.randomBytes(16).toString("hex");
+      }
+      const parsed = insertReferralSchema.safeParse(data);
       if (!parsed.success) {
         return res.status(400).json({ message: parsed.error.issues[0].message });
       }
       const referral = await storage.createReferral(parsed.data);
       res.status(201).json(referral);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── QR Code Public Endpoint ───
+  app.get("/api/referrals/qr/:token", async (req, res) => {
+    try {
+      const token = paramId(req, "token");
+      const referral = await storage.getReferralByQrToken(token);
+      if (!referral) return res.status(404).json({ message: "Referral not found" });
+      const broker = await storage.getUser(referral.brokerId);
+      res.json({
+        clientName: referral.clientName,
+        brokerName: broker?.name || "Unknown",
+        propertyAddress: referral.propertyAddress,
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── SMS Referral Link ───
+  app.post("/api/referrals/sms", requireAuth, async (req, res) => {
+    try {
+      const { clientName, clientPhone } = req.body;
+      if (!clientName || !clientPhone) {
+        return res.status(400).json({ message: "clientName and clientPhone are required" });
+      }
+      const qrToken = crypto.randomBytes(16).toString("hex");
+      const referral = await storage.createReferral({
+        brokerId: req.userId!,
+        clientName,
+        clientPhone,
+        status: "Pending",
+        channel: "SMS",
+        qrToken,
+      });
+      const appUrl = process.env.VITE_APP_URL || "https://properly-app.com.au";
+      const referralLink = `${appUrl}/referral/${qrToken}`;
+      let smsSent = false;
+      if (twilioService.isConfigured()) {
+        try {
+          await twilioService.sendSms({
+            to: clientPhone,
+            body: `G'day ${clientName}! You've been referred to Properly for your property settlement. Get started here: ${referralLink}`,
+          });
+          smsSent = true;
+        } catch (smsErr: any) {
+          console.error("SMS send failed:", smsErr.message);
+        }
+      }
+      res.status(201).json({ referral, referralLink, smsSent });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Payments ───
+  app.get("/api/payments", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.userId!);
+      if (!user) return res.status(401).json({ message: "User not found" });
+      let result;
+      if (user.role === "ADMIN") {
+        result = await db.select().from(payments);
+      } else {
+        result = await storage.getPaymentsByBroker(user.id);
+      }
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/payments", requireAuth, async (req, res) => {
+    try {
+      const data = { ...req.body };
+      data.brokerId = data.brokerId || req.userId!;
+      const properlyFee = 10000;
+      data.properlyFee = properlyFee;
+      data.netAmount = (data.amount || 0) - properlyFee;
+      const parsed = insertPaymentSchema.safeParse(data);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.issues[0].message });
+      }
+      const payment = await storage.createPayment(parsed.data);
+      res.status(201).json(payment);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.patch("/api/payments/:id", requireAuth, async (req, res) => {
+    try {
+      const payment = await storage.updatePayment(paramId(req, "id"), req.body);
+      if (!payment) return res.status(404).json({ message: "Payment not found" });
+      res.json(payment);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── Organisations ───
+  app.get("/api/organisations/me", requireAuth, async (req, res) => {
+    try {
+      const orgData = await storage.getOrganisationByUser(req.userId!);
+      if (!orgData) return res.status(404).json({ message: "No organisation found" });
+      const members = await storage.getOrganisationMembers(orgData.org.id);
+      res.json({ organisation: orgData.org, membership: orgData.member, members });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

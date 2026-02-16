@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "./db";
 import {
   users, matters, tasks, documents, referrals, notifications, playbookArticles,
+  payments, organisations, organisationMembers,
   type User, type InsertUser,
   type Matter, type InsertMatter,
   type Task, type InsertTask,
@@ -9,6 +10,9 @@ import {
   type Referral, type InsertReferral,
   type Notification, type InsertNotification,
   type PlaybookArticle, type InsertPlaybookArticle,
+  type Payment, type InsertPayment,
+  type Organisation, type InsertOrganisation,
+  type OrganisationMember, type InsertOrganisationMember,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -38,6 +42,19 @@ export interface IStorage {
   getReferralsByBroker(brokerId: string): Promise<Referral[]>;
   getAllReferrals(): Promise<Referral[]>;
   createReferral(referral: InsertReferral): Promise<Referral>;
+  getReferralByQrToken(qrToken: string): Promise<Referral | undefined>;
+  updateReferral(id: string, data: Partial<Referral>): Promise<Referral | undefined>;
+
+  getPaymentsByBroker(brokerId: string): Promise<Payment[]>;
+  getPaymentByMatter(matterId: string): Promise<Payment | undefined>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePayment(id: string, data: Partial<Payment>): Promise<Payment | undefined>;
+
+  getOrganisation(id: string): Promise<Organisation | undefined>;
+  createOrganisation(org: InsertOrganisation): Promise<Organisation>;
+  getOrganisationMembers(orgId: string): Promise<OrganisationMember[]>;
+  getOrganisationByUser(userId: string): Promise<{org: Organisation, member: OrganisationMember} | undefined>;
+  createOrganisationMember(member: InsertOrganisationMember): Promise<OrganisationMember>;
 
   getNotifications(): Promise<Notification[]>;
   updateNotification(id: string, data: Partial<Notification>): Promise<Notification | undefined>;
@@ -150,6 +167,62 @@ export class DatabaseStorage implements IStorage {
   async createReferral(data: InsertReferral): Promise<Referral> {
     const [referral] = await db.insert(referrals).values(data).returning();
     return referral;
+  }
+
+  async getReferralByQrToken(qrToken: string): Promise<Referral | undefined> {
+    const [referral] = await db.select().from(referrals).where(eq(referrals.qrToken, qrToken));
+    return referral;
+  }
+
+  async updateReferral(id: string, data: Partial<Referral>): Promise<Referral | undefined> {
+    const [referral] = await db.update(referrals).set(data).where(eq(referrals.id, id)).returning();
+    return referral;
+  }
+
+  async getPaymentsByBroker(brokerId: string): Promise<Payment[]> {
+    return db.select().from(payments).where(eq(payments.brokerId, brokerId));
+  }
+
+  async getPaymentByMatter(matterId: string): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.matterId, matterId));
+    return payment;
+  }
+
+  async createPayment(data: InsertPayment): Promise<Payment> {
+    const [payment] = await db.insert(payments).values(data).returning();
+    return payment;
+  }
+
+  async updatePayment(id: string, data: Partial<Payment>): Promise<Payment | undefined> {
+    const [payment] = await db.update(payments).set(data).where(eq(payments.id, id)).returning();
+    return payment;
+  }
+
+  async getOrganisation(id: string): Promise<Organisation | undefined> {
+    const [org] = await db.select().from(organisations).where(eq(organisations.id, id));
+    return org;
+  }
+
+  async createOrganisation(data: InsertOrganisation): Promise<Organisation> {
+    const [org] = await db.insert(organisations).values(data).returning();
+    return org;
+  }
+
+  async getOrganisationMembers(orgId: string): Promise<OrganisationMember[]> {
+    return db.select().from(organisationMembers).where(eq(organisationMembers.orgId, orgId));
+  }
+
+  async getOrganisationByUser(userId: string): Promise<{org: Organisation, member: OrganisationMember} | undefined> {
+    const [membership] = await db.select().from(organisationMembers).where(eq(organisationMembers.userId, userId));
+    if (!membership) return undefined;
+    const [org] = await db.select().from(organisations).where(eq(organisations.id, membership.orgId));
+    if (!org) return undefined;
+    return { org, member: membership };
+  }
+
+  async createOrganisationMember(data: InsertOrganisationMember): Promise<OrganisationMember> {
+    const [member] = await db.insert(organisationMembers).values(data).returning();
+    return member;
   }
 
   async getNotifications(): Promise<Notification[]> {
