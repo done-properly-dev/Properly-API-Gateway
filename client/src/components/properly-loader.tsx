@@ -21,7 +21,7 @@ export function ProperlyLoader({ size = 'md', text, className, fullPage = false 
         <svg
           width={iconSize}
           height={iconSize}
-          viewBox="0 0 36 36"
+          viewBox="0 0 40 40"
           fill="none"
           className="absolute"
           style={{
@@ -31,21 +31,22 @@ export function ProperlyLoader({ size = 'md', text, className, fullPage = false 
           }}
         >
           <path
-            d="M18 4L5 14V31C5 31.55 5.45 32 6 32H15V23H21V32H30C30.55 32 31 31.55 31 31V14L18 4Z"
+            d="M20 5L4 17V34H36V17L20 5Z"
             stroke="#425b58"
-            strokeWidth="2"
+            strokeWidth="2.4"
             strokeLinejoin="round"
+            strokeLinecap="round"
             fill="none"
           />
           <path
-            d="M13 19L16.5 22.5L23 15"
+            d="M15 21L18.5 24.5L25 17"
             stroke="#425b58"
-            strokeWidth="2.2"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
             style={{
-              strokeDasharray: 20,
+              strokeDasharray: 18,
               animation: 'loader-check-draw 1.8s ease-in-out infinite',
             }}
           />
