@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, ExternalLink } from 'lucide-react';
+import { ProperlyLoader } from '@/components/properly-loader';
 import { apiRequest } from '@/lib/queryClient';
 
 interface PropertyMapProps {
@@ -135,7 +136,7 @@ export function PropertyMap({ address }: PropertyMapProps) {
         <div ref={mapRef} className="h-48 w-full bg-[#e7f6f3] relative">
           {!mapLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <ProperlyLoader size="sm" />
             </div>
           )}
         </div>

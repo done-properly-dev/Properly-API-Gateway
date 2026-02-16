@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Clock, Search, ArrowLeft, ChevronRight } from 'lucide-react';
+import { ProperlyLoader } from '@/components/properly-loader';
 import type { PlaybookArticle } from '@shared/schema';
 
 const CATEGORIES = [
@@ -127,7 +128,7 @@ export default function PlaybookPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            <ProperlyLoader size="md" />
           </div>
         ) : filteredArticles?.length === 0 ? (
           <div className="text-center py-16">

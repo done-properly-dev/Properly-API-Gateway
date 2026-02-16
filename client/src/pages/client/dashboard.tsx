@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Circle, FileText, Upload, BookOpen, Home, ChevronRight, Mail, Phone, MapPin, Edit3, Check } from 'lucide-react';
+import { ProperlyLoader } from '@/components/properly-loader';
 import { Link } from 'wouter';
 import type { Matter, Task, Document } from '@shared/schema';
 import clivePhoto from '@/assets/images/clive-conway.jpg';
@@ -110,9 +111,7 @@ export default function ClientDashboard() {
   if (mattersLoading) {
     return (
       <Layout role="CLIENT">
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <ProperlyLoader size="lg" text="Loading your dashboard..." fullPage />
       </Layout>
     );
   }
@@ -229,7 +228,7 @@ export default function ClientDashboard() {
               </div>
               {tasksLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  <ProperlyLoader size="sm" />
                 </div>
               ) : tasks.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground px-5">

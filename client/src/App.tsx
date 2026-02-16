@@ -14,6 +14,7 @@ import AdminDashboard from '@/pages/admin/dashboard';
 import ConveyancerDashboard from '@/pages/conveyancer/dashboard';
 import NotFound from "@/pages/not-found";
 import { Toaster } from "@/components/ui/toaster";
+import { ProperlyLoader } from '@/components/properly-loader';
 
 function PrivateRoute({ component: Component, allowedRoles }: { component: any, allowedRoles: string[] }) {
   const { user, isLoading } = useAuth();
@@ -21,7 +22,7 @@ function PrivateRoute({ component: Component, allowedRoles }: { component: any, 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <ProperlyLoader size="lg" text="Loading..." />
       </div>
     );
   }

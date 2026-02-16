@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ProperlyLoader } from '@/components/properly-loader';
 import {
   Table,
   TableBody,
@@ -57,9 +58,7 @@ export default function ConveyancerDashboard() {
   if (isLoading) {
     return (
       <Layout role="CONVEYANCER">
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <ProperlyLoader size="lg" text="Loading matters..." fullPage />
       </Layout>
     );
   }

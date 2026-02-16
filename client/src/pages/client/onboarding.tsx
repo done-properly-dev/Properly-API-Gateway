@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocation, useSearch } from 'wouter';
 import { CheckCircle2, User, Shield, Upload, ArrowRight, ArrowLeft, PartyPopper, Loader2, AlertCircle, ExternalLink, Smartphone, Monitor } from 'lucide-react';
+import { ProperlyLoader } from '@/components/properly-loader';
 import { QRCodeSVG } from 'qrcode.react';
 
 const STEPS = [
@@ -362,8 +363,7 @@ export default function OnboardingPage() {
 
               {voiState === 'starting' && (
                 <div className="bg-[#e7f6f3] rounded-xl p-8 text-center space-y-4">
-                  <Loader2 className="h-12 w-12 text-primary mx-auto animate-spin" />
-                  <h3 className="font-heading font-semibold text-lg">Setting up verification...</h3>
+                  <ProperlyLoader size="lg" text="Setting up verification..." />
                   <p className="text-sm text-muted-foreground">Hang tight, we're getting things ready for you.</p>
                 </div>
               )}
@@ -446,8 +446,8 @@ export default function OnboardingPage() {
 
               {voiState === 'in_progress' && isMobile && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center space-y-4">
-                  <Loader2 className="h-10 w-10 text-blue-600 mx-auto animate-spin" />
-                  <h3 className="font-heading font-semibold text-lg text-blue-900">Redirecting to verification...</h3>
+                  <ProperlyLoader size="md" text="Redirecting to verification..." />
+                  <h3 className="font-heading font-semibold text-lg text-blue-900">Almost there!</h3>
                   <p className="text-sm text-blue-700">
                     If you're not redirected automatically, tap the button below.
                   </p>

@@ -143,3 +143,18 @@
     @apply font-heading tracking-tight text-foreground font-bold;
   }
 }
+
+@keyframes loader-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes loader-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.92); }
+}
+
+@keyframes loader-check {
+  0%, 40% { stroke-dashoffset: 24; stroke-dasharray: 24; }
+  60%, 100% { stroke-dashoffset: 0; stroke-dasharray: 24; }
+}

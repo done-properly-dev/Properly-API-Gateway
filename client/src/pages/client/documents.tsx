@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Trash2, Lock, UploadCloud, File } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ProperlyLoader } from '@/components/properly-loader';
 import type { Matter, Document } from '@shared/schema';
 
 export default function ClientDocuments() {
@@ -86,9 +87,7 @@ export default function ClientDocuments() {
   if (isLoading) {
     return (
       <Layout role="CLIENT">
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <ProperlyLoader size="lg" text="Loading documents..." fullPage />
       </Layout>
     );
   }

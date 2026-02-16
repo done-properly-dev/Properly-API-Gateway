@@ -8,6 +8,7 @@ import { Plus, Search, DollarSign, Users, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'wouter';
+import { ProperlyLoader } from '@/components/properly-loader';
 import type { Referral } from '@shared/schema';
 
 export default function ReferrerDashboard() {
@@ -24,9 +25,7 @@ export default function ReferrerDashboard() {
   if (isLoading) {
     return (
       <Layout role="BROKER">
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
+        <ProperlyLoader size="lg" text="Loading referrals..." fullPage />
       </Layout>
     );
   }
